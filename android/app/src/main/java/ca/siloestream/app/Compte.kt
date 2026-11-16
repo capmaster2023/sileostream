@@ -60,8 +60,12 @@ import org.json.JSONArray
 import org.json.JSONObject
 import java.util.concurrent.TimeUnit
 
-/** Client Web de Google Cloud (projet Siloé Stream) : le serveur vérifie que le jeton Google lui est destiné. */
-const val GOOGLE_CLIENT_WEB = "651141034269-s9hq1jb8bafbiipoprof0v1qm2175l9d.apps.googleusercontent.com"
+/**
+ * Client Web « Siloé Stream – site » du projet Google Cloud mychurchapp : le jeton Google lui est destiné, et le serveur le vérifie.
+ * 1.9.4 : Google demande un client de type Web ici (l'ancien était de type Desktop) ; l'application elle-même est reconnue par
+ * le client Android « Siloé Stream – Android » (paquet ca.siloestream.app, empreinte SHA-1 du keystore qui signe l'APK).
+ */
+const val GOOGLE_CLIENT_WEB = "651141034269-80ld00hjco7vsrs86thn99ghe6dnq47v.apps.googleusercontent.com"
 
 /**
  * Siloé Stream 1.9.1 : comptes Google et églises (API du relais). L'admin crée son église, relie le PC et ajoute ses membres
