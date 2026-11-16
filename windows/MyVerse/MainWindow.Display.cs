@@ -385,7 +385,7 @@ public partial class MainWindow
         var menu = MenuAjouterSource();
         var commandes = menu.Items.OfType<MenuItem>().ToList();
         Ouvrir(menu, DisplayAjouter, PlacementMode.Bottom);
-        bool ok = menu.IsOpen && commandes.Count == 7 + R.Duos.Count && commandes[0].Header?.ToString() == "Nouveau texte" && commandes[^1].Header?.ToString() == "Caméra virtuelle MyVirtualCam";
+        bool ok = menu.IsOpen && commandes.Count == 8 + R.Duos.Count && commandes.Any(c => c.Header?.ToString() == "Caméra Sony par Wi-Fi (sans câble)") && commandes[0].Header?.ToString() == "Nouveau texte" && commandes[^1].Header?.ToString() == "Caméra virtuelle MyVirtualCam";
         menu.IsOpen = false;
         return ok;
     }
