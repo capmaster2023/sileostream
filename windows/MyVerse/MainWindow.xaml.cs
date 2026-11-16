@@ -219,6 +219,8 @@ public partial class MainWindow : Window
         PreviewTextInput += (_, e) =>
         {
             if (e.Text != "/" || Keyboard.FocusedElement is TextBox or PasswordBox || ConnexionAffichee) return;
+            // 2.0 : « / » ouvre la barre magique des écrans simples
+            if (V2Visible) { V2OuvrirBarre(); e.Handled = true; return; }
             (onglet is "agenda" or "annonces" or "duo" ? Cmd : ongletBible ? Q : Qc).Focus();
             e.Handled = true;
         };
@@ -250,6 +252,8 @@ public partial class MainWindow : Window
         InitTelecommande();
         InitProjecteur();
         InitMyStream();
+        // 2.0 : les écrans simples (Bonjour, la Régie au gros Suivant, la barre magique…) par-dessus la régie complète
+        InitV2();
         AgendaAjoutBible.Click += (_, _) =>
         {
             if (sel is Ref s && s.V1 > 0) Toast($"{R.AjouterBibleAgenda(s).Titre} ajouté au programme « {R.Agenda.Nom} ».");
@@ -285,7 +289,8 @@ public partial class MainWindow : Window
     {
         // 1.9.3 : le compte Google du PC (et l'écran de connexion si l'admin l'a rendue obligatoire)
         BrancherComptes();
-        (onglet is "agenda" or "annonces" or "duo" ? Cmd : Q).Focus();
+        // 2.0 : sur les écrans simples, aucun champ ne prend le clavier (Espace = Suivant)
+        if (!V2Visible) (onglet is "agenda" or "annonces" or "duo" ? Cmd : Q).Focus();
         // l'index de recherche se prépare en arrière-plan : la première recherche est instantanée
         _ = Task.Run(async () =>
         {
@@ -438,6 +443,8 @@ public partial class MainWindow : Window
     {
         // 1.9.3 : l'écran de connexion est affiché : aucun raccourci ne touche à ce qui est à l'écran
         if (ConnexionAffichee) return;
+        // 2.0 : les écrans simples ont leurs touches (Espace = Suivant, B = noir, Ctrl K = la barre magique)
+        if (V2Clavier(e)) return;
         if (e.Key == Key.K && Keyboard.Modifiers == ModifierKeys.Control)
         {
             OuvrirCommande();
@@ -1061,6 +1068,8 @@ public partial class MainWindow : Window
         MajFonds();
         MajTelecommande(e);
         MajOutils();
+        // 2.0 : les aperçus et les cartes des écrans simples
+        V2MajEcran();
     }
 
     /// <summary>Pastille de l'aperçu : la diapositive part-elle vers la fenêtre de projection ?</summary>

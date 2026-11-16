@@ -77,6 +77,8 @@ public partial class MainWindow
         }
         else if (connexion != null) connexion.Visibility = Visibility.Collapsed;
         MajBoutonCompte();
+        // 2.0 : le mode simple suit le rôle (il montre le culte : Admin et Affichage)
+        V2Role();
     }
 
     /// <summary>L'écran de connexion est affiché : le clavier ne touche pas à ce qui est à l'écran.</summary>

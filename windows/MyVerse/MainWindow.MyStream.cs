@@ -67,6 +67,7 @@ public partial class MainWindow
         var b = lecteurStream?.Image;
         StreamRendu.ImageDisplay(b);
         App.MyStream?.Media(b);
+        V2ImageStream(b);
     }
 
     /// <summary>Après chaque changement de l'écran : l'aperçu de MyStream, son moteur, et les mots sous l'aperçu.</summary>

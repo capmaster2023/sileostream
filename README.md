@@ -1,6 +1,16 @@
-# Siloé Stream 1.0.0
+# Siloé Stream 2.0.0
 
 Logiciel Windows autonome de projection pour l'église, avec télécommande Android. Bible, chants et sources Display partent directement sur l'écran choisi dans **Projection**. Le son passe par le moteur audio d'OBS Studio (libobs), dans une page **Son** faite pour être comprise par tout le monde.
+
+## Siloé Stream 2.0 : le Grand Bouton
+
+Au démarrage, des écrans simples, faits pour le dimanche (fichiers `windows/MyVerse/MainWindow.V2.cs`, `MainWindow.V2Pages.cs` et `V2Ui.cs`) :
+
+- **Bonjour !** : 4 cartes (Projecteur, Caméra, Son, Internet), vertes quand tout est prêt, puis **Commencer le culte**.
+- **La Régie** : l'écran de l'église en grand (et ce que voient YouTube et Zoom), un énorme **SUIVANT** (Espace, flèche droite, télécommande de présentation, téléphone), **Revenir**, **Écran noir** (B), et le culte en cartes.
+- **La barre magique** (Ctrl K ou /) : « jean 3 16 », « wokovu 45 », « caméra », « noir »… **Montrer** (Entrée) ou **Mettre après** (Tab).
+- **Préparer le culte** (les cartes dans l'ordre, Ajouter une carte, Reprendre dimanche dernier), **Le son** en gros boutons, **Aller en direct** en un bouton.
+- **Mode complet** ramène toute la régie décrite plus bas ; son bouton **Simple** (barre de gauche) revient au Grand Bouton. Le choix est gardé (`interface` dans les réglages).
 
 ## Premier lancement
 
