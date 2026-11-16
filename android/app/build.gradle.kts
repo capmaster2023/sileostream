@@ -20,6 +20,18 @@ android {
         // pour s'installer par-dessus l'application existante (même package, même signature)
         versionCode = 700000 + (System.getenv("VERSION_CODE") ?: "0").toInt()
         versionName = System.getenv("VERSION_NAME") ?: "1.3.0"
+        // Siloé Stream 1.9.5 : pilote UVC natif de la caméra HDMI (src/main/cpp/uvc.c)
+        ndk {
+            abiFilters += listOf("arm64-v8a", "armeabi-v7a", "x86_64")
+        }
+    }
+
+    ndkVersion = "27.2.12479018"
+    externalNativeBuild {
+        cmake {
+            path = file("src/main/cpp/CMakeLists.txt")
+            version = "3.22.1"
+        }
     }
 
     signingConfigs {

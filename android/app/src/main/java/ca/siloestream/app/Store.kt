@@ -103,6 +103,11 @@ class Store(context: Context) {
         get() = prefs.getBoolean("camGrille", true)
         set(v) = prefs.edit().putBoolean("camGrille", v).apply()
 
+    /** Siloé Stream 1.9.5 : source de MyCam, « telephone » (caméra du téléphone) ou « hdmi » (carte de capture USB). */
+    var camSource: String
+        get() = prefs.getString("camSource", "telephone") ?: "telephone"
+        set(v) = prefs.edit().putString("camSource", v).apply()
+
     /** Réglages de l'écran reçus du PC (JSON : principale, seconde, theme, taille, presentation). */
     var reglages: String
         get() = prefs.getString("reglages", "{}") ?: "{}"

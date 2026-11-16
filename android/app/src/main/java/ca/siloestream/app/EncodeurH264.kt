@@ -253,6 +253,34 @@ internal class EncodeurH264 private constructor(
         }
     }
 
+    /**
+     * Siloé Stream 1.9.5 : une image d'une autre source (caméra HDMI par USB) : [remplir] écrit les pixels dans l'image d'entrée
+     * de l'encodeur. Faux si l'encodeur n'a pas de place ou si [remplir] échoue : l'image est sautée.
+     */
+    fun encoderAvec(tempsUs: Long, remplir: (Image) -> Boolean): Boolean {
+        if (ferme || panne != null) return false
+        val index = libres.poll() ?: return false
+        return try {
+            val capacite = codec.getInputBuffer(index)?.capacity() ?: 0
+            val dst = codec.getInputImage(index)
+            if (dst == null || capacite <= 0) {
+                panne = "image d’entrée indisponible"
+                codec.queueInputBuffer(index, 0, 0, tempsUs, 0)
+                return false
+            }
+            if (!remplir(dst)) {
+                // tampon gardé pour l'image suivante
+                libres.add(index)
+                return false
+            }
+            codec.queueInputBuffer(index, 0, capacite, tempsUs, 0)
+            true
+        } catch (e: Exception) {
+            panne = e.message ?: e.javaClass.simpleName
+            false
+        }
+    }
+
     /** Débit (b/s) changé à la volée : il baisse quand le Wi-Fi faiblit, puis remonte. */
     fun reglerDebit(b: Int) {
         if (ferme || b == debit) return

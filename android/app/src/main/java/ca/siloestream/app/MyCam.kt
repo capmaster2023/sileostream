@@ -5,6 +5,8 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.content.pm.PackageManager
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.graphics.ImageFormat
 import android.graphics.Rect
 import android.graphics.YuvImage
@@ -45,6 +47,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import java.io.ByteArrayOutputStream
+import java.nio.ByteBuffer
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicInteger
@@ -89,6 +92,15 @@ object MyCam {
     val format = MutableStateFlow("")
     /** Débit H.264 du moment en kb/s (il baisse quand le Wi-Fi ne suit pas, puis remonte) ; 0 en JPEG. */
     val debit = MutableStateFlow(0)
+    /**
+     * Siloé Stream 1.9.5 : d'où vient l'image. « telephone » : la caméra du téléphone ; « hdmi » : une vraie caméra (Sony α6100…)
+     * branchée au téléphone par une carte de capture HDMI → USB ([CameraUsb]) ; le téléphone sert alors de pont sans fil.
+     */
+    val source = MutableStateFlow("telephone")
+    private var usbOuvert = false
+    private var rgbaHdmi: ByteBuffer? = null
+    private var bitmapHdmi: Bitmap? = null
+    private var jpegHdmi = ByteArray(0)
 
     private var activite: ComponentActivity? = null
     private var remote: Remote? = null
@@ -152,6 +164,7 @@ object MyCam {
     fun attacher(a: ComponentActivity, r: Remote) {
         activite = a
         remote = r
+        source.value = r.store.camSource
         orientation?.disable()
         orientation = object : OrientationEventListener(a) {
             override fun onOrientationChanged(o: Int) {
@@ -260,14 +273,32 @@ object MyCam {
         h264Refuse = false
         tailleRefusee = ""
         fermerEncodeur()
-        if (camera != null) {
+        if (camera != null || usbOuvert) {
             fermer()
             appliquer()
         }
         infoDemandee = true
     }
 
+    /** Caméra du téléphone ou caméra HDMI (carte de capture branchée au téléphone). */
+    fun choisirSource(s: String) {
+        val r = remote ?: return
+        if (source.value == s) return
+        r.store.camSource = s
+        source.value = s
+        torche.value = false
+        zoom.value = 1f
+        erreur.value = ""
+        fermer()
+        appliquer()
+        infoDemandee = true
+        cleDemandee = true
+    }
+
+    val estHdmi: Boolean get() = source.value == "hdmi"
+
     fun basculerCamera() {
+        if (estHdmi) return
         avant.value = !avant.value
         torche.value = false
         zoom.value = 1f
@@ -317,6 +348,10 @@ object MyCam {
         val a = activite ?: return
         if (!ecranVisible && !diffuse.value) {
             fermer()
+            return
+        }
+        if (estHdmi) {
+            ouvrirHdmi(a)
             return
         }
         if (!peutFilmer(a)) {
@@ -407,6 +442,10 @@ object MyCam {
     }
 
     private fun fermer() {
+        if (usbOuvert) {
+            usbOuvert = false
+            CameraUsb.arreter()
+        }
         val a = activite
         val c = camera
         camera = null
@@ -486,7 +525,7 @@ object MyCam {
                 Rect(x0, 0, x0 + bw, h)
             } else Rect(0, 0, w, h)
             if (veutH264(r)) {
-                when (h264(r, img, zone, rotation, cadence, maintenant)) {
+                when (h264(r, zone, rotation, cadence, maintenant) { e, z -> e.encoder(img, z, img.imageInfo.timestamp / 1000) }) {
                     H264_ENVOYE -> {
                         dernierEnvoi = maintenant
                         return
@@ -539,6 +578,162 @@ object MyCam {
         afficherTaille(zone, rotation)
     }
 
+    // ------------------------------------------------------------ caméra HDMI (carte de capture USB, Siloé Stream 1.9.5)
+
+    private fun ouvrirHdmi(a: ComponentActivity) {
+        if (usbOuvert) return
+        val store = remote?.store ?: return
+        usbOuvert = true
+        // les images de la carte sont horodatées sur SystemClock.elapsedRealtimeNanos
+        horlogeCamera = 0
+        ouverteDepuis = SystemClock.elapsedRealtime()
+        dernierCadre = ouverteDepuis
+        erreur.value = ""
+        ouverte.value = false
+        CameraUsb.demarrer(a, if (store.camResolution >= 1080) 1080 else 720, store.camFps) { img -> traiterHdmi(img) }
+    }
+
+    /** Une image de la carte HDMI (fil USB) : même chemin que la caméra du téléphone, H.264 ou JPEG. */
+    private fun traiterHdmi(img: CameraUsb.Image) {
+        try {
+            val maintenant = SystemClock.elapsedRealtime()
+            dernierCadre = maintenant
+            if (!ouverte.value) ouverte.value = true
+            val r = remote ?: return
+            if (!diffuse.value) {
+                afficherTaille(Rect(0, 0, img.largeur, img.hauteur), 0)
+                return
+            }
+            val cadence = r.store.camFps.coerceIn(5, 30)
+            if (maintenant - dernierEnvoi < 1000L / cadence - 4) return
+            if (!r.pret()) return
+            val zone = Rect(0, 0, img.largeur and 1.inv(), img.hauteur and 1.inv())
+            if (veutH264(r)) {
+                when (h264(r, zone, 0, cadence, maintenant) { e, z -> encoderHdmi(e, img, z) }) {
+                    H264_ENVOYE -> {
+                        dernierEnvoi = maintenant
+                        return
+                    }
+                    H264_SAUTE -> return
+                }
+            } else if (encodeur != null) fermerEncodeur()
+            jpegHdmi(r, img, zone, maintenant)
+        } catch (e: Exception) {
+            erreur.value = "Image HDMI : ${e.message ?: e.javaClass.simpleName}"
+        }
+    }
+
+    /** JPEG de la carte décodé en pixels (RGBA), dans un Bitmap réutilisé ; null si illisible. */
+    private fun decoderJpegHdmi(img: CameraUsb.Image): Bitmap? {
+        if (jpegHdmi.size < img.longueur) jpegHdmi = ByteArray(img.longueur)
+        img.tampon.position(0)
+        img.tampon.get(jpegHdmi, 0, img.longueur)
+        img.tampon.position(0)
+        val o = BitmapFactory.Options().apply {
+            inMutable = true
+            inPreferredConfig = Bitmap.Config.ARGB_8888
+            inBitmap = bitmapHdmi?.takeIf { it.width == img.largeur && it.height == img.hauteur }
+        }
+        val b = try {
+            BitmapFactory.decodeByteArray(jpegHdmi, 0, img.longueur, o)
+        } catch (e: IllegalArgumentException) {
+            o.inBitmap = null
+            BitmapFactory.decodeByteArray(jpegHdmi, 0, img.longueur, o)
+        } ?: return null
+        bitmapHdmi = b
+        return b
+    }
+
+    private fun encoderHdmi(e: EncodeurH264, img: CameraUsb.Image, z: Rect): Boolean {
+        var format = img.format
+        var src = img.tampon
+        var n = img.longueur
+        var w = img.largeur
+        var h = img.hauteur
+        var matrice = UvcNatif.HDMI_709
+        if (format == UvcNatif.MJPEG) {
+            val b = decoderJpegHdmi(img) ?: return false
+            val t = rgbaHdmi?.takeIf { it.capacity() >= b.byteCount } ?: ByteBuffer.allocateDirect(b.byteCount).also { rgbaHdmi = it }
+            t.position(0)
+            b.copyPixelsToBuffer(t)
+            t.position(0)
+            format = UvcNatif.RGBA
+            src = t
+            n = b.byteCount
+            w = b.width
+            h = b.height
+            matrice = UvcNatif.COPIE
+        }
+        if (z.right > w || z.bottom > h) return false
+        return e.encoderAvec(img.tempsNs / 1000) { dst ->
+            val p = dst.planes
+            UvcNatif.versPlans(
+                format, src, n, w, h, z.left, z.top, z.width(), z.height(),
+                p[0].buffer, p[0].rowStride, p[1].buffer, p[1].rowStride, p[1].pixelStride, p[2].buffer, p[2].rowStride, p[2].pixelStride, matrice,
+            ) == 0
+        }
+    }
+
+    /** Le JPEG a ses tables de Huffman (beaucoup de webcams MJPEG les omettent ; le PC en a besoin). */
+    private fun aTablesHuffman(b: ByteArray, n: Int): Boolean {
+        var i = 2
+        while (i + 3 < n) {
+            if (b[i] != 0xFF.toByte()) return false
+            val m = b[i + 1].toInt() and 0xFF
+            if (m == 0xC4) return true
+            if (m == 0xDA) return false
+            i += 2 + ((b[i + 2].toInt() and 0xFF) shl 8 or (b[i + 3].toInt() and 0xFF))
+        }
+        return false
+    }
+
+    /** Images JPEG de la carte HDMI (PC sans H.264, ou réglage JPEG) : le MJPEG de la carte tel quel quand c'est possible. */
+    private fun jpegHdmi(r: Remote, img: CameraUsb.Image, zone: Rect, maintenant: Long) {
+        val max = if (img.hauteur >= 1080) 70 else 76
+        if (qualite == 0 || qualite > max) qualite = max
+        if (format.value != "JPEG") format.value = "JPEG"
+        if (r.fileEnvoi() > SEUIL_FILE) {
+            if (maintenant - derniereBaisse > 400) {
+                qualite = (qualite - 6).coerceAtLeast(40)
+                derniereBaisse = maintenant
+                bonnes = 0
+            }
+            return
+        }
+        val avecAge = r.horlogePc
+        tampon.reset()
+        tampon.write(byteArrayOf('M'.code.toByte(), 'C'.code.toByte(), 1, (if (avecAge) 0x10 else 0).toByte()))
+        if (avecAge) tampon.write(byteArrayOf(0, 0, 0, 0))
+        if (img.format == UvcNatif.MJPEG) {
+            if (jpegHdmi.size < img.longueur) jpegHdmi = ByteArray(img.longueur)
+            img.tampon.position(0)
+            img.tampon.get(jpegHdmi, 0, img.longueur)
+            img.tampon.position(0)
+            if (aTablesHuffman(jpegHdmi, img.longueur)) tampon.write(jpegHdmi, 0, img.longueur)
+            else {
+                val b = decoderJpegHdmi(img) ?: return
+                b.compress(Bitmap.CompressFormat.JPEG, qualite, tampon)
+            }
+        } else {
+            val w = img.largeur and 1.inv()
+            val h = img.hauteur and 1.inv()
+            if (nv21.size != w * h * 3 / 2) nv21 = ByteArray(w * h * 3 / 2)
+            if (UvcNatif.versNv21(img.format, img.tampon, img.longueur, img.largeur, img.hauteur, nv21, UvcNatif.HDMI_709) != 0) return
+            YuvImage(nv21, ImageFormat.NV21, w, h, null).compressToJpeg(Rect(0, 0, w, h), qualite, tampon)
+        }
+        if (avecAge) ecrireAge(tampon.octets, 4, ageUs(img.tempsNs).coerceAtLeast(0L))
+        if (r.sendBinary(tampon.octets, tampon.longueur)) {
+            dernierEnvoi = maintenant
+            envoyees.incrementAndGet()
+            if (++bonnes >= 45 && qualite < max) {
+                qualite = (qualite + 3).coerceAtMost(max)
+                bonnes = 0
+            }
+        }
+        if (qualiteImage.value != qualite) qualiteImage.value = qualite
+        afficherTaille(zone, 0)
+    }
+
     private fun afficherTaille(zone: Rect, rotation: Int) {
         val t = if (rotation % 2 == 1) "${zone.height()} × ${zone.width()}" else "${zone.width()} × ${zone.height()}"
         if (taille.value != t) taille.value = t
@@ -548,7 +743,7 @@ object MyCam {
     private fun veutH264(r: Remote) = r.store.camFormat != "jpeg" && !h264Refuse && "h264" in r.codecsPc.value
 
     /** Une image vers l'encodeur H.264 (fil de la caméra) : envoyée, sautée (Wi-Fi ou encodeur en retard), ou impossible (JPEG). */
-    private fun h264(r: Remote, img: ImageProxy, voulue: Rect, rotation: Int, cadence: Int, maintenant: Long): Int {
+    private fun h264(r: Remote, voulue: Rect, rotation: Int, cadence: Int, maintenant: Long, encoder: (EncodeurH264, Rect) -> Boolean): Int {
         synchronized(verrouEncodeur) {
             var e = encodeur
             e?.panne?.let { p ->
@@ -601,7 +796,7 @@ object MyCam {
             }
             val zone = e.zone(voulue)
             afficherTaille(zone, rotation)
-            return if (e.encoder(img, zone, img.imageInfo.timestamp / 1000)) H264_ENVOYE else H264_SAUTE
+            return if (encoder(e, zone)) H264_ENVOYE else H264_SAUTE
         }
     }
 
@@ -777,7 +972,7 @@ object MyCam {
     }
 
     /** Nom de la source dans Siloé Stream. */
-    fun nom(): String = remote?.store?.camNom?.takeIf { it.isNotBlank() } ?: "MyCam · ${Build.MODEL}"
+    fun nom(): String = remote?.store?.camNom?.takeIf { it.isNotBlank() } ?: if (estHdmi) "Caméra HDMI" else "MyCam · ${Build.MODEL}"
 
     private fun envoyerInfo() {
         val r = remote ?: return
@@ -801,7 +996,8 @@ object MyCam {
             "cam.info",
             "diffuse" to diffuse.value,
             "nom" to nom(),
-            "appareil" to "${Build.MANUFACTURER} ${Build.MODEL}",
+            "appareil" to if (estHdmi) "${CameraUsb.nomCarte.value.ifBlank { "Carte HDMI" }} · ${Build.MODEL}" else "${Build.MANUFACTURER} ${Build.MODEL}",
+            "source" to source.value,
             "taille" to taille.value,
             "fps" to fps.value,
             "fpsCible" to r.store.camFps,
@@ -809,7 +1005,7 @@ object MyCam {
             "charge" to charge,
             "temperature" to temp,
             "lien" to r.lien(),
-            "avant" to avant.value,
+            "avant" to (avant.value && !estHdmi),
             "depuis" to depuis.value,
             "codec" to format.value,
             "debit" to debit.value,

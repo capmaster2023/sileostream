@@ -97,6 +97,12 @@ L'installation conserve les chants, Bibles, réglages et téléphones jumelés. 
 
 Sur le téléphone, installez l'APK par-dessus l'application existante. Le package Android et la signature existante restent conservés. Le PC et le téléphone doivent être sur le même réseau pour la télécommande.
 
+## Caméra HDMI par le téléphone (1.9.6)
+
+Dans l'application Android, **MyCam › Caméra HDMI** fait du téléphone un pont sans fil pour une vraie caméra en 1080p :
+caméra → HDMI → carte de capture HDMI-USB → adaptateur USB-C → téléphone → Wi-Fi → Siloé Stream (source MyCam).
+Pilote UVC intégré (`android/app/src/main/cpp/uvc.c`) : isochrone ou bulk, YUY2 / NV12 / MJPEG.
+
 ## Caméra Sony par Wi-Fi (1.9.5)
 
 **Display › + Ajouter une source › Caméra Sony par Wi-Fi (sans câble)** reçoit l'image en direct d'une caméra Sony (α6100…) par son propre Wi-Fi, comme Imaging Edge Mobile.

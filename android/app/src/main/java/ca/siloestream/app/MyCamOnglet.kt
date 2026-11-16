@@ -12,6 +12,7 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.camera.view.PreviewView
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -62,6 +63,8 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
@@ -137,6 +140,7 @@ private fun BandeauTemoin(t: Temoin) {
 private fun Viseur(modifier: Modifier, grille: Boolean, contenu: @Composable BoxScope.() -> Unit) {
     val ref = remember { arrayOfNulls<PreviewView>(1) }
     var focus by remember { mutableStateOf<Offset?>(null) }
+    val source by MyCam.source.collectAsState()
     DisposableEffect(Unit) { onDispose { MyCam.delierApercu(ref[0]) } }
     LaunchedEffect(focus) {
         if (focus != null) {
@@ -149,7 +153,8 @@ private fun Viseur(modifier: Modifier, grille: Boolean, contenu: @Composable Box
             .pointerInput(Unit) { detectTapGestures { o -> MyCam.mettreAuPoint(o.x, o.y); focus = o } }
             .pointerInput(Unit) { detectTransformGestures { _, _, z, _ -> if (z != 1f) MyCam.reglerZoom(MyCam.zoom.value * z) } },
     ) {
-        AndroidView(
+        if (source == "hdmi") ApercuHdmi(Modifier.fillMaxSize())
+        else AndroidView(
             factory = { c ->
                 PreviewView(c).apply {
                     implementationMode = PreviewView.ImplementationMode.COMPATIBLE
@@ -177,6 +182,51 @@ private fun Viseur(modifier: Modifier, grille: Boolean, contenu: @Composable Box
             )
         }
         contenu()
+    }
+}
+
+/** Siloé Stream 1.9.5 : l'image de la caméra HDMI (carte de capture USB), réduite, quelques fois par seconde. */
+@Composable
+private fun ApercuHdmi(modifier: Modifier) {
+    val image by CameraUsb.apercu.collectAsState()
+    Box(modifier.background(Color.Black), contentAlignment = Alignment.Center) {
+        image?.let { Image(it.asImageBitmap(), contentDescription = "Image de la caméra HDMI", modifier = Modifier.fillMaxSize(), contentScale = ContentScale.Fit) }
+    }
+}
+
+/** Choix de la source : la caméra du téléphone ou une caméra HDMI branchée au téléphone. */
+@Composable
+private fun ChoixSource(source: String) {
+    Segments(listOf("Téléphone", "Caméra HDMI"), if (source == "hdmi") 1 else 0) { i ->
+        MyCam.choisirSource(if (i == 1) "hdmi" else "telephone")
+    }
+}
+
+/** Ce qu'il faut pour la caméra HDMI, et où on en est (carte, format reçu). */
+@Composable
+private fun CarteHdmi() {
+    val carte by CameraUsb.nomCarte.collectAsState()
+    val mode by CameraUsb.mode.collectAsState()
+    val marche by CameraUsb.enMarche.collectAsState()
+    Column(
+        Modifier.fillMaxWidth().clip(RoundedCornerShape(16.dp)).background(C.CamSurface).border(1.dp, C.CamBord, RoundedCornerShape(16.dp))
+            .padding(horizontal = 14.dp, vertical = 12.dp),
+        verticalArrangement = Arrangement.spacedBy(6.dp),
+    ) {
+        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+            Ico(I.cam, if (marche) C.OrClair else C.CamBrume2, 18.dp)
+            T(carte.ifBlank { "Aucune carte de capture branchée" }, taille = 13.5.sp, poids = FontWeight.Bold, couleur = C.CamTexte, modifier = Modifier.weight(1f), lignes = 1)
+            if (marche) T("● reçue", taille = 12.sp, poids = FontWeight.ExtraBold, couleur = C.OrClair)
+        }
+        if (mode.isNotBlank()) T(mode, taille = 12.5.sp, couleur = C.CamBrume, lignes = 1)
+        T(
+            "Caméra (sortie micro-HDMI) → câble HDMI → carte de capture HDMI-USB → adaptateur USB-C → ce téléphone. Le téléphone envoie l’image au PC par le Wi-Fi.",
+            taille = 12.sp, couleur = C.CamBrume, interligne = 17.sp,
+        )
+        T(
+            "Sony α6100 : MENU › Réglage › Réglages HDMI › Affichage infos HDMI : Non (image sans les indications de l’écran). Alimentez la caméra par USB ou une batterie factice pour tout le culte.",
+            taille = 12.sp, couleur = C.CamBrume, interligne = 17.sp,
+        )
     }
 }
 
@@ -290,10 +340,15 @@ fun MyCamOnglet(remote: Remote) {
         MyCamReglages(remote) { reglages = false }
         return
     }
-    DisposableEffect(permis) {
-        MyCam.ecran(permis)
+    val source by MyCam.source.collectAsState()
+    val hdmi = source == "hdmi"
+    val pret = permis || hdmi
+    DisposableEffect(pret) {
+        MyCam.ecran(pret)
         onDispose { MyCam.ecran(false) }
     }
+    val etatHdmi by CameraUsb.etat.collectAsState()
+    val marcheHdmi by CameraUsb.enMarche.collectAsState()
     val diffuse by MyCam.diffuse.collectAsState()
     val ouverte by MyCam.ouverte.collectAsState()
     val erreur by MyCam.erreur.collectAsState()
@@ -330,6 +385,7 @@ fun MyCamOnglet(remote: Remote) {
                 }
             }
             Column(Modifier.padding(horizontal = 16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                ChoixSource(source)
                 BandeauTemoin(t)
                 val anneau = t.anneau
                 Box(
@@ -337,7 +393,7 @@ fun MyCamOnglet(remote: Remote) {
                         .then(if (anneau != null) Modifier.border(3.dp, anneau, RoundedCornerShape(18.dp)) else Modifier)
                         .clip(RoundedCornerShape(18.dp))
                 ) {
-                    if (!permis) {
+                    if (!pret) {
                         Column(Modifier.fillMaxSize().background(C.CamSurface), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(10.dp, Alignment.CenterVertically)) {
                             Ico(I.cam, C.OrClair, 36.dp)
                             T("MyCam a besoin de la caméra", couleur = C.CamTexte, poids = FontWeight.Bold)
@@ -349,13 +405,17 @@ fun MyCamOnglet(remote: Remote) {
                         Viseur(Modifier.fillMaxSize(), grille) {
                             Info(listOf(taille, if (diffuse) "$fps i/s" else "", if (diffuse) codec else "").filter { it.isNotBlank() }.joinToString(" · ").ifBlank { "MyCam" }, Modifier.align(Alignment.TopStart).padding(8.dp))
                             if (batterie >= 0) Info("$batterie %", Modifier.align(Alignment.TopEnd).padding(8.dp))
-                            Info(if (remote.store.camUsb) "Câble USB" else "Wi-Fi", Modifier.align(Alignment.BottomStart).padding(8.dp))
+                            Info(if (remote.store.camUsb && !hdmi) "Câble USB" else if (hdmi) "HDMI → Wi-Fi" else "Wi-Fi", Modifier.align(Alignment.BottomStart).padding(8.dp))
                             Touche(
                                 onClick = { MyCam.pleinEcran.value = true },
                                 modifier = Modifier.align(Alignment.BottomEnd).padding(4.dp).size(44.dp),
                                 fond = Color(0x990B0F1A), rayon = 12.dp, description = "Plein écran à l’horizontale", padding = PaddingValues(0.dp),
                             ) { Ico(I.agrandir, Color.White, 20.dp) }
-                            if (!ouverte || erreur.isNotBlank()) {
+                            if (hdmi && !marcheHdmi) {
+                                Box(Modifier.fillMaxSize().background(Color(0xC70B0F1A)).padding(16.dp), contentAlignment = Alignment.Center) {
+                                    T(etatHdmi.ifBlank { "Recherche de la carte HDMI…" }, couleur = C.CamTexte, poids = FontWeight.Bold, centre = true)
+                                }
+                            } else if (!hdmi && (!ouverte || erreur.isNotBlank())) {
                                 Box(Modifier.fillMaxSize().background(Color(0xC70B0F1A)).padding(16.dp), contentAlignment = Alignment.Center) {
                                     T(erreur.ifBlank { "Ouverture de la caméra…" }, couleur = C.CamTexte, poids = FontWeight.Bold, centre = true)
                                 }
@@ -368,7 +428,9 @@ fun MyCamOnglet(remote: Remote) {
                     }
                 }
 
-                if (diffuse && portrait) T(
+                if (hdmi) CarteHdmi()
+
+                if (diffuse && portrait && !hdmi) T(
                     if (remote.store.camRemplir) "Téléphone à la verticale : l’écran de l’église reçoit le cadre 16:9 du viseur. Tournez-le à l’horizontale pour l’image la plus nette."
                     else "Téléphone à la verticale : l’écran de l’église reçoit l’image en hauteur. Tournez-le à l’horizontale pour remplir l’écran.",
                     taille = 12.sp, couleur = C.CamBrume, interligne = 17.sp,
@@ -381,7 +443,7 @@ fun MyCamOnglet(remote: Remote) {
                     if (zMax >= 2f) add(2f)
                     if (zMax >= 3f) add(3f)
                 }
-                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally)) {
+                if (!hdmi) Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally)) {
                     niveaux.forEach { n ->
                         val on = abs(zoom - n) < 0.05f
                         Box(
@@ -397,11 +459,11 @@ fun MyCamOnglet(remote: Remote) {
                 if (remote.store.camMessages) messages.forEach { m -> CarteMessage(remote, m) }
 
                 Row(Modifier.fillMaxWidth().padding(top = 6.dp), horizontalArrangement = Arrangement.SpaceEvenly, verticalAlignment = Alignment.Top) {
-                    Rond(I.retourner, if (avant) "Avant" else "Arrière", actif = permis) { MyCam.basculerCamera() }
+                    Rond(I.retourner, if (avant) "Avant" else "Arrière", actif = permis && !hdmi) { MyCam.basculerCamera() }
                     Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(6.dp)) {
                         Box(
                             Modifier.size(78.dp).clip(CircleShape).border(3.dp, C.CamTexte, CircleShape)
-                                .clickable(enabled = permis, role = Role.Button, onClickLabel = if (diffuse) "Arrêter la diffusion" else "Diffuser vers le PC") {
+                                .clickable(enabled = pret, role = Role.Button, onClickLabel = if (diffuse) "Arrêter la diffusion" else "Diffuser vers le PC") {
                                     if (diffuse) MyCam.arreterDiffusion() else MyCam.demarrerDiffusion()
                                 },
                             contentAlignment = Alignment.Center,
@@ -411,7 +473,7 @@ fun MyCamOnglet(remote: Remote) {
                         }
                         T(if (diffuse) "Arrêter" else "Diffuser", taille = 12.sp, poids = FontWeight.ExtraBold, couleur = C.CamTexte)
                     }
-                    Rond(I.eclair, "Lampe", on = torche, actif = permis && !avant) { MyCam.basculerTorche() }
+                    Rond(I.eclair, "Lampe", on = torche, actif = permis && !avant && !hdmi) { MyCam.basculerTorche() }
                 }
 
                 Column(
@@ -419,7 +481,7 @@ fun MyCamOnglet(remote: Remote) {
                         .padding(horizontal = 12.dp, vertical = 10.dp),
                     verticalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
-                    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                    if (!hdmi) Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                         Ico(I.soleil, C.CamBrume2, 18.dp)
                         T("Exposition", taille = 13.5.sp, poids = FontWeight.Bold, couleur = C.CamTexte, modifier = Modifier.weight(1f))
                         T(if (expo > 0) "+$expo" else if (expo < 0) "−${-expo}" else "0", taille = 14.sp, poids = FontWeight.ExtraBold, couleur = C.OrClair)
@@ -441,7 +503,7 @@ fun MyCamOnglet(remote: Remote) {
                         }
                         Touche(
                             onClick = { MyCam.pleinEcran.value = true },
-                            modifier = Modifier.weight(1f), fond = C.CamSurface2, bord = C.CamBord, epaisseur = 1.dp, rayon = 12.dp, actif = permis,
+                            modifier = Modifier.weight(1f), fond = C.CamSurface2, bord = C.CamBord, epaisseur = 1.dp, rayon = 12.dp, actif = pret,
                         ) {
                             Ico(I.agrandir, C.CamTexte, 18.dp)
                             Spacer(Modifier.width(8.dp))

@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Siloé Stream 1.9.5 : les caméras USB (classe vidéo 14), dont les cartes de capture HDMI (Elgato Cam Link…) -->
+<resources>
+    <usb-device class="14" />
+</resources>

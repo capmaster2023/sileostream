@@ -16,6 +16,8 @@
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-feature android:name="android.hardware.camera" android:required="false" />
     <uses-feature android:name="android.hardware.microphone" android:required="false" />
+    <!-- Siloé Stream 1.9.5 : caméra HDMI par une carte de capture USB branchée au téléphone (USB hôte / OTG) -->
+    <uses-feature android:name="android.hardware.usb.host" android:required="false" />
 
     <!-- Android 11 et plus : voir le service de reconnaissance vocale (application Google) -->
     <queries>
@@ -43,6 +45,13 @@
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+            <!-- carte de capture HDMI branchée : Android propose d'ouvrir Siloé Stream (et retient l'autorisation USB) -->
+            <intent-filter>
+                <action android:name="android.hardware.usb.action.USB_DEVICE_ATTACHED" />
+            </intent-filter>
+            <meta-data
+                android:name="android.hardware.usb.action.USB_DEVICE_ATTACHED"
+                android:resource="@xml/cartes_capture" />
         </activity>
         <service
             android:name=".Ecoute"
