@@ -151,7 +151,7 @@ public partial class MainWindow
         EnvoyerStream.IsEnabled = true;
         string retour = p != null ? "revenir sur " + p.Titre : "arrêter (antenne noire)";
         // 2.0.2 : le menu de l'antenne montre le nom de sa source principale
-        StreamSourceNom.Text = p != null ? p.Titre : "Aucune (noir)";
+        StreamSourceNom.Text = p != null ? p.Titre : "Aucune";
         // 2.0.2, design « Conducteur » : « ENVOYER À L'ANTENNE » en bordeaux ; quand l'antenne suit l'écran, le bouton le dit (un clic ou M : l'antenne revient)
         var texte = Pinceau(suit ? "RougeTexte" : "SurAntenne");
         if (suit)
@@ -293,7 +293,7 @@ public partial class MainWindow
                 DirectBtn.ClearValue(BackgroundProperty); DirectBtn.ClearValue(BorderBrushProperty);
                 DirectTexte.ClearValue(TextBlock.ForegroundProperty);
                 DirectPoint.Fill = Pinceau(d.Etat == EtatDirect.Erreur ? "Danger" : "Brume2");
-                StreamPastilleTexte.Text = "Zoom · YouTube";
+                StreamPastilleTexte.Text = "YouTube · Zoom · MyStream";
                 StreamPastille.Background = Pinceau("StreamLeger"); StreamPastilleTexte.Foreground = Pinceau("Stream");
                 break;
         }

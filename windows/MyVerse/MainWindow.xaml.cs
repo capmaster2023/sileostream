@@ -339,7 +339,7 @@ public partial class MainWindow : Window
     {
         double w = ActualWidth > 0 ? ActualWidth : Width;
         ColonneGauche.Width = new GridLength(Math.Clamp(w * 0.215, 270, 340));
-        ColonneDroite.Width = new GridLength(Math.Clamp(w * 0.21, 270, 330));
+        ColonneDroite.Width = new GridLength(Math.Clamp(w * 0.25, 300, 420));
         Recherches.Width = Math.Clamp(w * 0.2, 220, 360);
         // petit écran : en-tête et barre du bas plus courts
         bool compact = w < 1360;
@@ -1079,7 +1079,7 @@ public partial class MainWindow : Window
         EcranInfo.Text = PastilleTexte.Text;
         EcranInfo.Foreground = Pinceau(dif == SourceDisplay.Streaming ? "OrVif" : ouvert && !noir ? "Vert" : attente ? "OrVif" : "Brume");
         // 1.6.0 : l'état de l'écran de l'église, au-dessus de son aperçu
-        EgliseEtat.Text = PastilleTexte.Text;
+        EgliseEtat.Text = PastilleTexte.Text == "À l'écran" ? "Église · projecteur" : PastilleTexte.Text;
         EgliseEtat.Foreground = EcranInfo.Foreground;
         EgliseApercu.Background = R.EtatSalle(EtatProjete()) is { Vide: true, Duo: null } || R.Etat.Theme == "transparent" ? Pinceau("Damier") : Brushes.Black;
         EcranInfo.ToolTip = dif == SourceDisplay.Streaming ? "MyStream seulement : Zoom, YouTube et OBS reçoivent cette source, l'écran de projection garde l'écran de repos"
