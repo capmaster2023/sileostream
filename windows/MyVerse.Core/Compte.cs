@@ -20,6 +20,8 @@ public sealed class CompteEglise
     [JsonPropertyName("nom")] public string Nom { get; set; } = "";
     [JsonPropertyName("secret")] public string Secret { get; set; } = "";
     [JsonPropertyName("relais")] public string Relais { get; set; } = ReglagesDistance.RelaisDefaut;
+    /// <summary>1.9.3 : chacun se connecte avec Google pour utiliser le logiciel sur ce PC (l'admin l'active dans Réglages).</summary>
+    [JsonPropertyName("obligatoire")] public bool ConnexionObligatoire { get; set; }
 
     public static CompteEglise? Lire(string dossier)
     {

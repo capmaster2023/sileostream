@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Connexion · Siloé Stream</title>
+<meta name="robots" content="noindex">
+<meta name="referrer" content="no-referrer">
+<link rel="icon" href="/favicon.ico" sizes="any">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --fond: #fbf7f1; --surface: #ffffff; --encre: #1e1a17; --encre-2: #4a433d; --discret: #756b63;
+  --trait: #e8dfd3; --rouge: #a8141b; --erreur: #b3261e;
+  --ombre: 0 1px 2px rgba(30, 26, 23, .05), 0 12px 32px rgba(30, 26, 23, .08);
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --fond: #141110; --surface: #1f1a17; --encre: #f4eee7; --encre-2: #d4cbc1; --discret: #a39890;
+    --trait: #332c27; --rouge: #f2676c; --erreur: #ff8a80;
+    --ombre: 0 1px 2px rgba(0, 0, 0, .3), 0 12px 32px rgba(0, 0, 0, .3);
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --fond: #141110; --surface: #1f1a17; --encre: #f4eee7; --encre-2: #d4cbc1; --discret: #a39890;
+  --trait: #332c27; --rouge: #f2676c; --erreur: #ff8a80; color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; min-height: 100vh; display: grid; place-items: center; padding: 24px 16px;
+  background: var(--fond); color: var(--encre);
+  font: 400 16.5px/1.6 "Manrope", system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+main {
+  width: min(440px, 100%); background: var(--surface); border: 1px solid var(--trait);
+  border-radius: 22px; padding: 36px 28px 30px; text-align: center; box-shadow: var(--ombre);
+}
+main > img { width: 84px; height: 84px; margin: 0 auto 14px; display: block; }
+h1 { font-size: 24px; line-height: 1.2; letter-spacing: -.02em; margin: 0 0 8px; }
+p { margin: 0 0 22px; color: var(--encre-2); }
+#bouton { display: flex; justify-content: center; min-height: 44px; }
+.note { margin: 22px 0 0; font-size: 14px; color: var(--discret); }
+.erreur { color: var(--erreur); font-weight: 600; }
+a { color: var(--rouge); }
+</style>
+</head>
+<body>
+<main>
+  <img src="/logo.png" alt="" width="84" height="84">
+  <h1 id="titre">Se connecter à Siloé Stream</h1>
+  <p id="texte">Choisissez votre compte Google. Siloé Stream, sur l'ordinateur de l'église, s'ouvre ensuite avec les pages de votre rôle.</p>
+  <div id="bouton"></div>
+  <p class="note" id="note">Votre mot de passe reste chez Google : Siloé Stream ne reçoit que votre nom et votre adresse Gmail.</p>
+</main>
+
+<!-- Siloé Stream 1.9.3 : le logiciel ouvre cette page avec ?port=…&etat=… ; le jeton d'identité de Google lui est renvoyé
+     sur 127.0.0.1 (cet ordinateur seulement), avec le code etat qu'il a tiré. Le relais vérifie le jeton auprès de Google. -->
+<script>
+(() => {
+  // l'identifiant Google de Siloé Stream (le même que l'application Android et le serveur des comptes)
+  const CLIENT_ID = '651141034269-s9hq1jb8bafbiipoprof0v1qm2175l9d.apps.googleusercontent.com';
+  const params = new URLSearchParams(location.search);
+  const port = Number(params.get('port'));
+  const etat = params.get('etat') || '';
+  const titre = document.getElementById('titre');
+  const texte = document.getElementById('texte');
+  const note = document.getElementById('note');
+
+  if (!Number.isInteger(port) || port < 1024 || port > 65535 || !/^[A-Za-z0-9_-]{16,64}$/.test(etat)) {
+    titre.textContent = 'Ouvrez cette page depuis Siloé Stream';
+    texte.textContent = "Dans Siloé Stream, sur l'ordinateur de l'église : bouton « Compte » (barre de gauche) › Se connecter avec Google. "
+      + 'Cette page s\'ouvre alors toute seule.';
+    note.innerHTML = '<a href="/">Découvrir Siloé Stream</a>';
+    return;
+  }
+
+  // le jeton part à Siloé Stream, sur cet ordinateur (formulaire envoyé à 127.0.0.1)
+  function envoyer(jeton) {
+    titre.textContent = 'Connexion…';
+    texte.textContent = 'Siloé Stream reçoit votre compte.';
+    const f = document.createElement('form');
+    f.method = 'POST';
+    f.action = 'http://127.0.0.1:' + port + '/connexion';
+    for (const [nom, valeur] of [['idToken', jeton], ['etat', etat]]) {
+      const champ = document.createElement('input');
+      champ.type = 'hidden';
+      champ.name = nom;
+      champ.value = valeur;
+      f.appendChild(champ);
+    }
+    document.body.appendChild(f);
+    f.submit();
+    // si rien ne se passe (Siloé Stream fermé, ou délai dépassé)
+    setTimeout(() => {
+      titre.textContent = 'Siloé Stream ne répond pas';
+      texte.textContent = 'Laissez Siloé Stream ouvert, puis relancez « Se connecter avec Google » depuis le logiciel.';
+    }, 15000);
+  }
+
+  function erreur(message) {
+    note.textContent = message;
+    note.className = 'note erreur';
+  }
+
+  window.surGoogle = () => {
+    try {
+      google.accounts.id.initialize({
+        client_id: CLIENT_ID,
+        callback: (r) => (r && r.credential ? envoyer(r.credential) : erreur('Google n\'a pas donné de compte. Réessayez.')),
+        auto_select: false,
+        cancel_on_tap_outside: false,
+        context: 'signin',
+        ux_mode: 'popup',
+        itp_support: true,
+        use_fedcm_for_button: true,
+      });
+      google.accounts.id.renderButton(document.getElementById('bouton'), {
+        type: 'standard', theme: 'filled_blue', size: 'large', shape: 'pill', text: 'signin_with', locale: 'fr', width: 300,
+      });
+    } catch (e) {
+      erreur('Le bouton Google ne se charge pas : ' + e.message);
+    }
+  };
+})();
+</script>
+<script src="https://accounts.google.com/gsi/client?hl=fr" async defer onload="surGoogle()" onerror="document.getElementById('note').textContent='Le service de connexion de Google ne répond pas : vérifiez Internet, ou un bloqueur de publicités.'"></script>
+</body>
+</html>

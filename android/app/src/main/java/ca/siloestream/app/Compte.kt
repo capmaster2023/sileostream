@@ -178,7 +178,7 @@ fun Context.activite(): Activity? {
     return null
 }
 
-private val NOMS_ROLES = listOf("admin" to "Admin", "bible" to "Versets", "chants" to "Chants", "camera" to "Caméraman")
+private val NOMS_ROLES = listOf("admin" to "Admin", "bible" to "Versets", "chants" to "Chants", "affichage" to "Affichage", "camera" to "Caméraman")
 fun nomRole(r: String) = NOMS_ROLES.firstOrNull { it.first == r }?.second ?: "Admin"
 
 @Composable

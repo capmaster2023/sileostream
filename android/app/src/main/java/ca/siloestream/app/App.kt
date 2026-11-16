@@ -74,11 +74,12 @@ object AppEtat {
     val chercherChant = MutableStateFlow("")
 }
 
-/** Siloé Stream 1.7.1 : les onglets de chaque rôle (0 Régie, 1 Bible, 2 Chants, 3 Culte, 4 MyCam). */
+/** Siloé Stream 1.7.1 : les onglets de chaque rôle (0 Régie, 1 Bible, 2 Chants, 3 Culte, 4 MyCam). 1.9.3 : Affichage = Régie et Culte. */
 fun ongletsDuRole(role: String): List<Int> = when (role) {
     "bible" -> listOf(0, 1)
     "chants" -> listOf(0, 2)
     "camera" -> listOf(4)
+    "affichage" -> listOf(0, 3)
     else -> listOf(0, 1, 2, 3, 4)
 }
 

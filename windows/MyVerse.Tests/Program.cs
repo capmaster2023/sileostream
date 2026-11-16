@@ -2097,6 +2097,54 @@ if (Actif())
     Egal(new AppareilsJumeles(dossierR).Role("t1"), Roles.Admin, "redevenu Admin");
 }
 
+Groupe("Comptes Google sur le PC (1.9.3)");
+if (Actif())
+{
+    // le rôle Affichage, pour les téléphones et pour le logiciel
+    Egal(Roles.Nettoyer(Roles.Affichage), Roles.Affichage, "Affichage : un rôle connu des téléphones");
+    Ok(Roles.Connu("inconnu") == null && Roles.Connu(null) == null && Roles.Pages("inconnu").Count == 0, "rôle inconnu d'un compte : aucune page, jamais Admin");
+    Ok(Roles.Permis(Roles.Affichage, "display.show") && Roles.Permis(Roles.Affichage, "agenda.show") && Roles.Permis(Roles.Affichage, "next")
+        && !Roles.Permis(Roles.Affichage, "bible.show") && !Roles.Permis(Roles.Affichage, "song.show") && !Roles.Permis(Roles.Affichage, "app.quit"),
+        "Affichage (téléphone) : médias, culte et Suivant ; pas la Bible, ni les chants, ni fermer");
+    Ok(!Roles.Permis(Roles.Bible, "display.show") && !Roles.Permis(Roles.Bible, "agenda.show"), "Versets : ni les médias, ni le culte");
+    Ok(Roles.Pages(Roles.Bible).SequenceEqual(new[] { "bible" }) && Roles.Pages(Roles.Chants).SequenceEqual(new[] { "chants" }), "pages du logiciel : Versets = Bible, Chants = chants");
+    Ok(Roles.Pages(Roles.Affichage).SequenceEqual(new[] { "agenda", "annonces", "duo" }), "pages du logiciel : Affichage = Culte, Médias, Duo");
+    Ok(Roles.Pages(Roles.Admin).Count == 7 && Roles.Pages(Roles.Admin).Contains("reglages") && Roles.Pages(Roles.Camera).Count == 0, "pages du logiciel : Admin tout, Caméraman aucune");
+
+    // la page siloestream.tech/connexion renvoie le jeton Google au logiciel, sur 127.0.0.1
+    var rq = ConnexionGoogle.Analyser("POST /connexion HTTP/1.1\r\nHost: 127.0.0.1", "idToken=abc.def%2Bg+h&etat=XyZ_-1");
+    Ok(rq is { Methode: "POST", Chemin: "/connexion" } && rq.Champs["idToken"] == "abc.def+g h" && rq.Champs["etat"] == "XyZ_-1", "formulaire de la page de connexion lu");
+    using (var cx = new ConnexionGoogle())
+    {
+        Ok(cx.Adresse.StartsWith($"https://siloestream.tech/connexion/?port={cx.Port}&etat=") && cx.Etat.Length >= 20, "adresse de la page de connexion (port et code etat)");
+        using var fin = new CancellationTokenSource(TimeSpan.FromSeconds(20));
+        var attente = cx.Attendre(fin.Token);
+        using var http = new HttpClient();
+        var faux = await http.PostAsync($"http://127.0.0.1:{cx.Port}/connexion",
+            new FormUrlEncodedContent(new Dictionary<string, string> { ["idToken"] = new string('j', 40), ["etat"] = "mauvais" }));
+        Ok(faux.StatusCode == System.Net.HttpStatusCode.NotFound && !attente.IsCompleted, "mauvais code etat : refusé, la connexion attend toujours");
+        var jeton = "eyJhbGciOi." + new string('x', 60) + ".signature";
+        var bon = await http.PostAsync($"http://127.0.0.1:{cx.Port}/connexion",
+            new FormUrlEncodedContent(new Dictionary<string, string> { ["idToken"] = jeton, ["etat"] = cx.Etat }));
+        Ok(bon.IsSuccessStatusCode && (await bon.Content.ReadAsStringAsync()).Contains("connecté"), "bon code : la page « Vous êtes connecté »");
+        Egal(await attente, jeton, "le jeton Google arrive au logiciel");
+    }
+    using (var cx2 = new ConnexionGoogle())
+    {
+        using var vite = new CancellationTokenSource(300);
+        Egal(await cx2.Attendre(vite.Token), (string?)null, "connexion annulée : aucun jeton");
+    }
+
+    // le compte gardé sur le PC, et la connexion obligatoire gardée avec l'église du PC
+    var dossierC = Temp();
+    new SessionPc { Jeton = "j1", Email = "a@b.c", Nom = "A", Role = Roles.Affichage, Eglise = "e1", EgliseNom = "Église", Relais = "r" }.Ecrire(dossierC);
+    Ok(SessionPc.Lire(dossierC) is { Role: Roles.Affichage, Email: "a@b.c", Eglise: "e1" }, "compte gardé (compte-pc.json)");
+    SessionPc.Effacer(dossierC);
+    Ok(SessionPc.Lire(dossierC) == null, "déconnexion : compte effacé");
+    new CompteEglise { Eglise = "e1", Nom = "Église", Secret = Telephone.B64(new byte[32]), ConnexionObligatoire = true }.Ecrire(dossierC);
+    Ok(CompteEglise.Lire(dossierC) is { ConnexionObligatoire: true, Eglise: "e1" }, "connexion obligatoire gardée (eglise.json)");
+}
+
 Groupe("Caméras USB fluides (1.6.5)");
 if (Actif())
 {

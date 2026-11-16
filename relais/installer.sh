@@ -1,9 +1,21 @@
 #!/bin/bash
-# Installe (ou met à jour) le relais Siloé Stream sur un VPS Ubuntu :
-#   curl -fsSL https://raw.githubusercontent.com/capmaster2023/sileostream/main/relais/installer.sh | bash
+# Installe (ou met à jour) le relais Siloé Stream sur un VPS Ubuntu. Le dépôt est privé : il faut un jeton GitHub en lecture
+# seule sur sileostream (le même que celui du site siloestream.tech, « Contents : Read-only »). Sur le VPS :
+#   export JETON=github_pat_...
+#   curl -fsSL -H "Authorization: Bearer $JETON" -H "Accept: application/vnd.github.raw" \
+#     https://api.github.com/repos/capmaster2023/sileostream/contents/relais/installer.sh | bash
 # Avec votre propre nom de domaine (enregistrement A vers l'IP du VPS) : ... | bash -s relais.exemple.com
 set -e
 # tout le script est lu avant de commencer (curl | bash : apt ne peut pas avaler la suite)
+# un fichier du dépôt : avec le jeton (dépôt privé), sinon l'adresse publique
+telecharger() {
+  if [ -n "${JETON:-}" ]; then
+    curl -fsSL -H "Authorization: Bearer $JETON" -H "Accept: application/vnd.github.raw" \
+      "https://api.github.com/repos/capmaster2023/sileostream/contents/$1?ref=$BRANCHE" -o "$2"
+  else
+    curl -fsSL "https://raw.githubusercontent.com/capmaster2023/sileostream/$BRANCHE/$1" -o "$2"
+  fi
+}
 principal() {
 BRANCHE="${BRANCHE:-main}"
 IP=$(curl -fsS -4 https://api.ipify.org || hostname -I | awk '{print $1}')
@@ -19,8 +31,8 @@ if ! command -v caddy >/dev/null; then
   apt-get install -y -q caddy
 fi
 mkdir -p /opt/siloestream-relais && cd /opt/siloestream-relais
-curl -fsSL "https://raw.githubusercontent.com/capmaster2023/sileostream/$BRANCHE/relais/relais.js" -o relais.js
-curl -fsSL "https://raw.githubusercontent.com/capmaster2023/sileostream/$BRANCHE/relais/comptes.js" -o comptes.js
+telecharger relais/relais.js relais.js
+telecharger relais/comptes.js comptes.js
 [ -f package.json ] || npm init -y >/dev/null
 npm install --omit=dev ws@8 >/dev/null
 id siloestream >/dev/null 2>&1 || useradd --system --no-create-home siloestream

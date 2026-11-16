@@ -163,15 +163,44 @@ public sealed class AppareilsJumeles
 /// <summary>
 /// Siloé Stream 1.7.1 : les rôles des téléphones. Admin : tout (et démarrer / fermer Siloé Stream) ; Bible : les versets ;
 /// Chants : les chants ; Caméra : MyCam seulement. Le PC refuse ce que le rôle ne permet pas, l'app cache ces onglets.
+/// 1.9.3 : Affichage (ce qui est montré dans l'église et sur Zoom : le culte, les médias, le duo), et les mêmes rôles
+/// pour les comptes Google connectés sur le PC : chacun ne voit que les pages de son rôle (<see cref="Pages"/>).
 /// </summary>
 public static class Roles
 {
-    public const string Admin = "admin", Bible = "bible", Chants = "chants", Camera = "camera";
-    public static readonly string[] Tous = { Admin, Bible, Chants, Camera };
+    public const string Admin = "admin", Bible = "bible", Chants = "chants", Camera = "camera", Affichage = "affichage";
+    public static readonly string[] Tous = { Admin, Bible, Chants, Affichage, Camera };
 
-    public static string Nettoyer(string? role) => role is Bible or Chants or Camera ? role : Admin;
+    public static string Nettoyer(string? role) => role is Bible or Chants or Camera or Affichage ? role : Admin;
 
-    public static string Nom(string? role) => Nettoyer(role) switch { Bible => "Versets", Chants => "Chants", Camera => "Caméraman", _ => "Admin" };
+    /// <summary>1.9.3 : un rôle connu, sinon null. Pour un compte, un rôle inconnu ne vaut jamais Admin.</summary>
+    public static string? Connu(string? role) => role is Admin or Bible or Chants or Camera or Affichage ? role : null;
+
+    public static string Nom(string? role) => Nettoyer(role) switch { Bible => "Versets", Chants => "Chants", Camera => "Caméraman", Affichage => "Affichage", _ => "Admin" };
+
+    /// <summary>1.9.3 : ce que le rôle permet, en quelques mots.</summary>
+    public static string Description(string? role) => Connu(role) switch
+    {
+        Admin => "tout, et les membres de l'église",
+        Bible => "la Bible et les versets",
+        Chants => "les chants",
+        Affichage => "ce qui est affiché dans l'église et sur Zoom",
+        Camera => "MyCam, sur le téléphone",
+        _ => "aucun accès",
+    };
+
+    /// <summary>
+    /// 1.9.3 : les pages du logiciel permises à un compte connecté sur le PC (« agenda » = Culte, « annonces » = Médias).
+    /// Caméraman : aucune (MyCam se pilote du téléphone) ; un rôle inconnu : aucune.
+    /// </summary>
+    public static IReadOnlyList<string> Pages(string? role) => Connu(role) switch
+    {
+        Admin => new[] { "agenda", "bible", "chants", "annonces", "duo", "son", "reglages" },
+        Bible => new[] { "bible" },
+        Chants => new[] { "chants" },
+        Affichage => new[] { "agenda", "annonces", "duo" },
+        _ => Array.Empty<string>(),
+    };
 
     /// <summary>Demandes que l'app envoie d'elle-même à la connexion : refusées sans message.</summary>
     public static bool Automatique(string commande) => commande is "state.get" or "agenda.get" or "display.list" or "sync.get" or "bible.get" or "cam.info";
@@ -185,6 +214,7 @@ public static class Roles
             Bible => commande is "bible.preview" or "bible.search" or "bible.show" or "bible.get" or "sync.get" or "next" or "prev" or "clear" or "noir",
             Chants => commande is "song.search" or "song.open" or "song.show" or "sync.get" or "bible.get" or "next" or "prev" or "clear" or "noir",
             Camera => commande is "cam.info" or "cam.ack",
+            Affichage => commande is "display.list" or "display.show" or "default.set" or "agenda.get" or "agenda.show" or "sync.get" or "next" or "prev" or "clear" or "noir",
             _ => false,
         };
     }

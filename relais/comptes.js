@@ -1,5 +1,6 @@
 // Siloé Stream 1.9.1 : comptes Google, églises, membres et rôles (API HTTPS du relais).
-// Chaque église : un ou plusieurs admins, des membres (Versets, Chants, Caméraman) ajoutés par leur Gmail, et le PC de l'église.
+// Chaque église : un ou plusieurs admins, des membres (Versets, Chants, Affichage, Caméraman) ajoutés par leur Gmail, et le PC de l'église.
+// 1.9.3 : les mêmes comptes se connectent au logiciel du PC (siloestream.tech/connexion) ; Affichage = l'église et Zoom.
 // Le PC donne un secret au moment de la liaison ; le serveur signe avec lui des billets de 24 h pour les téléphones des membres.
 // Le PC vérifie le billet lui-même : un membre retiré n'obtient plus de billet et ne peut plus entrer.
 const fs = require('fs');
@@ -9,7 +10,7 @@ const crypto = require('crypto');
 const CLIENT_ID = process.env.GOOGLE_CLIENT_ID || '651141034269-s9hq1jb8bafbiipoprof0v1qm2175l9d.apps.googleusercontent.com';
 const DOSSIER = process.env.STATE_DIRECTORY || process.env.DONNEES || path.join(__dirname, 'donnees');
 const FICHIER = path.join(DOSSIER, 'comptes.json');
-const ROLES = ['admin', 'bible', 'chants', 'camera'];
+const ROLES = ['admin', 'bible', 'chants', 'affichage', 'camera'];
 const JOUR = 86400;
 
 let d = { comptes: {}, sessions: {}, eglises: {}, codes: {} };

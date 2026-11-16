@@ -463,7 +463,7 @@ public partial class MainWindow
         int g = ++generationCmd;
         using (Perf.Chrono("recherche Ctrl K (rapide)"))
         {
-            try { cmdRes = R.Commande(q, recueil, false); }
+            try { cmdRes = FiltrerRole(R.Commande(q, recueil, false)); }
             catch (Exception x) { Journal.Erreur("recherche du culte", x); cmdRes = new(); }
         }
         cmdIndex = 0;
@@ -471,7 +471,7 @@ public partial class MainWindow
         if (Recherche.Mots(q).Count < 2) return;
         List<ResultatCommande> complet;
         long t0 = System.Diagnostics.Stopwatch.GetTimestamp();
-        try { complet = await Task.Run(() => R.Commande(q, recueil, true)); }
+        try { complet = FiltrerRole(await Task.Run(() => R.Commande(q, recueil, true))); }
         catch (Exception x) { Journal.Erreur("recherche du culte (paroles)", x); return; }
         Perf.Ajouter("recherche Ctrl K (paroles, à côté)", System.Diagnostics.Stopwatch.GetElapsedTime(t0).TotalMilliseconds);
         if (g != generationCmd || Cmd.Text != q || complet.Count <= cmdRes.Count) return;
@@ -572,6 +572,8 @@ public partial class MainWindow
         }
         if (mode == "ajouter")
         {
+            // 1.9.3 : le programme du culte appartient aux rôles qui ont la page Culte
+            if (!PagePermise("agenda")) { Toast("Le programme du culte ne fait pas partie de votre rôle."); return; }
             var el = r.ChantId != null ? R.AjouterChantAgenda(r.ChantId) : r.Ref is Ref ra ? R.AjouterBibleAgenda(ra) : null;
             if (el != null) { Toast($"« {el.Titre} » ajouté au programme."); ChoisirElement(el); }
             Cmd.SelectAll();

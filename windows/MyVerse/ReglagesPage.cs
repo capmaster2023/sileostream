@@ -18,6 +18,8 @@ public sealed class ReglagesPage : Grid
     readonly StackPanel ecrans = new() { Margin = new Thickness(0, 8, 0, 0) };
     readonly StackPanel distance = new() { Margin = new Thickness(0, 8, 0, 0) };
     int versionDistance;
+    readonly StackPanel eglise = new() { Margin = new Thickness(0, 8, 0, 0) };
+    int versionEglise;
     readonly Button clair, sombre;
     bool defilement;
 
@@ -46,6 +48,8 @@ public sealed class ReglagesPage : Grid
         var telephone = Section("Téléphone", "La télécommande Android passe les diapositives et choisit les chants. Le PC et le téléphone doivent être sur le même réseau.", jumeler);
         var aDistance = Section("À distance", "Contrôler Siloé Stream avec le téléphone de n'importe où, par Internet (passe par le relais Siloé Stream du VPS). "
             + "Réglé une fois ici : ensuite, dès que ce PC est allumé, il est joignable, et le téléphone peut même démarrer ou fermer Siloé Stream.", distance);
+        var comptes = Section("Église et comptes", "Chacun se connecte avec son compte Google (par siloestream.tech) et ne voit que les pages de son rôle : "
+            + "Versets (la Bible), Chants, Affichage (ce qui est montré dans l'église et sur Zoom : Culte, Médias, Duo). L'admin ajoute les membres par leur Gmail.", eglise);
 
         // l'ordre de la page : Licences (dernière section du son) passe tout en bas
         son.Children.Remove(son.Licences);
@@ -56,6 +60,7 @@ public sealed class ReglagesPage : Grid
         Ajouter("projection", "Projection", projection);
         Ajouter("telephone", "Téléphone", telephone);
         Ajouter("distance", "À distance", aDistance);
+        Ajouter("eglise", "Église et comptes", comptes);
         Ajouter("maj", "Mise à jour", maj);
         Ajouter("transfert", "Transfert", transfert);
         Ajouter("journal", "Journal", journal);
@@ -72,7 +77,7 @@ public sealed class ReglagesPage : Grid
         sections[0].Bouton.IsChecked = true;
 
         Palette.Change += MajApparence;
-        IsVisibleChanged += (_, _) => { if (IsVisible) { MajEcrans(); MajDistance(); MajApparence(); Outils.MajJournal(); } };
+        IsVisibleChanged += (_, _) => { if (IsVisible) { MajEcrans(); MajDistance(); MajEglise(); MajApparence(); Outils.MajJournal(); } };
         MajApparence();
     }
 
@@ -310,6 +315,203 @@ public sealed class ReglagesPage : Grid
             if (v == versionDistance && IsVisible) MajDistance();
         }
     }
+
+    /// <summary>
+    /// 1.9.3 : la section « Église et comptes » : le compte Google connecté, l'église du PC, la connexion obligatoire
+    /// et, pour l'admin, les membres (ajouter par Gmail, changer le rôle, retirer) ou la liaison du PC à une église.
+    /// </summary>
+    public async void MajEglise()
+    {
+        int v = ++versionEglise;
+        var dossier = App.Donnees.Dossier;
+        eglise.Children.Clear();
+        var s = ComptesPc.Session;
+        var lien = ComptesPc.Eglise;
+        static Button Petit(string texte) => new() { Style = S("BtnPetit"), Content = texte, Height = 34, Padding = new Thickness(12, 0, 12, 0) };
+
+        // le compte connecté sur ce PC
+        if (s == null)
+        {
+            var entrer = Petit("Se connecter avec Google…");
+            entrer.Click += async (_, _) =>
+            {
+                Principale?.Toast("Terminez la connexion dans votre navigateur (siloestream.tech).");
+                var err = await ComptesPc.Connecter();
+                Principale?.Toast(err ?? $"Connecté : {ComptesPc.Session?.Nom} ({Roles.Nom(ComptesPc.Session?.Role)}).");
+                MajEglise();
+            };
+            eglise.Children.Add(Ligne(false, "Compte Google", "personne n'est connecté sur ce PC", entrer));
+        }
+        else
+        {
+            var sortir = Petit("Se déconnecter");
+            sortir.Click += async (_, _) => { await ComptesPc.Deconnecter(); MajEglise(); };
+            eglise.Children.Add(Ligne(true, s.Nom.Length > 0 ? s.Nom : s.Email, $"{s.Email} · {Roles.Nom(s.Role)} : {Roles.Description(s.Role)}", sortir));
+        }
+
+        // l'église de ce PC, et la connexion obligatoire
+        if (lien != null)
+        {
+            eglise.Children.Add(Ligne(true, $"Église « {lien.Nom} »", "ce PC est relié : ses membres se connectent avec leur Gmail", null));
+            if (s != null && ComptesPc.EstAdmin)
+            {
+                var bascule = Petit(lien.ConnexionObligatoire ? "Rendre facultative" : "Rendre obligatoire");
+                bascule.Click += (_, _) =>
+                {
+                    var c = CompteEglise.Lire(dossier);
+                    if (c == null) return;
+                    c.ConnexionObligatoire = !c.ConnexionObligatoire;
+                    try { c.Ecrire(dossier); }
+                    catch (Exception x) { Principale?.Toast("Réglage impossible à enregistrer : " + x.Message); return; }
+                    Journal.Info(c.ConnexionObligatoire ? "comptes : connexion obligatoire" : "comptes : connexion facultative");
+                    Principale?.AppliquerRole();
+                    Principale?.Toast(c.ConnexionObligatoire
+                        ? "Connexion obligatoire : chacun se connecte au démarrage et ne voit que les pages de son rôle."
+                        : "Connexion facultative : sans compte connecté, le logiciel reste entier.");
+                    MajEglise();
+                };
+                eglise.Children.Add(Ligne(lien.ConnexionObligatoire, "Connexion Google obligatoire", lien.ConnexionObligatoire
+                    ? "chacun se connecte au démarrage et ne voit que les pages de son rôle"
+                    : "facultative : sans compte connecté, le logiciel reste entier", bascule));
+            }
+        }
+        if (s == null || !ComptesPc.EstAdmin) return;
+
+        if (lien == null)
+        {
+            // relier ce PC : à une église dont ce compte est l'admin, ou à une nouvelle
+            ComptesApi.Moi moi;
+            try { moi = await ComptesApi.MoiActuel(s.Relais, s.Jeton); }
+            catch (Exception x) when (x is ComptesApi.Refus or HttpRequestException or TaskCanceledException)
+            {
+                if (v == versionEglise) eglise.Children.Add(Note("Églises : " + x.Message));
+                return;
+            }
+            if (v != versionEglise) return;
+            foreach (var eg in moi.Eglises.Where(x => x.Role == Roles.Admin))
+            {
+                var (id, nomEglise) = (eg.Id, eg.Nom);
+                var relier = Petit("Relier ce PC");
+                relier.Click += async (_, _) =>
+                {
+                    relier.IsEnabled = false;
+                    var err = await ComptesPc.RelierPc(id);
+                    Principale?.Toast(err ?? $"Ce PC est relié à l'église « {nomEglise} ».");
+                    MajEglise();
+                };
+                eglise.Children.Add(Ligne(false, $"Église « {nomEglise} »", "vous en êtes l'admin", relier));
+            }
+            var nom = new TextBox { Style = S("Champ"), FontSize = 13.5, MinWidth = 260, Margin = new Thickness(0, 0, 10, 0) };
+            var creer = Petit("Créer mon église");
+            creer.Click += async (_, _) =>
+            {
+                var n = nom.Text.Trim();
+                if (n.Length < 2) { Principale?.Toast("Donnez un nom à votre église."); return; }
+                creer.IsEnabled = false;
+                var err = await ComptesPc.CreerEglise(n);
+                Principale?.Toast(err ?? $"Église « {n} » créée : ce PC y est relié, et vous en êtes l'admin.");
+                MajEglise();
+            };
+            eglise.Children.Add(Rangee("Nouvelle église (vous en serez l'admin)", nom, creer));
+            return;
+        }
+
+        // les membres de l'église (admin)
+        List<ComptesApi.Membre> membres;
+        try { membres = await ComptesApi.Membres(s.Relais, s.Jeton, lien.Eglise); }
+        catch (Exception x) when (x is ComptesApi.Refus or HttpRequestException or TaskCanceledException)
+        {
+            if (v == versionEglise) eglise.Children.Add(Note("Membres : " + x.Message));
+            return;
+        }
+        if (v != versionEglise) return;
+        eglise.Children.Add(new TextBlock { Text = $"Membres ({membres.Count})", FontSize = 14, FontWeight = FontWeights.SemiBold, Margin = new Thickness(0, 18, 0, 4) });
+        foreach (var m in membres.OrderBy(x => x.Role != Roles.Admin).ThenBy(x => x.Email))
+        {
+            var (courrielMembre, roleMembre) = (m.Email, m.Role);
+            var choix = ChoixRole(roleMembre);
+            choix.SelectionChanged += async (_, _) =>
+            {
+                if (choix.SelectedItem is ComboBoxItem { Tag: string r } && r != roleMembre)
+                    await Agir(() => ComptesApi.AjouterMembre(s.Relais, s.Jeton, lien.Eglise, courrielMembre, r), $"{courrielMembre} : {Roles.Nom(r)}.");
+            };
+            var retirer = Petit("Retirer");
+            retirer.Click += async (_, _) =>
+            {
+                if (!Dialogue.Confirmer(Principale, $"Retirer {courrielMembre} de l'église « {lien.Nom} » ? Ce compte ne pourra plus se connecter.", "Retirer")) return;
+                await Agir(() => ComptesApi.RetirerMembre(s.Relais, s.Jeton, lien.Eglise, courrielMembre), $"{courrielMembre} est retiré de l'église.");
+            };
+            eglise.Children.Add(LigneMembre(m.Nom.Length > 0 ? m.Nom : courrielMembre, m.Nom.Length > 0 ? courrielMembre : "pas encore connecté", choix, retirer));
+        }
+
+        // ajouter quelqu'un : son Gmail et son rôle
+        var courriel = new TextBox { Style = S("Champ"), FontSize = 13.5, MinWidth = 220, Margin = new Thickness(0, 0, 10, 0) };
+        var role = ChoixRole(Roles.Bible);
+        role.Margin = new Thickness(0, 0, 10, 0);
+        var ajouter = Petit("Ajouter");
+        ajouter.Click += async (_, _) =>
+        {
+            var em = courriel.Text.Trim();
+            if (em.Length == 0) { Principale?.Toast("Écrivez son adresse Gmail."); return; }
+            if (role.SelectedItem is ComboBoxItem { Tag: string r })
+                await Agir(() => ComptesApi.AjouterMembre(s.Relais, s.Jeton, lien.Eglise, em, r), $"{em} est ajouté ({Roles.Nom(r)}) : il se connecte avec ce Gmail.");
+        };
+        var ligneAjout = new DockPanel { Margin = new Thickness(0, 4, 0, 0) };
+        DockPanel.SetDock(ajouter, Dock.Right);
+        ligneAjout.Children.Add(ajouter);
+        DockPanel.SetDock(role, Dock.Right);
+        ligneAjout.Children.Add(role);
+        ligneAjout.Children.Add(courriel);
+        var bloc = new StackPanel { Margin = new Thickness(0, 14, 0, 0) };
+        bloc.Children.Add(new TextBlock { Text = "Ajouter quelqu'un : son adresse Gmail et son rôle", FontSize = 12.5, Foreground = P("Brume") });
+        bloc.Children.Add(ligneAjout);
+        eglise.Children.Add(bloc);
+    }
+
+    async Task Agir(Func<Task> action, string reussi)
+    {
+        try { await action(); Principale?.Toast(reussi); }
+        catch (Exception x) when (x is ComptesApi.Refus or HttpRequestException or TaskCanceledException) { Principale?.Toast(x.Message); }
+        await ComptesPc.Rafraichir();
+        MajEglise();
+    }
+
+    static ComboBox ChoixRole(string actuel)
+    {
+        var c = new ComboBox { Width = 270, Height = 34, FontSize = 13.5, VerticalContentAlignment = VerticalAlignment.Center };
+        foreach (var r in Roles.Tous) c.Items.Add(new ComboBoxItem { Content = $"{Roles.Nom(r)} · {Roles.Description(r)}", Tag = r });
+        c.SelectedItem = c.Items.OfType<ComboBoxItem>().FirstOrDefault(i => (string)i.Tag == actuel);
+        return c;
+    }
+
+    static Border LigneMembre(string titre, string sous, ComboBox role, Button retirer)
+    {
+        var d = new DockPanel();
+        DockPanel.SetDock(retirer, Dock.Right);
+        d.Children.Add(retirer);
+        role.Margin = new Thickness(0, 0, 10, 0);
+        DockPanel.SetDock(role, Dock.Right);
+        d.Children.Add(role);
+        var t = new StackPanel { VerticalAlignment = VerticalAlignment.Center };
+        t.Children.Add(new TextBlock { Text = titre, FontSize = 14, FontWeight = FontWeights.SemiBold, TextTrimming = TextTrimming.CharacterEllipsis });
+        t.Children.Add(new TextBlock { Text = sous, FontSize = 12.5, Foreground = P("Brume"), Margin = new Thickness(0, 2, 0, 0), TextTrimming = TextTrimming.CharacterEllipsis });
+        d.Children.Add(t);
+        return new Border { Child = d, BorderBrush = P("Trait"), BorderThickness = new Thickness(0, 1, 0, 0), Padding = new Thickness(0, 9, 0, 9) };
+    }
+
+    static StackPanel Rangee(string titre, TextBox champ, Button bouton)
+    {
+        var ligne = new DockPanel { Margin = new Thickness(0, 4, 0, 0) };
+        DockPanel.SetDock(bouton, Dock.Right);
+        ligne.Children.Add(bouton);
+        ligne.Children.Add(champ);
+        var bloc = new StackPanel { Margin = new Thickness(0, 12, 0, 0) };
+        bloc.Children.Add(new TextBlock { Text = titre, FontSize = 12.5, Foreground = P("Brume") });
+        bloc.Children.Add(ligne);
+        return bloc;
+    }
+
+    static TextBlock Note(string texte) => new() { Text = texte, Style = S("Muet"), FontSize = 12.5, TextWrapping = TextWrapping.Wrap, Margin = new Thickness(0, 12, 0, 0) };
 
     /// <summary>Pour le test automatique : le texte de l'état « À distance ».</summary>
     public string TestDistance => string.Join(" / ", distance.Children.OfType<Border>().Select(b => b.Child).OfType<DockPanel>()

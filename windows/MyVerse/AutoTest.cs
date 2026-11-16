@@ -1507,6 +1507,12 @@ public static class AutoTest
                 foreach (var page in new[] { "bible", "chants", "annonces", "duo", "son", "reglages", "agenda", "bible", "agenda" })
                     temps.Add($"{page} {await Mesurer(() => w.TestPage(page)):0} ms");
                 Note("1.5.1 : changements de page (jusqu'à l'image affichée) : " + string.Join(", ", temps));
+                // 1.9.3 : les boutons de pages de chaque rôle (Culte, Bibliothèque, Médias, Son, Réglages), puis retour à l'état réel
+                Ok(w.TestRole(Roles.Bible) == "01000" && w.TestRole(Roles.Affichage) == "10100" && w.TestRole(Roles.Camera) == "00000" && w.TestRole(Roles.Admin) == "11111",
+                    "1.9.3 : pages par rôle (Versets : Bibliothèque ; Affichage : Culte et Médias ; Caméraman : aucune ; Admin : tout)");
+                w.AppliquerRole();
+                Ok(w.TestRole(ComptesPc.Role) == "11111", "1.9.3 : sans compte connecté ni connexion obligatoire, le logiciel est entier");
+                w.AppliquerRole();
                 var boutons = new List<string>();
                 boutons.Add($"Suivant {await Mesurer(() => R.Bouger(1)):0} ms");
                 boutons.Add($"Précédent {await Mesurer(() => R.Bouger(-1)):0} ms");

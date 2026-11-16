@@ -97,6 +97,10 @@ L'installation conserve les chants, Bibles, réglages et téléphones jumelés. 
 
 Sur le téléphone, installez l'APK par-dessus l'application existante. Le package Android et la signature existante restent conservés. Le PC et le téléphone doivent être sur le même réseau pour la télécommande.
 
+## Comptes Google (1.9.3)
+
+Le logiciel se connecte avec un compte Google par la page **siloestream.tech/connexion** (bouton **Compte** de la barre de gauche) : la page renvoie le jeton de Google au logiciel, sur `127.0.0.1`, et le relais le vérifie. Les rôles sont ceux de l'église (relais du VPS) : **Admin** (tout), **Versets** (la Bible), **Chants**, **Affichage** (Culte, Médias, Duo : l'église et Zoom) et **Caméraman** (MyCam, sur le téléphone). L'admin gère les membres dans **Réglages › Église et comptes** et peut y rendre la connexion obligatoire.
+
 ## Licence et code source
 
 Siloé Stream est un logiciel libre : vous pouvez le redistribuer et le modifier selon les termes de la **GNU General Public License, version 2 ou (à votre choix) toute version ultérieure**, publiée par la Free Software Foundation. Cette licence s'applique parce que Siloé Stream utilise libobs (OBS Studio), elle-même sous GPL v2 ou ultérieure. Le texte complet est dans [`COPYING`](COPYING), installé avec Siloé Stream sous le nom `COPYING.txt` (**Réglages › Licences › Lire la licence GNU GPL**).

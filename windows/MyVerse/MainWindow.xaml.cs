@@ -218,7 +218,7 @@ public partial class MainWindow : Window
         PreviewKeyDown += Clavier;
         PreviewTextInput += (_, e) =>
         {
-            if (e.Text != "/" || Keyboard.FocusedElement is TextBox or PasswordBox) return;
+            if (e.Text != "/" || Keyboard.FocusedElement is TextBox or PasswordBox || ConnexionAffichee) return;
             (onglet is "agenda" or "annonces" or "duo" ? Cmd : ongletBible ? Q : Qc).Focus();
             e.Handled = true;
         };
@@ -283,6 +283,8 @@ public partial class MainWindow : Window
 
     void Demarre()
     {
+        // 1.9.3 : le compte Google du PC (et l'écran de connexion si l'admin l'a rendue obligatoire)
+        BrancherComptes();
         (onglet is "agenda" or "annonces" or "duo" ? Cmd : Q).Focus();
         // l'index de recherche se prépare en arrière-plan : la première recherche est instantanée
         _ = Task.Run(async () =>
@@ -342,7 +344,7 @@ public partial class MainWindow : Window
         // petit écran : en-tête et barre du bas plus courts
         bool compact = w < 1360;
         VersionsLab.Visibility = compact ? Visibility.Collapsed : Visibility.Visible;
-        SceneBtn.Visibility = SceneSep.Visibility = w < 1200 ? Visibility.Collapsed : Visibility.Visible;
+        SceneBtn.Visibility = SceneSep.Visibility = w < 1200 || !sceneRole ? Visibility.Collapsed : Visibility.Visible;
         // 1.5.0 : l'état est en haut, à côté de la recherche : le nom court du projecteur sous 1500 px
         ProjectionCompact = w < 1500;
         MajProjection();
@@ -365,6 +367,13 @@ public partial class MainWindow : Window
 
     void MontrerOnglet(string o)
     {
+        // 1.9.3 : seulement les pages du rôle du compte connecté (sinon la première qui l'est)
+        if (!PagePermise(o))
+        {
+            var permises = Roles.Pages(ComptesPc.Role);
+            if (permises.Count == 0 || permises[0] == o) return;
+            o = permises[0];
+        }
         onglet = o;
         R.OngletBible = o == "bible";
         // 1.8.0 : les tuiles en direct ne travaillent que sur la page Médias (la caméra reste ouverte, prête)
@@ -427,6 +436,8 @@ public partial class MainWindow : Window
     // ------------------------------------------------------------ raccourcis clavier
     void Clavier(object sender, KeyEventArgs e)
     {
+        // 1.9.3 : l'écran de connexion est affiché : aucun raccourci ne touche à ce qui est à l'écran
+        if (ConnexionAffichee) return;
         if (e.Key == Key.K && Keyboard.Modifiers == ModifierKeys.Control)
         {
             OuvrirCommande();
@@ -1150,7 +1161,8 @@ public partial class MainWindow : Window
         if (r.Disponible)
         {
             maj = r;
-            MajBtn.Visibility = Visibility.Visible;
+            // 1.9.3 : la mise à jour se propose à l'admin (ou quand personne n'est connecté)
+            MajBtn.Visibility = ComptesPc.EstAdmin ? Visibility.Visible : Visibility.Collapsed;
             MajBtn.Content = $"Mettre à jour ({r.Version})";
         }
         else if (manuel && r.Erreur != null) Journal.Info("mise à jour : " + r.Erreur);

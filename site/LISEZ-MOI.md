@@ -18,6 +18,7 @@ Le site de Siloé Stream : la page de téléchargement et les mises à jour du l
 | `/telecharger/portable` | version portable (.zip) |
 | `/telecharger/android` | application Android (.apk) |
 | `/telecharger/<tag>/<fichier>` | un fichier d'une version précise (liens donnés au logiciel) |
+| `/connexion/` | connexion Google du logiciel (1.9.3) : ouverte par Siloé Stream avec `?port=…&etat=…` |
 
 ## Mise en ligne (Hostinger)
 
@@ -25,6 +26,8 @@ Le site de Siloé Stream : la page de téléchargement et les mises à jour du l
 2. **Fichiers** : hPanel › Sites web › siloestream.tech › Gestionnaire de fichiers › `public_html`. Supprimez la page « Coming soon » (`default.php` ou `index.php`), envoyez `siloestream-site.zip` et choisissez *Extraire*. `.htaccess`, `index.html`, `logo.png`, `favicon.ico` et le dossier `api` doivent être directement dans `public_html`.
 3. **Relier à GitHub** : ouvrez `public_html/api/config.php`, remplacez `COLLER_LE_JETON_ICI` par le jeton, enregistrez. Ne mettez jamais le jeton dans GitHub.
 4. **Vérifier** : https://siloestream.tech/api/releases/latest doit afficher la dernière version.
+
+La page `/connexion/` utilise l'identifiant Google de Siloé Stream : dans Google Cloud (projet mychurchapp › API et services › Identifiants › le client Web), **https://siloestream.tech** doit être dans les *Origines JavaScript autorisées*.
 
 Le jeton GitHub expire (date choisie à sa création) : avant cette date, créez-en un nouveau et remplacez-le dans `api/config.php`.
 
