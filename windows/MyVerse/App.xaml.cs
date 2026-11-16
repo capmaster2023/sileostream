@@ -169,7 +169,7 @@ public partial class App : Application
         SourcesDuo = new SourcesDisplay("display-duo.jpg");
         SourcesDefaut = new SourcesDisplay("");
         SourcesStream = new SourcesDisplay("");
-        if (AutoTest == null || Environment.GetEnvironmentVariable("MYCHURCH_TEST_CAM") == "1")
+        if (AutoTest == null || Environment.GetEnvironmentVariable("SILOE_TEST_CAM") == "1")
             try { CameraVirtuelle = new MyVirtualCam(); } catch (Exception ex) { Journal.Erreur("MyVirtualCam démarrage", ex); }
         try
         {

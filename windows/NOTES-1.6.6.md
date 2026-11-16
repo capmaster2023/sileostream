@@ -1,4 +1,4 @@
-# MyChurch 1.6.6 — MyStream sous contrôle, retours instantanés, texte plein écran
+# Siloé Stream 1.6.6 — MyStream sous contrôle, retours instantanés, texte plein écran
 
 ## MyStream (Zoom, YouTube) : seulement ce que vous choisissez
 - **Sans source principale, MyStream reste noir** : les paroles et les versets ne partent plus jamais tout seuls sur MyVirtualCam

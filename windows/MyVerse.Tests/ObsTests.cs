@@ -3,7 +3,7 @@ using MyVerse.Audio;
 namespace MyVerse.Tests;
 
 /// <summary>Le mélangeur sur la vraie libobs : un fichier son joué par OBS, mesuré par ses vumètres et ses pistes.
-/// Dossier d'OBS : variable MYCHURCH_OBS (Windows) ; sous Linux, la libobs du système si elle est installée.</summary>
+/// Dossier d'OBS : variable SILOE_OBS (Windows) ; sous Linux, la libobs du système si elle est installée.</summary>
 public static class ObsTests
 {
     static string Sinus(string dossier)
@@ -188,7 +188,7 @@ public static class ObsTests
 
     public static void Run(Action<bool, string, string?> ok)
     {
-        string? racine = Environment.GetEnvironmentVariable("MYCHURCH_OBS");
+        string? racine = Environment.GetEnvironmentVariable("SILOE_OBS");
         var chemins = racine != null ? ObsPaths.Windows(racine) : OperatingSystem.IsLinux() ? ObsPaths.Linux() : null;
         if (chemins == null || !chemins.Present) { Console.WriteLine("  (libobs absente : essais du mélangeur OBS non faits)"); return; }
         var journal = new List<string>();

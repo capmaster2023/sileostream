@@ -108,7 +108,7 @@ public sealed class DecodeurH264 : IDisposable
             var dossiers = new List<string>();
             if (Dossier is { Length: > 0 } d) dossiers.Add(d);
             dossiers.Add(Path.Combine(AppContext.BaseDirectory, "obs", "bin", "64bit"));
-            if (Environment.GetEnvironmentVariable("MYCHURCH_OBS") is { Length: > 0 } obs) dossiers.Add(Path.Combine(obs, "bin", "64bit"));
+            if (Environment.GetEnvironmentVariable("SILOE_OBS") is { Length: > 0 } obs) dossiers.Add(Path.Combine(obs, "bin", "64bit"));
             dossiers.Add(AppContext.BaseDirectory);
             foreach (var dossier in dossiers.Distinct(StringComparer.OrdinalIgnoreCase).Where(Directory.Exists))
             {

@@ -1,4 +1,4 @@
-# MyChurch 1.2.0 bêta — mixeur audio et enregistrement
+# Siloé Stream 1.2.0 bêta — mixeur audio et enregistrement
 
 **Bêta : jamais essayée sur du vrai matériel. Ne pas l'utiliser pour un culte avant de l'avoir testée.**
 

@@ -289,7 +289,7 @@ public sealed class Telephone : IDisposable
     }
     internal static string Hasard(int n) => B64(RandomNumberGenerator.GetBytes(n));
     /// <summary>
-    /// <paramref name="siloe"/> (1.9.0) : l'app Siloé Stream (bonjour « v » 2) ; sinon l'ancienne app MyChurch, qui reste acceptée
+    /// <paramref name="siloe"/> (1.9.0) : l'app Siloé Stream (bonjour « v » 2) ; sinon l'ancienne app, qui reste acceptée
     /// le temps de la remplacer sur les téléphones.
     /// </summary>
     public static byte[] DeriverCle(byte[] secret, string pcId, string deviceId, bool siloe = false) =>
@@ -396,7 +396,7 @@ public sealed class Telephone : IDisposable
             catch (SocketException) { continue; } // Windows : ICMP « port injoignable » d'un envoi précédent
             catch (ObjectDisposedException) { return; }
             var demande = Encoding.UTF8.GetString(r.Buffer);
-            // 1.9.0 : l'app Siloé Stream (SILOE_DISCOVER) et l'ancienne app MyChurch
+            // 1.9.0 : l'app Siloé Stream (SILOE_DISCOVER) et l'ancienne app
             if (!demande.StartsWith("SILOE_DISCOVER") && !demande.StartsWith("VERSELIGHT_DISCOVER")) continue;
             var ip = r.RemoteEndPoint.Address.ToString();
             if (!vus.TryGetValue(ip, out var t) || DateTime.Now - t > TimeSpan.FromMinutes(1))

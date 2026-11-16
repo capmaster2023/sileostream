@@ -1,4 +1,4 @@
-# MyChurch 3.1.0 : nouvelle interface, thème clair ou sombre, un micro par bande
+# Siloé Stream 3.1.0 : nouvelle interface, thème clair ou sombre, un micro par bande
 
 **Pas encore essayé sur du vrai matériel d'église (cartes son à plusieurs entrées, micros, caméras, Zoom). Faites un essai complet avant de l'utiliser pendant un culte : ajoutez vos micros, parlez dans chacun et regardez si le bon vumètre bouge.**
 
@@ -24,7 +24,7 @@ Une carte son à plusieurs entrées (Behringer UMC404HD, Focusrite…) arrive da
 **+ Source audio › Micros (une bande par entrée)…** montre chaque micro de Windows avec ses entrées. Cochez chaque entrée où un micro est branché : chacune devient **sa propre bande**, avec son volume, ses filtres, son écoute au casque, ses vumètres et ses pastilles (enregistrements 1 à 5, sorties A à D). Sous le nom de la bande : « Micro · entrée 2 » et le nom de la carte son.
 
 - Clic droit sur une bande › **Entrée** : choisir une autre entrée, ou **Toutes les entrées ensemble** (une bande stéréo, comme avant).
-- MyChurch écoute la carte son une seule fois (partagée avec Windows et Zoom) et donne à chaque bande son canal.
+- Siloé Stream écoute la carte son une seule fois (partagée avec Windows et Zoom) et donne à chaque bande son canal.
 - Les micros de la 3.0 gardent « toutes les entrées ensemble » : rien ne change tant que vous n'ajoutez pas de micro par entrée.
 
 ## Réglages en page
@@ -33,7 +33,7 @@ Les Paramètres ne sont plus une fenêtre : la page **Réglages** a un sommaire 
 
 ## Licences
 
-- MyChurch : GNU GPL version 2 ou ultérieure (à cause de libobs) — https://github.com/capmaster2023/Verselight
+- Siloé Stream : GNU GPL version 2 ou ultérieure (à cause de libobs) — https://github.com/capmaster2023/sileostream
 - OBS Studio 33.0.1 (libobs) : https://github.com/obsproject/obs-studio/tree/33.0.1
 - FFmpeg 8.0.1 (`ffmpeg.exe` seul, programme séparé) : GNU GPL version 3, texte dans `ffmpeg\LICENSE.txt`.
 - NAudio (lecture des entrées de la carte son) : licence MIT.

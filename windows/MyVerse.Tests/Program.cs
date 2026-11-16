@@ -1465,8 +1465,8 @@ if (Actif())
     Ok(MyCams.LireEntete(new byte[] { (byte)'M', (byte)'C', 3, 0, 0, 0, 0, 1 }) == null, "en-tête : version inconnue refusée");
     Ok(MyCams.LireEntete(new byte[] { (byte)'M', (byte)'C', 1, 0, 0xFF, 0xD8, 0, 0 }) is { H264: false, Cle: false }, "en-tête MC 1 : toujours le JPEG");
 
-    // FFmpeg : celui d'OBS (MYCHURCH_OBS) sous Windows, celui du système sous Linux
-    bool ffmpegAttendu = OperatingSystem.IsWindows() ? Environment.GetEnvironmentVariable("MYCHURCH_OBS") != null
+    // FFmpeg : celui d'OBS (SILOE_OBS) sous Windows, celui du système sous Linux
+    bool ffmpegAttendu = OperatingSystem.IsWindows() ? Environment.GetEnvironmentVariable("SILOE_OBS") != null
         : new[] { "/usr/lib/x86_64-linux-gnu", "/usr/lib64", "/usr/lib" }.Any(d => Directory.Exists(d) && Directory.GetFiles(d, "libavcodec.so.*").Length > 0);
     Console.WriteLine($"  décodeur : {DecodeurH264.Etat}");
     if (!ffmpegAttendu && !DecodeurH264.Disponible) Console.WriteLine("  (FFmpeg absent : essais du décodage H.264 non faits)");
@@ -1954,7 +1954,7 @@ if (Actif())
         var lu = node.StandardOutput.ReadLineAsync();
         if (await Task.WhenAny(lu, Task.Delay(8000)) == lu) pret = lu.Result;
     }
-    if (pret == null || !pret.Contains("relais MyChurch"))
+    if (pret == null || !pret.Contains("relais SiloeStream"))
     {
         Console.WriteLine($"   (relais non essayé : node ou le module ws absent — {script})" + (node != null ? " " + await node.StandardError.ReadToEndAsync() : ""));
         try { node?.Kill(); } catch { }
@@ -1975,16 +1975,16 @@ if (Actif())
         store.Ajouter("tel-maison", "Pixel de Mike", cleTel);
         Ok(await ReglagesDistance.PcJoignable(relais, pcId) == false, "relais en marche, PC pas encore relié : « pas joignable »");
 
-        Telephone? myChurch = null;
+        Telephone? pcSiloe = null;
         Regie? rgD = null;
         int demarrages = 0;
         bool Demarrer()
         {
             demarrages++;
             rgD = new Regie(don, new Bibles(don));
-            myChurch = new Telephone(dossier, rgD, f => f(), "PC-EGLISE");
-            myChurch.FermerDemande = () => null;
-            myChurch.Demarrer();
+            pcSiloe = new Telephone(dossier, rgD, f => f(), "PC-EGLISE");
+            pcSiloe.FermerDemande = () => null;
+            pcSiloe.Demarrer();
             return true;
         }
         using var agent = new AgentDistance(dossier, Demarrer, "PC-EGLISE") { PauseReconnexion = TimeSpan.FromMilliseconds(300) };
@@ -2043,9 +2043,9 @@ if (Actif())
         await TelEnv(w1, new { t = "app.start", rid = "8" });
         var e1 = await TelRec(w1, "app.etat");
         var e2 = await TelRec(w1, "app.etat", 10000);
-        Ok((string?)e1?["app"] == "demarrage" && (string?)e2?["app"] == "ouvert" && demarrages == 1 && myChurch?.Port > 0, "« Démarrer Siloé Stream » : l'agent le lance, puis dit « ouvert »");
+        Ok((string?)e1?["app"] == "demarrage" && (string?)e2?["app"] == "ouvert" && demarrages == 1 && pcSiloe?.Port > 0, "« Démarrer Siloé Stream » : l'agent le lance, puis dit « ouvert »");
         Ok(await TelRec(w1, null, 3000) == null, "… et ferme la connexion : le téléphone se reconnecte");
-        Egal(PortSiloe.Lire(dossier), myChurch?.Port, "Siloé Stream ouvert : son port est connu de l'agent");
+        Egal(PortSiloe.Lire(dossier), pcSiloe?.Port, "Siloé Stream ouvert : son port est connu de l'agent");
 
         // Siloé Stream ouvert : le téléphone passe par l'agent jusqu'à Siloé Stream (même vérification, mêmes commandes)
         var (w2, b2) = await TelConnecter(cleTel);
@@ -2053,9 +2053,9 @@ if (Actif())
         await TelEnv(w2, new { t = "bible.show", @ref = "jn 3 16", rid = 1 });
         var st = await TelRec(w2, "state");
         Egal((string?)st?["ref"], "Jean 3:16 (LSG)", "par Internet : un verset affiché à l'église depuis la maison");
-        Ok(myChurch!.Connectes().Contains("tel-maison"), "Siloé Stream voit le téléphone connecté");
-        Ok(myChurch.OuvrirJumelage().Contains("&relay=" + Uri.EscapeDataString(ReglagesDistance.Nettoyer(relais))), "code QR : le relais y est (nouveaux téléphones)");
-        myChurch.FermerJumelage();
+        Ok(pcSiloe!.Connectes().Contains("tel-maison"), "Siloé Stream voit le téléphone connecté");
+        Ok(pcSiloe.OuvrirJumelage().Contains("&relay=" + Uri.EscapeDataString(ReglagesDistance.Nettoyer(relais))), "code QR : le relais y est (nouveaux téléphones)");
+        pcSiloe.FermerJumelage();
         await TelEnv(w2, new { t = "app.quit", rid = "9" });
         var fq = await TelRec(w2, "app.etat");
         Egal((string?)fq?["app"], "fermeture", "« Fermer Siloé Stream » depuis le téléphone");
@@ -2065,7 +2065,7 @@ if (Actif())
         var (w3, b3) = await TelConnecter(RandomNumberGenerator.GetBytes(32), "intrus");
         Ok((string?)b3?["t"] == "auth.fail", "un téléphone pas jumelé est refusé par Internet", b3?.ToJsonString());
         try { w3.Abort(); } catch { }
-        myChurch.Dispose();
+        pcSiloe.Dispose();
         Ok(PortSiloe.Lire(dossier) == null, "Siloé Stream fermé : le port n'est plus annoncé");
         var (w4, b4) = await TelConnecter(cleTel);
         Ok((bool?)b4?["agent"] == true, "Siloé Stream refermé : l'agent reprend le téléphone");

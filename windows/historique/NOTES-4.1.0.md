@@ -1,6 +1,6 @@
-# MyChurch 4.1.0 : MyCam fluide à 30 i/s (vidéo H.264, comme DroidCam)
+# Siloé Stream 4.1.0 : MyCam fluide à 30 i/s (vidéo H.264, comme DroidCam)
 
-**À installer sur le PC (MyChurch-Setup-4.1.0.exe) et sur le téléphone (MyChurch.apk).**
+**À installer sur le PC (SiloeStream-Setup-4.1.0.exe) et sur le téléphone (SiloeStream.apk).**
 
 Avant, le téléphone envoyait une photo JPEG pour chaque image (60 à 150 Ko) : sur le Wi-Fi d'une église, ça plafonnait autour de 10 images par seconde, avec du retard. Et dans la pénombre, la caméra du téléphone ralentissait d'elle-même pour mieux exposer.
 
@@ -14,7 +14,7 @@ Avant, le téléphone envoyait une photo JPEG pour chaque image (60 à 150 Ko) :
 
 ## Sur le PC
 
-- La vidéo H.264 est décodée par le FFmpeg d'OBS déjà livré avec MyChurch (rien à installer). Couleurs identiques au JPEG.
+- La vidéo H.264 est décodée par le FFmpeg d'OBS déjà livré avec Siloé Stream (rien à installer). Couleurs identiques au JPEG.
 - L'image de la page OBS s'écrit à côté, sans ralentir la caméra.
 - La tuile et l'écran montrent le format reçu (« MyCam · 1280 × 720 · 30 i/s · H.264 · Wi-Fi »).
 

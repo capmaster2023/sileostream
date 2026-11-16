@@ -1,10 +1,10 @@
-# MyChurch 1.7.0 — À distance par Internet, tuiles toujours en direct
+# Siloé Stream 1.7.0 — À distance par Internet, tuiles toujours en direct
 
-- **Contrôler MyChurch de chez soi.** Réglages › À distance › Activer, une seule fois sur le PC de l'église. Ensuite, dès que
-  Windows démarre, un petit agent invisible relie ce PC au relais MyChurch (le VPS de l'église). L'app MyChurch du téléphone
+- **Contrôler Siloé Stream de chez soi.** Réglages › À distance › Activer, une seule fois sur le PC de l'église. Ensuite, dès que
+  Windows démarre, un petit agent invisible relie ce PC au relais Siloé Stream (le VPS de l'église). L'app Siloé Stream du téléphone
   le joint de n'importe où (4G, Wi-Fi de la maison) : Bible, chants, médias, Suivant, Noir… comme sur place.
-- **Démarrer ou fermer MyChurch depuis le téléphone.** MyChurch fermé sur le PC : l'app affiche « MyChurch est fermé » et un
-  bouton « Démarrer MyChurch ». Réglages de l'app › « Fermer MyChurch sur le PC » (refusé pendant un direct ou un enregistrement).
+- **Démarrer ou fermer Siloé Stream depuis le téléphone.** Siloé Stream fermé sur le PC : l'app affiche « Siloé Stream est fermé » et un
+  bouton « Démarrer Siloé Stream ». Réglages de l'app › « Fermer Siloé Stream sur le PC » (refusé pendant un direct ou un enregistrement).
 - Sécurité : seuls les téléphones déjà jumelés (code QR, sur place) entrent, avec la même clé qu'au Wi-Fi ; le relais ne fait
   que passer les messages, en HTTPS.
 - Les téléphones déjà jumelés apprennent le relais tout seuls : rien à rescanner.

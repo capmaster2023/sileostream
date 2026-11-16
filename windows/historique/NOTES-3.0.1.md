@@ -1,4 +1,4 @@
-# MyChurch 3.0.1 : mélangeur vertical, enregistrements et sorties à la carte
+# Siloé Stream 3.0.1 : mélangeur vertical, enregistrements et sorties à la carte
 
 **Pas encore essayé sur du vrai matériel d'église (micros, tables de mixage, cartes son, caméras, Zoom). Faites un essai complet — un enregistrement vidéo de quelques minutes, une sortie vers Zoom — avant de l'utiliser pendant un culte.**
 
@@ -16,7 +16,7 @@ Les pastilles en bas de chaque bande disent où va la source : **1 à 5** pour l
 - **Couper les autres sources pendant cet enregistrement** : tant qu'il tourne, les sources non cochées sont coupées partout (casque, Zoom, autres enregistrements). Exemple : « Prédication » (pasteur seul) coupe la guitare, le piano et le chanteur ; « Louange » peut couper le micro du pasteur ;
 - ses **sources Display** (facultatif) : la projection et toutes les sources de la bibliothèque (caméras, fenêtres, images, vidéos, textes, dossiers Duo). Avec au moins une, le fichier est une **vidéo MKV** ; on les coche dans l'ordre, la 1re est en grand. Disposition : **incrustation** (les autres en petit en bas à droite) ou **côte à côte** (chaque image garde la forme de l'écran) ;
 - la **synchro du son** (de −500 à +1000 ms) pour une caméra en retard ;
-- le **dossier** (par défaut `Vidéos\MyChurch\<nom>`) et, pour le son seul, **WAV** ou **FLAC**.
+- le **dossier** (par défaut `Vidéos\Siloé Stream\<nom>`) et, pour le son seul, **WAV** ou **FLAC**.
 
 Dès qu'un enregistrement existe, le bouton propose le suivant (5 au plus). Les 5 peuvent tourner **en même temps** : chacun a son bouton ● / ■, sa durée, la taille du fichier et son vumètre. Clic droit ou **⋯** : Modifier, Ouvrir le dossier, Montrer le dernier fichier, Supprimer.
 
@@ -32,7 +32,7 @@ VB-CABLE n'est toujours pas inclus : il s'installe seulement sur clic, dans **Pa
 
 ## Pistes d'OBS automatiques
 
-On ne choisit plus de « piste » : MyChurch donne une piste d'OBS à chaque mélange différent en cours (enregistrements qui tournent, sorties actives). Deux destinations avec les mêmes sources partagent une piste. OBS en a 6 : au-delà de 6 mélanges différents en même temps, le panneau le dit et propose d'en arrêter un.
+On ne choisit plus de « piste » : Siloé Stream donne une piste d'OBS à chaque mélange différent en cours (enregistrements qui tournent, sorties actives). Deux destinations avec les mêmes sources partagent une piste. OBS en a 6 : au-delà de 6 mélanges différents en même temps, le panneau le dit et propose d'en arrêter un.
 
 ## Duo
 
@@ -41,7 +41,7 @@ On ne choisit plus de « piste » : MyChurch donne une piste d'OBS à chaque mé
 
 ## Moteur OBS absent
 
-Si le dossier `obs` manque ou ne se charge pas (fichier supprimé, antivirus), le panneau Audio l'explique et propose **Réparer le moteur audio** : MyChurch télécharge sa dernière version sur GitHub et la réinstalle (chants, agendas et réglages gardés).
+Si le dossier `obs` manque ou ne se charge pas (fichier supprimé, antivirus), le panneau Audio l'explique et propose **Réparer le moteur audio** : Siloé Stream télécharge sa dernière version sur GitHub et la réinstalle (chants, agendas et réglages gardés).
 
 ## Reprise des réglages de la 3.0.0
 
@@ -51,6 +51,6 @@ Si le dossier `obs` manque ou ne se charge pas (fichier supprimé, antivirus), l
 
 ## Licences
 
-- MyChurch : GNU GPL version 2 ou ultérieure (à cause de libobs) — https://github.com/capmaster2023/Verselight
+- Siloé Stream : GNU GPL version 2 ou ultérieure (à cause de libobs) — https://github.com/capmaster2023/sileostream
 - OBS Studio 33.0.1 (libobs) : https://github.com/obsproject/obs-studio/tree/33.0.1
 - **FFmpeg 8.0.1** (build « essentials » de gyan.dev, `ffmpeg.exe` seul) : programme séparé, **GNU GPL version 3**, texte dans `ffmpeg\LICENSE.txt`. Sources : https://ffmpeg.org/releases/ · build : https://www.gyan.dev/ffmpeg/builds/

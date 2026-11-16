@@ -1,4 +1,4 @@
-// Relais MyChurch (1.6.9) : relie un téléphone, n'importe où sur Internet, au PC de l'église.
+// Relais Siloé Stream (1.6.9) : relie un téléphone, n'importe où sur Internet, au PC de l'église.
 // Le PC garde une connexion « contrôle » ouverte (/pc/<pcId>). Un téléphone qui arrive (/telephone/<pcId>) reçoit un canal :
 // le PC ouvre /canal/<id>, et le relais passe les messages tels quels dans les deux sens. Le relais ne lit rien :
 // le jumelage (clé HMAC) se fait entre le téléphone et le PC, comme sur le Wi-Fi de l'église.
@@ -19,11 +19,11 @@ const serveur = http.createServer((req, res) => {
   const [, type, id] = (req.url || '').split('?')[0].split('/');
   if (type === 'etat' && ok(id)) {
     res.writeHead(200, { 'content-type': 'application/json', 'cache-control': 'no-store' });
-    res.end(JSON.stringify({ relais: 'mychurch', version: VERSION, pc: pcs.has(id) }));
+    res.end(JSON.stringify({ relais: 'siloestream', version: VERSION, pc: pcs.has(id) }));
     return;
   }
   res.writeHead(200, { 'content-type': 'text/plain; charset=utf-8' });
-  res.end(`Relais MyChurch (version ${VERSION}) : en marche\n`);
+  res.end(`Relais Siloé Stream (version ${VERSION}) : en marche\n`);
 });
 const wss = new WebSocketServer({ noServer: true, maxPayload: 16 * 1024 * 1024 });
 const ok = id => /^[A-Za-z0-9_\-]{4,128}$/.test(id || '');
@@ -83,4 +83,4 @@ setInterval(() => {
   }
 }, 20000);
 
-serveur.listen(PORT, '127.0.0.1', () => console.log(`relais MyChurch sur 127.0.0.1:${PORT}`));
+serveur.listen(PORT, '127.0.0.1', () => console.log(`relais SiloeStream sur 127.0.0.1:${PORT}`));

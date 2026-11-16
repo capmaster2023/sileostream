@@ -1,7 +1,7 @@
-# MyChurch 1.7.1 — Rôles des téléphones
+# Siloé Stream 1.7.1 — Rôles des téléphones
 
-- **Chaque téléphone jumelé a un rôle** (MyChurch › Téléphone, à côté de son nom) :
-  - **Admin** : tout, y compris démarrer et fermer MyChurch à distance ;
+- **Chaque téléphone jumelé a un rôle** (Siloé Stream › Téléphone, à côté de son nom) :
+  - **Admin** : tout, y compris démarrer et fermer Siloé Stream à distance ;
   - **Versets** : la Bible et Suivant / Précédent / Noir ;
   - **Chants** : les chants et Suivant / Précédent / Noir ;
   - **Caméraman** : MyCam seulement.

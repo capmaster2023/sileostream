@@ -1,6 +1,6 @@
-# MyChurch 1.5.0 : le nouveau design, plus simple et plus rapide
+# Siloé Stream 1.5.0 : le nouveau design, plus simple et plus rapide
 
-**À installer sur le PC (MyChurch-Setup-1.5.0.exe).** Vos chants, Bibles, cultes et réglages sont gardés.
+**À installer sur le PC (SiloeStream-Setup-1.5.0.exe).** Vos chants, Bibles, cultes et réglages sont gardés.
 
 ## Un design repensé : trois pages, une télécommande
 
@@ -28,7 +28,7 @@
 
 ## Licence et code source
 
-- MyChurch : GNU GPL version 2 ou ultérieure — https://github.com/capmaster2023/MyChurch
+- Siloé Stream : GNU GPL version 2 ou ultérieure — https://github.com/capmaster2023/sileostream
 - OBS Studio 33.0.1 (libobs) : https://github.com/obsproject/obs-studio/tree/33.0.1
 - FFmpeg 8.0.1 : GNU GPL version 3 — https://ffmpeg.org/releases/
 - NAudio 2.2.1 (MIT) : https://github.com/naudio/NAudio

@@ -16,7 +16,7 @@ namespace MyVerse;
 /// </summary>
 public sealed class ReglagesDistance
 {
-    /// <summary>Le relais MyChurch du VPS de l'église (installé avec relais/installer.sh).</summary>
+    /// <summary>Le relais Siloé Stream du VPS de l'église (installé avec relais/installer.sh).</summary>
     public const string RelaisDefaut = "2-25-216-99.sslip.io";
     public const string Fichier = "distance.json";
 
@@ -133,7 +133,7 @@ public static class PortSiloe
 
 /// <summary>
 /// Siloé Stream 1.7.0, l'agent « à distance » : un petit processus sans fenêtre (SiloeStream.exe --agent), lancé à l'ouverture de
-/// session Windows. Il garde une connexion avec le relais MyChurch (VPS). Un téléphone qui arrive par Internet :
+/// session Windows. Il garde une connexion avec le relais Siloé Stream (VPS). Un téléphone qui arrive par Internet :
 /// <list type="bullet">
 /// <item>Siloé Stream est ouvert : l'agent le relie au module téléphone de Siloé Stream (127.0.0.1), comme sur le Wi-Fi de l'église ;</item>
 /// <item>Siloé Stream est fermé : l'agent vérifie le téléphone (même clé de jumelage) et peut démarrer Siloé Stream (« app.start »).</item>

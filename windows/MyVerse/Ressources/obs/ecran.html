@@ -110,7 +110,7 @@ function cadreDuo(nom) {
   return c;
 }
 function envoyerDuo(c, etat, image) {
-  c.msg = { verselight: true, etat, image };
+  c.msg = { siloe: true, etat, image };
   if (c.pret) try { c.f.contentWindow.postMessage(c.msg, '*'); } catch (x) {}
 }
 function cacherDuo(nom) {
@@ -192,7 +192,7 @@ function afficherSeul(e) {
   }, avant && !vide ? 380 : 0);
 }
 window.addEventListener('message', (ev) => {
-  if (!ev.data || !ev.data.verselight) return;
+  if (!ev.data || !ev.data.siloe) return;
   if (enfant && ev.data.image && ev.data.image !== displayFichier) { displayFichier = ev.data.image; displayImage.removeAttribute('src'); }
   afficher(ev.data.etat);
 });
@@ -201,10 +201,10 @@ document.addEventListener('keydown', (ev) => {
   const k = { ArrowRight: 'suiv', ArrowDown: 'suiv', PageDown: 'suiv', ' ': 'suiv', Enter: 'suiv', ArrowLeft: 'prec', ArrowUp: 'prec', PageUp: 'prec', Backspace: 'prec', Escape: 'retirer', Delete: 'retirer', b: 'retirer', B: 'retirer' }[ev.key];
   if (!k) return;
   ev.preventDefault();
-  try { localStorage.setItem('verselight-cmd', JSON.stringify({ k, t: Date.now() + Math.random() })); } catch (x) {}
-  if (window.opener) try { window.opener.postMessage({ verselightCmd: k }, '*'); } catch (x) {}
+  try { localStorage.setItem('siloe-cmd', JSON.stringify({ k, t: Date.now() + Math.random() })); } catch (x) {}
+  if (window.opener) try { window.opener.postMessage({ siloeCmd: k }, '*'); } catch (x) {}
 });
-// OBS (source navigateur, fichier local) : lit l'état écrit par VerseLight dans etat.json
+// OBS (source navigateur, fichier local) : lit l'état écrit par Siloé Stream dans etat.json
 if (!enfant) if (location.protocol !== 'http:' || location.hostname === 'absolute' || /[?&]obs\b/.test(location.search) || location.protocol === 'file:') {
   if (location.hostname !== '127.0.0.1') {
     document.documentElement.classList.add('obs');
@@ -218,13 +218,13 @@ if (!enfant) if (location.protocol !== 'http:' || location.hostname === 'absolut
   }
 }
 // la régie écrit aussi l'état dans le stockage local : l'écran suit même si la régie est rechargée
-if (!enfant) window.addEventListener('storage', (ev) => { if (ev.key === 'verselight-etat' && ev.newValue) try { afficher(JSON.parse(ev.newValue)); } catch (x) {} });
-if (!enfant) try { const s = localStorage.getItem('verselight-etat'); if (s) afficher(JSON.parse(s)); } catch (x) {}
+if (!enfant) window.addEventListener('storage', (ev) => { if (ev.key === 'siloe-etat' && ev.newValue) try { afficher(JSON.parse(ev.newValue)); } catch (x) {} });
+if (!enfant) try { const s = localStorage.getItem('siloe-etat'); if (s) afficher(JSON.parse(s)); } catch (x) {}
 window.addEventListener('resize', () => { if (courant) ajuster(); });
 document.addEventListener('dblclick', () => { document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen().catch(() => {}); });
 document.addEventListener('mousemove', () => { document.body.style.cursor = 'default'; clearTimeout(window._c); window._c = setTimeout(() => (document.body.style.cursor = 'none'), 2000); });
 // demande l'état actuel à la régie (ouverture ou rechargement)
-if (window.opener) try { window.opener.postMessage({ verselightDemande: true }, '*'); } catch (e) {}
+if (window.opener) try { window.opener.postMessage({ siloeDemande: true }, '*'); } catch (e) {}
 </script>
 </body>
 </html>

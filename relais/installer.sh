@@ -1,6 +1,6 @@
 #!/bin/bash
-# Installe (ou met à jour) le relais MyChurch sur un VPS Ubuntu :
-#   curl -fsSL https://raw.githubusercontent.com/capmaster2023/MyChurch/main/relais/installer.sh | bash
+# Installe (ou met à jour) le relais Siloé Stream sur un VPS Ubuntu :
+#   curl -fsSL https://raw.githubusercontent.com/capmaster2023/sileostream/main/relais/installer.sh | bash
 # Avec votre propre nom de domaine (enregistrement A vers l'IP du VPS) : ... | bash -s relais.exemple.com
 set -e
 # tout le script est lu avant de commencer (curl | bash : apt ne peut pas avaler la suite)
@@ -8,7 +8,7 @@ principal() {
 BRANCHE="${BRANCHE:-main}"
 IP=$(curl -fsS -4 https://api.ipify.org || hostname -I | awk '{print $1}')
 NOM="${1:-$(echo "$IP" | tr . -).sslip.io}"
-echo "== Relais MyChurch : $NOM"
+echo "== Relais Siloé Stream : $NOM"
 export DEBIAN_FRONTEND=noninteractive NEEDRESTART_MODE=a
 apt-get update -q
 apt-get install -y -q nodejs npm ufw curl gnupg debian-keyring debian-archive-keyring apt-transport-https
@@ -18,20 +18,20 @@ if ! command -v caddy >/dev/null; then
   apt-get update -q
   apt-get install -y -q caddy
 fi
-mkdir -p /opt/mychurch-relais && cd /opt/mychurch-relais
-curl -fsSL "https://raw.githubusercontent.com/capmaster2023/MyChurch/$BRANCHE/relais/relais.js" -o relais.js
-curl -fsSL "https://raw.githubusercontent.com/capmaster2023/MyChurch/$BRANCHE/relais/comptes.js" -o comptes.js
+mkdir -p /opt/siloestream-relais && cd /opt/siloestream-relais
+curl -fsSL "https://raw.githubusercontent.com/capmaster2023/sileostream/$BRANCHE/relais/relais.js" -o relais.js
+curl -fsSL "https://raw.githubusercontent.com/capmaster2023/sileostream/$BRANCHE/relais/comptes.js" -o comptes.js
 [ -f package.json ] || npm init -y >/dev/null
 npm install --omit=dev ws@8 >/dev/null
-id mychurch >/dev/null 2>&1 || useradd --system --no-create-home mychurch
-cat > /etc/systemd/system/mychurch-relais.service <<UNIT
+id siloestream >/dev/null 2>&1 || useradd --system --no-create-home siloestream
+cat > /etc/systemd/system/siloestream-relais.service <<UNIT
 [Unit]
-Description=Relais MyChurch
+Description=Relais Siloé Stream
 After=network.target
 [Service]
-ExecStart=/usr/bin/node /opt/mychurch-relais/relais.js
+ExecStart=/usr/bin/node /opt/siloestream-relais/relais.js
 Restart=always
-User=mychurch
+User=siloestream
 # 1.9.1 : comptes et églises gardés dans /var/lib/siloe
 StateDirectory=siloe
 [Install]
@@ -43,12 +43,17 @@ $NOM {
 }
 CADDY
 ufw allow 22/tcp >/dev/null; ufw allow 80/tcp >/dev/null; ufw allow 443/tcp >/dev/null; ufw --force enable >/dev/null
+# ancien nom du relais : son service est arrêté et retiré (les comptes restent dans /var/lib/siloe)
+if [ -f /etc/systemd/system/mychurch-relais.service ]; then
+  systemctl disable --now mychurch-relais >/dev/null 2>&1 || true
+  rm -f /etc/systemd/system/mychurch-relais.service
+fi
 systemctl daemon-reload
-systemctl enable --now mychurch-relais
+systemctl enable --now siloestream-relais
 systemctl restart caddy
 for i in $(seq 1 12); do
   if curl -fsS "https://$NOM/" >/dev/null 2>&1; then
-    echo; echo "== OK : le relais MyChurch fonctionne sur https://$NOM"; echo "== Adresse à mettre dans MyChurch (Réglages › À distance) : $NOM"; return 0
+    echo; echo "== OK : le relais Siloé Stream fonctionne sur https://$NOM"; echo "== Adresse à mettre dans Siloé Stream (Réglages › À distance) : $NOM"; return 0
   fi
   sleep 5
 done

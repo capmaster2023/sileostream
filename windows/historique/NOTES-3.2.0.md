@@ -1,4 +1,4 @@
-# MyChurch 3.2.0 : design « Pupitre », un petit écran en direct et toutes les diapositives du culte
+# Siloé Stream 3.2.0 : design « Pupitre », un petit écran en direct et toutes les diapositives du culte
 
 **Pas encore essayé sur du vrai matériel d'église (cartes son à plusieurs entrées, micros, caméras, Zoom). Faites un essai complet avant de l'utiliser pendant un culte.**
 
@@ -29,7 +29,7 @@ Les **enregistrements** en pastilles (un clic : ● démarrer, ■ arrêter, ave
 
 ## Licences
 
-- MyChurch : GNU GPL version 2 ou ultérieure (à cause de libobs) — https://github.com/capmaster2023/Verselight
+- Siloé Stream : GNU GPL version 2 ou ultérieure (à cause de libobs) — https://github.com/capmaster2023/sileostream
 - OBS Studio 33.0.1 (libobs) : https://github.com/obsproject/obs-studio/tree/33.0.1
 - FFmpeg 8.0.1 (`ffmpeg.exe` seul, programme séparé) : GNU GPL version 3, texte dans `ffmpeg\LICENSE.txt`.
 - NAudio (lecture des entrées de la carte son) : licence MIT.

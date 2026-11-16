@@ -85,13 +85,13 @@ La capture de fenêtre nécessite une fenêtre ouverte et non réduite (elle att
 
 ## Installation et mises à jour
 
-[Téléchargements de la 1.0.0](https://github.com/capmaster2023/MyChurch/releases/tag/v1.0.0) :
+[Téléchargements de la 1.0.0](https://github.com/capmaster2023/sileostream/releases/tag/v1.0.0) :
 
 - `SiloeStream-Setup-1.0.0.exe` : installateur Windows.
 - `SiloeStream-1.0.0-Windows.zip` : version portable.
 - `SiloeStream.apk` : télécommande Android.
 
-Siloé Stream 1.0 continue Siloé Stream 4.x, publié jusque-là dans le dépôt [Verselight](https://github.com/capmaster2023/Verselight) (historique et anciennes versions). Un PC ou un téléphone en 4.x ne voit pas la 1.0 dans ses mises à jour : installez-la une fois à la main, par-dessus ; les données sont gardées. Les mises à jour suivantes se font de nouveau depuis Siloé Stream.
+Siloé Stream 1.0 continue Siloé Stream 4.x, publié jusque-là dans un ancien dépôt (historique et anciennes versions). Un PC ou un téléphone en 4.x ne voit pas la 1.0 dans ses mises à jour : installez-la une fois à la main, par-dessus ; les données sont gardées. Les mises à jour suivantes se font de nouveau depuis Siloé Stream.
 
 Aucun jeton GitHub n'est intégré dans l'application.
 
@@ -103,7 +103,7 @@ Sur le téléphone, installez l'APK par-dessus l'application existante. Le packa
 
 Siloé Stream est un logiciel libre : vous pouvez le redistribuer et le modifier selon les termes de la **GNU General Public License, version 2 ou (à votre choix) toute version ultérieure**, publiée par la Free Software Foundation. Cette licence s'applique parce que Siloé Stream utilise libobs (OBS Studio), elle-même sous GPL v2 ou ultérieure. Le texte complet est dans [`COPYING`](COPYING), installé avec Siloé Stream sous le nom `COPYING.txt` (**Réglages › Licences › Lire la licence GNU GPL**).
 
-- Code source de Siloé Stream : https://github.com/capmaster2023/MyChurch
+- Code source de Siloé Stream : https://github.com/capmaster2023/sileostream
 - Code source d'OBS Studio 33.0.1 (libobs) : https://github.com/obsproject/obs-studio/tree/33.0.1
 - FFmpeg 8.0.1 (`ffmpeg.exe`, build « essentials » de gyan.dev) : programme séparé sous **GNU GPL version 3**, licence dans `ffmpeg\LICENSE.txt`, sources sur https://ffmpeg.org/releases/
 
@@ -116,8 +116,8 @@ Le dossier `obs` livré avec Siloé Stream contient les bibliothèques du paquet
 - `windows/MyVerse.Tests` : tests du cœur et du protocole téléphone, dont Duo, et du mélangeur sur la vraie libobs (groupe « Audio OBS »).
 - `windows/MyVirtualCam` : composant vidéo DirectShow 32 et 64 bits.
 - `android` : télécommande Kotlin / Compose.
-- `windows/NOTES-<version>.md` : notes de version (la dernière : `NOTES-1.0.0.md`). Les notes des versions publiées dans Verselight sont dans `windows/historique`.
+- `windows/NOTES-<version>.md` : notes de version (la dernière : `NOTES-1.0.0.md`). Les notes des anciennes versions sont dans `windows/historique`.
 
-Tests locaux : `dotnet run --project windows/MyVerse.Tests -c Release -- windows/MyVerse/Ressources [groupe]`. Les essais de libobs utilisent le dossier OBS donné par la variable `MYCHURCH_OBS` sous Windows, ou le paquet `obs-studio` sous Linux (avec `xvfb`). Les essais FLAC et MKV (dont la synchro son/image mesurée) utilisent le `ffmpeg` donné par `MYCHURCH_FFMPEG`.
+Tests locaux : `dotnet run --project windows/MyVerse.Tests -c Release -- windows/MyVerse/Ressources [groupe]`. Les essais de libobs utilisent le dossier OBS donné par la variable `SILOE_OBS` sous Windows, ou le paquet `obs-studio` sous Linux (avec `xvfb`). Les essais FLAC et MKV (dont la synchro son/image mesurée) utilisent le `ffmpeg` donné par `SILOE_FFMPEG`.
 
 GitHub Actions **Build Siloé Stream** télécharge le paquet officiel d'OBS 33.0.1 et FFmpeg 8.0.1 (SHA-256 vérifiés), ne garde d'OBS que libobs et trois modules (win-wasapi, obs-filters, obs-ffmpeg), vérifie leurs dépendances, enregistre de vrais fichiers WAV, FLAC et MKV, compile et teste WPF sur Windows, vérifie les images de projection, les pixels de MyVirtualCam, l'export navigateur local et l'installation, puis construit les APK. La branche `dev` sert à valider. Une avance de `main` publie la version. Les comptes rendus et captures sont copiés dans `ci-logs`.

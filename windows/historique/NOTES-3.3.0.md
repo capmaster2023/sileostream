@@ -1,4 +1,4 @@
-# MyChurch 3.3.0 : écran par défaut, écrans principaux du déroulé et nouveau design ivoire, bleu nuit et or
+# Siloé Stream 3.3.0 : écran par défaut, écrans principaux du déroulé et nouveau design ivoire, bleu nuit et or
 
 **Pas encore essayé sur du vrai matériel d'église (projecteur, caméras, OBS). Faites un essai complet avant de l'utiliser pendant un culte.**
 
@@ -25,14 +25,14 @@ Quand un écran principal passe à l'écran (clic, double-clic ou Suivant), **il
 ## Nouveau design
 
 - **Couleurs** : ivoire et sable, texte bleu nuit, accent or ; les boutons principaux (Suivant, Importer, Ajouter) sont bleu nuit. Le thème sombre ne change pas.
-- **Barre de gauche** : quand la fenêtre est assez large (1360 px et plus), le logo (une croix au-dessus des vagues), « MyChurch » et le nom de chaque page ; plus étroite, la barre compacte d'icônes revient.
+- **Barre de gauche** : quand la fenêtre est assez large (1360 px et plus), le logo (une croix au-dessus des vagues), « Siloé Stream » et le nom de chaque page ; plus étroite, la barre compacte d'icônes revient.
 - **Déroulé** : chaque carte a l'icône de son type sur sa couleur pâle, « heure · TYPE », le titre et le détail ; **À L'ÉCRAN** en rouge sur l'élément à l'écran, **PAR DÉFAUT** en or sur l'écran principal choisi.
 - **Page Culte** : l'**écran live** en grand au centre (ce qui est à l'écran, ce qui vient ensuite, Précédent, Suivant, Noir, Retirer de l'écran et « Retour direct »), puis toutes les diapositives du culte en vignettes. La colonne de droite garde l'écran par défaut, l'audio, le Duo et l'habillage.
 - **Display** : chaque tuile de la grille montre son type (texte, image, caméra, fenêtre, Duo) au-dessus de la vignette.
 
 ## Licences
 
-- MyChurch : GNU GPL version 2 ou ultérieure (à cause de libobs) — https://github.com/capmaster2023/Verselight
+- Siloé Stream : GNU GPL version 2 ou ultérieure (à cause de libobs) — https://github.com/capmaster2023/sileostream
 - OBS Studio 33.0.1 (libobs) : https://github.com/obsproject/obs-studio/tree/33.0.1
 - FFmpeg 8.0.1 (`ffmpeg.exe` seul, programme séparé) : GNU GPL version 3, texte dans `ffmpeg\LICENSE.txt`.
 - NAudio (lecture des entrées de la carte son) : licence MIT.

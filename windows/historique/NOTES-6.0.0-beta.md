@@ -1,19 +1,19 @@
-# MyChurch 6.0.0 bêta
+# Siloé Stream 6.0.0 bêta
 
-- Nouveau nom **MyChurch** et nouveau logo sur Windows et Android.
+- Nouveau nom **Siloé Stream** et nouveau logo sur Windows et Android.
 - **Display** remplace l'onglet Annonces. Les anciens textes restent disponibles.
 - Double-clic sur le titre d'un Display ou d'un chant : envoi immédiat à la sortie en direct. Double-clic dans la liste ou sur le titre de l'éditeur Display fonctionne aussi.
 - **Périphérique de capture vidéo** : sélection d'une webcam ou d'une carte de capture USB/HDMI compatible DirectShow, comme la catégorie équivalente d'OBS. Sortie visée 1280 × 720 / 30 ips, selon le périphérique.
-- Import de plusieurs images (copiées dans les données de MyChurch), capture d'une fenêtre choisie, ajout de ces sources au déroulé du culte et affichage dans la projection / source navigateur OBS.
-- **MyVirtualCam** : périphérique de caméra virtuel DirectShow 64 et 32 bits, indépendant d'OBS. L'installateur demande l'autorisation Windows pour l'enregistrer. Après installation, il reste dans la liste des caméras. La sortie de MyChurch y est envoyée automatiquement, sans bouton Démarrer. MyChurch fermé, aucune source affichée ou sortie interrompue : vidéo noire, sans conserver la dernière image.
-- APK **MyChurch** : onglet Display, liste des sources du PC, Afficher en direct, état courant, Précédent / Suivant / Retirer. Identité Android, signature et jumelage conservés.
+- Import de plusieurs images (copiées dans les données de Siloé Stream), capture d'une fenêtre choisie, ajout de ces sources au déroulé du culte et affichage dans la projection / source navigateur OBS.
+- **MyVirtualCam** : périphérique de caméra virtuel DirectShow 64 et 32 bits, indépendant d'OBS. L'installateur demande l'autorisation Windows pour l'enregistrer. Après installation, il reste dans la liste des caméras. La sortie de Siloé Stream y est envoyée automatiquement, sans bouton Démarrer. Siloé Stream fermé, aucune source affichée ou sortie interrompue : vidéo noire, sans conserver la dernière image.
+- APK **Siloé Stream** : onglet Display, liste des sources du PC, Afficher en direct, état courant, Précédent / Suivant / Retirer. Identité Android, signature et jumelage conservés.
 - Mises à jour : les utilisateurs de la bêta peuvent consulter les publications bêta; une version finale de même numéro remplace la bêta.
 
 ## Installation
 
-PC : lancer `MyChurch-Setup-6.0.0-beta.exe` et accepter l'installation MyVirtualCam. Version portable : ouvrir Display puis cliquer MyVirtualCam pour enregistrer le périphérique une fois. Fermer puis rouvrir les logiciels vidéo déjà ouverts pour qu'ils découvrent la caméra.
+PC : lancer `SiloeStream-Setup-6.0.0-beta.exe` et accepter l'installation MyVirtualCam. Version portable : ouvrir Display puis cliquer MyVirtualCam pour enregistrer le périphérique une fois. Fermer puis rouvrir les logiciels vidéo déjà ouverts pour qu'ils découvrent la caméra.
 
-Téléphone : installer `MyChurch.apk` par-dessus l'application actuelle. Pour remplacer une installation signée avec une autre clé, la même clé doit être fournie à GitHub Actions.
+Téléphone : installer `SiloeStream.apk` par-dessus l'application actuelle. Pour remplacer une installation signée avec une autre clé, la même clé doit être fournie à GitHub Actions.
 
 ## Limites de la bêta
 

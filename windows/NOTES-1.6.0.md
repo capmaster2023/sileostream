@@ -1,6 +1,6 @@
-# MyChurch 1.6.0 : MyStream et le direct sur YouTube
+# Siloé Stream 1.6.0 : MyStream et le direct sur YouTube
 
-**À installer sur le PC (MyChurch-Setup-1.6.0.exe).** Vos chants, Bibles, cultes et réglages sont gardés.
+**À installer sur le PC (SiloeStream-Setup-1.6.0.exe).** Vos chants, Bibles, cultes et réglages sont gardés.
 
 ## Deux écrans, à droite
 
@@ -21,13 +21,13 @@
 
 ## Le direct sur YouTube (pastille « YouTube », en haut)
 
-- **Mon compte YouTube** (conseillé) : MyChurch crée le direct comme OBS : titre, description, confidentialité, catégorie,
+- **Mon compte YouTube** (conseillé) : Siloé Stream crée le direct comme OBS : titre, description, confidentialité, catégorie,
   « conçue pour les enfants ? », miniature, latence, DVR, 360°, programmer pour plus tard. Ou « Direct déjà prévu ».
   « Arrêter le direct » le termine aussi sur YouTube.
 - **Clé de stream** : la clé de YouTube Studio › Créer › Passer au direct, et c'est parti.
 - **Autre service** : Facebook, Vimeo… (une adresse rtmps:// et une clé).
 - **Image et son du direct** : 720p (conseillé) ou 1080p ; tout le son, ou seulement les sons choisis.
-- **Si Internet coupe, MyChurch se reconnecte tout seul.** La pastille dit « En direct 0:42:13 » (rouge) ou « Reconnexion… ».
+- **Si Internet coupe, Siloé Stream se reconnecte tout seul.** La pastille dit « En direct 0:42:13 » (rouge) ou « Reconnexion… ».
 - La carte graphique encode l'image quand elle le peut (NVIDIA, Intel, AMD), sinon le processeur.
 - La clé de stream et l'accès au compte sont chiffrés pour cet utilisateur de Windows.
 
@@ -35,13 +35,13 @@
 
 Google demande un identifiant propre à chaque logiciel. En attendant, **la clé de stream marche tout de suite**.
 
-1. Sur console.cloud.google.com, créez un projet (par exemple « MyChurch »).
+1. Sur console.cloud.google.com, créez un projet (par exemple « Siloé Stream »).
 2. API et services › Bibliothèque : activez **YouTube Data API v3**.
-3. Écran de consentement OAuth : type **Externe**, nom « MyChurch », votre adresse e-mail ;
+3. Écran de consentement OAuth : type **Externe**, nom « Siloé Stream », votre adresse e-mail ;
    accès aux données : ajoutez le champ d'application `https://www.googleapis.com/auth/youtube`.
 4. Audience : **Publier l'application** (« En production »). Sinon, Google coupe l'accès tous les 7 jours.
    Pas besoin de validation pour une église : à la connexion, Google dira « application non validée » :
-   « Paramètres avancés », puis « Accéder à MyChurch ».
+   « Paramètres avancés », puis « Accéder à Siloé Stream ».
 5. Clients : **Créer un client OAuth**, type **Application de bureau**. Gardez l'identifiant et le secret.
 6. Collez-les dans la fenêtre du direct (« Identifiant client », « Secret du client », puis « Garder »).
    Ou, pour toutes les prochaines versions : dépôt GitHub › Settings › Secrets and variables › Actions :
@@ -54,7 +54,7 @@ Google demande un identifiant propre à chaque logiciel. En attendant, **la clé
 
 ## Licence et code source
 
-- MyChurch : GNU GPL version 2 ou ultérieure — https://github.com/capmaster2023/MyChurch
+- Siloé Stream : GNU GPL version 2 ou ultérieure — https://github.com/capmaster2023/sileostream
 - OBS Studio 33.0.1 (libobs) : https://github.com/obsproject/obs-studio/tree/33.0.1
 - FFmpeg 8.0.1 : GNU GPL version 3 — https://ffmpeg.org/releases/
 - NAudio 2.2.1 (MIT) : https://github.com/naudio/NAudio

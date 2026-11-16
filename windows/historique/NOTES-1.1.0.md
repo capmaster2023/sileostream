@@ -1,4 +1,4 @@
-# MyChurch 1.1.0
+# Siloé Stream 1.1.0
 
 - **Nouvel onglet « Duo »**, à côté de Display. Un dossier contient 2 éléments affichés ensemble : une source Display, un chant ou un verset.
 - Pour chaque élément : place (gauche, haut) et taille, avec un plan de l'écran. Raccourcis « Côte à côte », « Grand + coin », « Échanger 1 et 2 ».

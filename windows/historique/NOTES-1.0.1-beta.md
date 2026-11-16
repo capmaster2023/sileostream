@@ -1,4 +1,4 @@
-# MyChurch 1.0.1 bêta
+# Siloé Stream 1.0.1 bêta
 
 - **Display : grille de sources.** Le grand rectangle montre les sources en tuiles (texte, image, caméra, fenêtre). Un clic sur une tuile l'envoie en direct.
 - Dans la bibliothèque, chaque titre a un bouton **+** (ajouter à la grille) et un bouton **Modifier**. Clic droit : afficher, retirer de la grille, ajouter au déroulé, supprimer.

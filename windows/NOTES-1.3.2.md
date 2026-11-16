@@ -1,12 +1,12 @@
-# MyChurch 1.3.2 : Zoom voit l'écran de l'église, même pendant que Zoom est projeté
+# Siloé Stream 1.3.2 : Zoom voit l'écran de l'église, même pendant que Zoom est projeté
 
-**À installer sur le PC (MyChurch-Setup-1.3.2.exe).** Vos chants, sources Display et réglages sont gardés.
+**À installer sur le PC (SiloeStream-Setup-1.3.2.exe).** Vos chants, sources Display et réglages sont gardés.
 
 **Testé automatiquement, pas encore avec Zoom dans l'église : faites un essai (Zoom projeté, MyVirtualCam comme caméra dans Zoom) avant un culte.**
 
 ## MyVirtualCam = l'écran de l'église
 
-**MyVirtualCam** (la caméra de MyChurch dans Zoom) montre maintenant tout ce que montre l'écran de l'église :
+**MyVirtualCam** (la caméra de Siloé Stream dans Zoom) montre maintenant tout ce que montre l'écran de l'église :
 
 - les versets, les chants, Display, le Duo… comme avant ;
 - **l'écran par défaut** (le logo, l'image ou le fond choisi dans « Écran par défaut ») : avant, Zoom voyait un écran noir ;
@@ -23,7 +23,7 @@ La page OBS (source navigateur) ne change pas : rien pendant l'écran par défau
 
 ## Licence et code source
 
-- MyChurch : GNU GPL version 2 ou ultérieure — https://github.com/capmaster2023/MyChurch
+- Siloé Stream : GNU GPL version 2 ou ultérieure — https://github.com/capmaster2023/sileostream
 - OBS Studio 33.0.1 (libobs) : https://github.com/obsproject/obs-studio/tree/33.0.1
 - FFmpeg 8.0.1 : GNU GPL version 3 — https://ffmpeg.org/releases/
 - NAudio 2.2.1 (MIT) : https://github.com/naudio/NAudio

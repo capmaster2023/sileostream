@@ -306,7 +306,7 @@ private fun Reglages(remote: Remote, fermer: () -> Unit) {
                             T(if (proto >= 2) "Siloé Stream 4.0 ou plus" else "Siloé Stream 3.3 ou avant : mettez le PC à jour pour le déroulé, Noir et MyCam", taille = 12.5.sp, couleur = C.Encre2)
                             // 1.7.0 : par où passe la connexion
                             if (link == Link.CONNECTED) T(
-                                if (route == "internet") "Relié par Internet (relais MyChurch)" + (if (app == "ferme") " · Siloé Stream fermé sur le PC" else "")
+                                if (route == "internet") "Relié par Internet (relais Siloé Stream)" + (if (app == "ferme") " · Siloé Stream fermé sur le PC" else "")
                                 else "Relié par le Wi-Fi de l'église",
                                 taille = 12.5.sp, couleur = C.Brume,
                             )

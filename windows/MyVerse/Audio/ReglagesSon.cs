@@ -13,7 +13,7 @@ namespace MyVerse.Ui.Audio;
 /// </summary>
 public sealed class ReglagesSon : StackPanel
 {
-    public const string DepotSiloe = "https://github.com/capmaster2023/MyChurch";
+    public const string DepotSiloe = "https://github.com/capmaster2023/sileostream";
     public const string DepotObs = "https://github.com/obsproject/obs-studio/tree/33.0.1";
     public const string SiteVbCable = "https://www.vb-cable.com";
     public const string SourcesFfmpeg = "https://ffmpeg.org/releases/";

@@ -5,7 +5,7 @@ using System.Text.Json.Nodes;
 namespace MyVerse;
 
 /// <summary>
-/// Sortie OBS sans fenêtre : dossier %APPDATA%\VerseLight-OBS avec ecran.html (source navigateur « Fichier local »),
+/// Sortie OBS sans fenêtre : dossier %APPDATA%\SiloeStream-OBS (ou l'ancien, s'il existe) avec ecran.html (source navigateur « Fichier local »),
 /// qui relit etat.json (écrit ici à chaque changement).
 /// </summary>
 public sealed class SortieObs

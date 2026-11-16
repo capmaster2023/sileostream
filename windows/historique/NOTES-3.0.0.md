@@ -1,10 +1,10 @@
-# MyChurch 3.0.0 : le moteur audio d'OBS et un nouveau design
+# Siloé Stream 3.0.0 : le moteur audio d'OBS et un nouveau design
 
 **Pas encore essayé sur du vrai matériel d'église (micros, tables de mixage, cartes son, Zoom). Faites un essai complet avant de l'utiliser pendant un culte.**
 
 ## Moteur audio OBS (libobs 33.0.1)
 
-Le son de MyChurch passe maintenant par **libobs**, la bibliothèque d'OBS Studio 33.0.1, livrée dans le dossier `obs` (sans l'interface d'OBS).
+Le son de Siloé Stream passe maintenant par **libobs**, la bibliothèque d'OBS Studio 33.0.1, livrée dans le dossier `obs` (sans l'interface d'OBS).
 
 - **Mélangeur** dans l'onglet Display, sous la grille. Il démarre vide : **+ Source audio** ajoute un micro, le son d'une sortie, un fichier audio ou vidéo, ou le son de la vidéo projetée. Chaque bande a son volume (−60 à +6 dB), sa sourdine (**M**) et deux vumètres d'OBS.
 - **Périphériques** : micros et entrées, son des sorties (haut-parleurs, casques), périphériques Windows par défaut. Le micro et la sortie proposés en premier se choisissent dans les Paramètres.
@@ -27,7 +27,7 @@ Fond gris clair, cartes blanches, accent bleu, onglet actif en noir, police Inte
 
 ## Licence et code source
 
-Parce qu'il utilise libobs, MyChurch est distribué sous **GNU GPL version 2 ou ultérieure**. Le texte de la licence est installé (`COPYING.txt`) et visible dans **Paramètres › Code source et licences**.
+Parce qu'il utilise libobs, Siloé Stream est distribué sous **GNU GPL version 2 ou ultérieure**. Le texte de la licence est installé (`COPYING.txt`) et visible dans **Paramètres › Code source et licences**.
 
-- Code source de MyChurch : https://github.com/capmaster2023/Verselight
+- Code source de Siloé Stream : https://github.com/capmaster2023/sileostream
 - Code source d'OBS Studio 33.0.1 : https://github.com/obsproject/obs-studio/tree/33.0.1

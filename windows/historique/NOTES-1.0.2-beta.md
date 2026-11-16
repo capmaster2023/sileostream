@@ -1,4 +1,4 @@
-# MyChurch 1.0.2 bêta
+# Siloé Stream 1.0.2 bêta
 
 - **Duo : deux contenus en même temps à l'écran.** Deux sources Display, un chant + une caméra, une source + un verset, deux chants… Affichez le premier contenu, cliquez sur **Épingler le contenu en direct** (ou touche **P**) : il part dans un coin et l'écran se libère. Affichez ensuite le second : les deux sont à l'écran.
 - Nouvelle carte **DUO** dans la colonne de droite, entre « EN DIRECT » et « HABILLAGE DE L'ÉCRAN » : le contenu épinglé, **Retirer le duo**, la place (haut droite, haut gauche, bas droite, bas gauche, **côte à côte**) et la taille (20 à 50 % de l'écran). La place et la taille sont gardées pour la prochaine fois.
@@ -7,7 +7,7 @@
 - Le contenu épinglé reste vivant : une caméra, une fenêtre ou une image épinglée continue d'être capturée pendant qu'autre chose est à l'écran.
 - Le Duo sort partout : fenêtre de projection, aperçu de la régie, caméra virtuelle **MyVirtualCam** et export navigateur local.
 - **Installation :** la mise à jour ne bloque plus avec « Erreur lors de l'ouverture du fichier en écriture : …\MyVirtualCam.dll » quand OBS, Zoom ou un autre logiciel utilise la caméra virtuelle. Ce logiciel garde l'ancienne version de la caméra jusqu'à ce qu'il soit fermé puis rouvert.
-- Le numéro de version affiché dans MyChurch (en haut, et dans Outils › Mise à jour) est maintenant le bon.
+- Le numéro de version affiché dans Siloé Stream (en haut, et dans Outils › Mise à jour) est maintenant le bon.
 
 - **Menu d'ajout Display** : un bouton **+ Ajouter une source** remplace la liste des boutons. Le menu propose Nouveau texte, Images, Périphérique de capture vidéo, Capture de fenêtre et MyVirtualCam.
 - **Projection autonome** : choisissez un moniteur ou une fenêtre avec **Projection**. Cliquer une vignette affiche immédiatement son contenu sur la sortie choisie, Duo compris.

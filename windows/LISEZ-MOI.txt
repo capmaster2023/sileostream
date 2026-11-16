@@ -1,4 +1,4 @@
-MYCHURCH 1.0.0
+SILOÉ STREAM 1.0.0
 
 PREMIER LANCEMENT
 Siloé Stream démarre vide : aucun chant, aucune source, aucun enregistrement. Seules deux Bibles libres de droits sont livrées : Louis Segond 1910 (français) et King James (anglais). Les chants s'ajoutent avec + Importer chants ou recueil (ou + Nouveau chant), les autres Bibles avec + Importer une Bible.
@@ -64,7 +64,7 @@ Gardez la fenêtre à capturer ouverte et non réduite. Certains contenus proté
 
 LICENCE ET CODE SOURCE
 Siloé Stream est un logiciel libre, sous licence GNU GPL version 2 ou ultérieure, parce que son moteur audio utilise libobs (OBS Studio 33.0.1). Le texte de la licence est dans COPYING.txt, à côté de SiloeStream.exe.
-Code source de Siloé Stream : https://github.com/capmaster2023/MyChurch
+Code source de Siloé Stream : https://github.com/capmaster2023/sileostream
 Code source d'OBS Studio 33.0.1 : https://github.com/obsproject/obs-studio/tree/33.0.1
 Le dossier « obs » contient aussi le runtime Microsoft Visual C++ (fichiers redistribuables) dont libobs a besoin.
 Le dossier « ffmpeg » contient ffmpeg.exe 8.0.1 (build « essentials » de gyan.dev), un programme séparé sous licence GNU GPL version 3 : texte dans ffmpeg\LICENSE.txt, sources sur https://ffmpeg.org/releases/

@@ -190,8 +190,8 @@ public static class RecordingIntegrationTests
     }
     public static async Task RunAsync(Action<bool, string, string?> ok)
     {
-        string? executable = Environment.GetEnvironmentVariable("MYCHURCH_FFMPEG");
-        string directory = Environment.GetEnvironmentVariable("MYCHURCH_AUDIO_FIXTURES") ?? Path.Combine(Path.GetTempPath(), "siloestream-recording-" + Guid.NewGuid().ToString("N")); Directory.CreateDirectory(directory);
+        string? executable = Environment.GetEnvironmentVariable("SILOE_FFMPEG");
+        string directory = Environment.GetEnvironmentVariable("SILOE_AUDIO_FIXTURES") ?? Path.Combine(Path.GetTempPath(), "siloestream-recording-" + Guid.NewGuid().ToString("N")); Directory.CreateDirectory(directory);
         var frame = new Frames(); var block = new float[AudioBlock.Samples];
         // Siloé Stream 1.3 : le son seul s'enregistre en MP3 (léger, à partager) ou en WAV (studio) ; M4A si l'encodeur MP3 manquait ; FLAC encore lu
         var formats = executable == null ? new[] { "wav" } : new[] { "wav", "mp3", "m4a", "flac", "mkv" };
@@ -272,7 +272,7 @@ public static class RecordingIntegrationTests
                     "Session x264 : vidéo H.264 + son de 3 s, finalisée sans blocage", $"{new FileInfo(chemin).Length} octets, {duree:0.00} s");
             }
         }
-        if (executable == null) Console.WriteLine("  FFmpeg non configuré : tests MP3/FLAC/MKV facultatifs ignorés (MYCHURCH_FFMPEG).");
-        if (Environment.GetEnvironmentVariable("MYCHURCH_AUDIO_FIXTURES") == null) Directory.Delete(directory, true);
+        if (executable == null) Console.WriteLine("  FFmpeg non configuré : tests MP3/FLAC/MKV facultatifs ignorés (SILOE_FFMPEG).");
+        if (Environment.GetEnvironmentVariable("SILOE_AUDIO_FIXTURES") == null) Directory.Delete(directory, true);
     }
 }

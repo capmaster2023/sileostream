@@ -16,7 +16,7 @@ android {
         applicationId = "ca.siloestream.app"
         minSdk = 26
         targetSdk = 35
-        // Siloé Stream 1.0 (dépôt capmaster2023/MyChurch) : au-dessus des APK 6xxxxx de l'ancien dépôt Verselight,
+        // Siloé Stream 1.0 (dépôt capmaster2023/sileostream) : au-dessus des APK 6xxxxx de l'ancien dépôt,
         // pour s'installer par-dessus l'application existante (même package, même signature)
         versionCode = 700000 + (System.getenv("VERSION_CODE") ?: "0").toInt()
         versionName = System.getenv("VERSION_NAME") ?: "1.3.0"

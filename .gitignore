@@ -7,32 +7,13 @@ android/.idea/
 android/*.iml
 android/app/release.keystore
 android/captures/
-mixeur/.gradle/
-mixeur/build/
-mixeur/app/build/
-mixeur/local.properties
 .kotlin/
-
-# Go
-bridge/dist/
-bridge/*.exe
-
-# Neutralino
-verselight/dist/
-verselight/.tmp/
-verselight/.storage/
-verselight/extensions/bridge/*.exe
-verselight/bin/*
-!verselight/bin/neutralino-win_x64.exe
-verselight/neutralinojs.log
 
 # Divers
 .DS_Store
 Thumbs.db
 *.log
 node_modules/
-verselight/installer/app/
-verselight/installer/*.exe
 
 # MyVerse 4 (.NET)
 windows/**/bin/

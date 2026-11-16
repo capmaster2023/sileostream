@@ -131,11 +131,11 @@ public sealed class Donnees
 
     public static string DossierParDefaut()
     {
-        var d = Environment.GetEnvironmentVariable("SILOE_DATA_DIR") ?? Environment.GetEnvironmentVariable("VERSELIGHT_DATA_DIR");
+        var d = Environment.GetEnvironmentVariable("SILOE_DATA_DIR");
         if (!string.IsNullOrWhiteSpace(d)) return d;
         var appdata = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
         var nouveau = Path.Combine(appdata, "SiloeStream");
-        // 1.9.0 : Siloé Stream (anciennement MyChurch) : le dossier des données est copié une seule fois depuis l'ancien,
+        // 1.9.0 : nouveau nom : le dossier des données est copié une seule fois depuis l'ancien,
         // qui reste en place comme sauvegarde (chants, Bibles, réglages, téléphones jumelés)
         var ancien = Path.Combine(appdata, "VerseLight");
         if (!Directory.Exists(nouveau) && Directory.Exists(ancien))

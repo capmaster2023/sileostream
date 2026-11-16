@@ -1,8 +1,8 @@
-# MyChurch 1.0.0 : la projection tient tout le culte, Échap n'efface plus le direct, l'audio comme OBS
+# Siloé Stream 1.0.0 : la projection tient tout le culte, Échap n'efface plus le direct, l'audio comme OBS
 
-**À installer sur le PC (MyChurch-Setup-1.0.0.exe) et sur le téléphone (MyChurch.apk).**
+**À installer sur le PC (SiloeStream-Setup-1.0.0.exe) et sur le téléphone (SiloeStream.apk).**
 
-**Vous avez MyChurch 4.x ?** MyChurch a déménagé dans ce dépôt (l'historique et les anciennes versions restent dans [Verselight](https://github.com/capmaster2023/Verselight)). Une 4.x ne voit pas la 1.0 dans ses mises à jour : installez-la **une fois à la main, par-dessus** — l'installateur sur le PC, l'APK sur le téléphone. Chants, Bibles, déroulés, réglages et téléphones jumelés sont gardés. Les mises à jour suivantes se font de nouveau depuis MyChurch.
+**Vous avez Siloé Stream 4.x ?** Siloé Stream a déménagé dans ce dépôt (l'historique et les anciennes versions restent dans l'ancien dépôt). Une 4.x ne voit pas la 1.0 dans ses mises à jour : installez-la **une fois à la main, par-dessus** — l'installateur sur le PC, l'APK sur le téléphone. Chants, Bibles, déroulés, réglages et téléphones jumelés sont gardés. Les mises à jour suivantes se font de nouveau depuis Siloé Stream.
 
 **Testé automatiquement, pas encore avec le projecteur et la carte son de l'église : faites un essai avant un culte (débrancher puis rebrancher le projecteur, micros, enregistrement, Zoom).**
 
@@ -16,7 +16,7 @@ Avant, rien n'empêchait Windows d'éteindre l'écran pendant 45 minutes de pré
 
 ## Projecteur débranché, puis rebranché
 
-Avant, MyChurch ne réagissait pas : la projection ne revenait pas sur le projecteur rebranché, et pouvait recouvrir l'écran de la régie.
+Avant, Siloé Stream ne réagissait pas : la projection ne revenait pas sur le projecteur rebranché, et pouvait recouvrir l'écran de la régie.
 
 - **Débranché** (câble tiré, projecteur éteint) : la projection se ferme tout de suite, sans recouvrir l'écran de la régie, et la barre du bas affiche **Projecteur débranché**.
 - **Rebranché** : la projection se rouvre toute seule dessus, avec ce qui est en direct, même sur une autre prise ou dans une autre résolution.
@@ -26,8 +26,8 @@ Avant, MyChurch ne réagissait pas : la projection ne revenait pas sur le projec
 
 ## La projection se rouvre au démarrage
 
-- La projection laissée ouverte à la fermeture de MyChurch **se rouvre toute seule sur le dernier écran**.
-- Projecteur pas encore branché : MyChurch l'attend et ouvre la projection dès qu'il est branché.
+- La projection laissée ouverte à la fermeture de Siloé Stream **se rouvre toute seule sur le dernier écran**.
+- Projecteur pas encore branché : Siloé Stream l'attend et ouvre la projection dès qu'il est branché.
 - Jamais en plein écran sur l'écran de la régie. Après **Arrêter la projection** (ou la croix de la fenêtre de projection), elle ne se rouvre plus toute seule.
 
 ## Échap n'efface plus le verset pendant une recherche
@@ -40,24 +40,24 @@ Avant, Échap dans la recherche (Bible ou chants) annulait la recherche **et** r
 
 ## L'audio, simplifié comme OBS
 
-Il y avait trop de réglages. MyChurch garde ce qu'OBS montre, et presque rien d'autre.
+Il y avait trop de réglages. Siloé Stream garde ce qu'OBS montre, et presque rien d'autre.
 
 - **+ Source audio**, comme le « + » des sources d'OBS : **Capture audio (entrée)**, **Capture audio (sortie)**, **Média**, ou le son de la vidéo projetée depuis Display.
 - Une capture audio s'ouvre sur la fenêtre « Propriétés » d'OBS : **Périphérique** (« Par défaut » ou un périphérique) et **Utiliser l'horodatage du périphérique**, avec **Valeurs par défaut**, **OK** et **Annuler**. Une carte son à plusieurs entrées (Behringer, Focusrite…) propose aussi **Entrée** : toutes ensemble, ou une seule (un micro par source).
 - **Mélangeur** : pour chaque source, son nom, son volume, ses vumètres, le fader, **M** (sourdine), le **casque** (monitoring) et **⋮** : Propriétés, Filtres, Renommer, Propriétés audio avancées, déplacer, Supprimer.
 - **⚙ Propriétés audio avancées**, le même tableau que dans OBS : nom, état (**Actif** ou **Inactif**), volume (case **%**), mono, balance, décalage de synchronisation, monitoring audio et **pistes 1 à 6**, avec « Sources actives uniquement ».
 - **Pistes**, comme dans OBS : chaque source coche ses pistes (une nouvelle source va dans les 6), et chaque enregistrement ou sortie MyVirtualSound choisit **sa piste**. Exemple : le pasteur seul sur la piste 2 pour l'enregistrement « Prédication ». Les mélanges déjà faits en 4.1 reçoivent chacun leur piste.
-- **Retiré** : dans Réglages › Audio, tout sauf le **périphérique de monitoring audio** (casque de la régie) ; dans le mélangeur, épingler, masquer, disposition horizontale, pastilles sous les bandes ; « Couper les autres sources » ; le choix d'un autre ffmpeg.exe (celui de MyChurch est inclus). « Audio du bureau » et « Micro/Aux » deviennent des sources ordinaires : rien n'est perdu.
+- **Retiré** : dans Réglages › Audio, tout sauf le **périphérique de monitoring audio** (casque de la régie) ; dans le mélangeur, épingler, masquer, disposition horizontale, pastilles sous les bandes ; « Couper les autres sources » ; le choix d'un autre ffmpeg.exe (celui de Siloé Stream est inclus). « Audio du bureau » et « Micro/Aux » deviennent des sources ordinaires : rien n'est perdu.
 - **MyVirtualSound et VB-CABLE ne changent pas** : Réglages › MyVirtualSound › Installer VB-CABLE.
 
 ## Premier lancement : un logiciel vide
 
-Une nouvelle installation démarre sans chant (les recueils ne sont plus livrés avec MyChurch), sans source audio et sans enregistrement. Seules deux Bibles libres de droits sont livrées : **Louis Segond 1910** (français) et **King James** (anglais). Les chants s'ajoutent avec **+ Importer chants ou recueil** ou **+ Nouveau chant**.
+Une nouvelle installation démarre sans chant (les recueils ne sont plus livrés avec Siloé Stream), sans source audio et sans enregistrement. Seules deux Bibles libres de droits sont livrées : **Louis Segond 1910** (français) et **King James** (anglais). Les chants s'ajoutent avec **+ Importer chants ou recueil** ou **+ Nouveau chant**.
 
 **Une mise à jour ne supprime rien** : chants, recueils, Bibles importées, déroulés et réglages restent.
 
 ## Licence et code source
 
-- MyChurch : GNU GPL version 2 ou ultérieure (à cause de libobs) — https://github.com/capmaster2023/MyChurch
+- Siloé Stream : GNU GPL version 2 ou ultérieure (à cause de libobs) — https://github.com/capmaster2023/sileostream
 - OBS Studio 33.0.1 (libobs) : https://github.com/obsproject/obs-studio/tree/33.0.1
 - FFmpeg 8.0.1 : GNU GPL version 3 — https://ffmpeg.org/releases/

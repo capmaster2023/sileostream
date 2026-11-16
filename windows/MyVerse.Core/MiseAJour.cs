@@ -10,8 +10,8 @@ namespace MyVerse;
 /// </summary>
 public static class MiseAJour
 {
-    public const string Api = "https://api.github.com/repos/capmaster2023/MyChurch/releases/latest";
-    public const string Prefixe = "https://github.com/capmaster2023/MyChurch/releases/download/";
+    public const string Api = "https://api.github.com/repos/capmaster2023/sileostream/releases/latest";
+    public const string Prefixe = "https://github.com/capmaster2023/sileostream/releases/download/";
 
     public sealed record Resultat(bool Disponible, string Version, string Url, string? Erreur);
 
@@ -89,7 +89,7 @@ public static class MiseAJour
                     {
                         var nom = a.GetProperty("name").GetString() ?? "";
                         var u = a.GetProperty("browser_download_url").GetString() ?? "";
-                        if ((nom.StartsWith("SiloeStream-Setup-") || nom.StartsWith("MyChurch-Setup-") || nom.StartsWith("MyVerse-Setup-")) && nom.EndsWith(".exe") && u.StartsWith(Prefixe)) url = u;
+                        if ((nom.StartsWith("SiloeStream-Setup-") || nom.StartsWith("MyVerse-Setup-")) && nom.EndsWith(".exe") && u.StartsWith(Prefixe)) url = u;
                     }
                 var derniere = tag.TrimStart('v');
                 return new Resultat(url.Length > 0 && PlusRecente(derniere, actuelle), derniere, url, null);

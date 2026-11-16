@@ -1,6 +1,6 @@
-# MyChurch 1.1.0 : la capture ASIO, comme dans OBS
+# Siloé Stream 1.1.0 : la capture ASIO, comme dans OBS
 
-**À installer sur le PC (MyChurch-Setup-1.1.0.exe).**
+**À installer sur le PC (SiloeStream-Setup-1.1.0.exe).**
 
 **Testé automatiquement, pas encore avec la carte son de l'église : faites un essai avant un culte.**
 
@@ -21,10 +21,10 @@ Volume, filtres, monitoring, pistes 1 à 6 et propriétés audio avancées march
 ## À savoir
 
 - **Un seul pilote ASIO à la fois** : toutes les sources ASIO utilisent la même carte son.
-- **Fermez OBS** s'il utilise déjà le pilote ASIO : sinon MyChurch ne peut pas l'ouvrir (le nom de la source passe en rouge avec l'explication).
+- **Fermez OBS** s'il utilise déjà le pilote ASIO : sinon Siloé Stream ne peut pas l'ouvrir (le nom de la source passe en rouge avec l'explication).
 
 ## Licence et code source
 
-- MyChurch : GNU GPL version 2 ou ultérieure — https://github.com/capmaster2023/MyChurch
+- Siloé Stream : GNU GPL version 2 ou ultérieure — https://github.com/capmaster2023/sileostream
 - OBS Studio 33.0.1 (libobs) : https://github.com/obsproject/obs-studio/tree/33.0.1
 - NAudio 2.2.1 (MIT) : https://github.com/naudio/NAudio

@@ -44,7 +44,7 @@ public sealed class ReglagesPage : Grid
         var jumeler = new Button { Style = S("Btn"), Content = "Jumeler un téléphone (code QR)…", Height = 40, Padding = new Thickness(14, 0, 14, 0), FontSize = 14, HorizontalAlignment = HorizontalAlignment.Left, Margin = new Thickness(0, 14, 0, 0) };
         jumeler.Click += (_, _) => { if (Principale is { } m) new TelephoneWindow { Owner = m }.ShowDialog(); };
         var telephone = Section("Téléphone", "La télécommande Android passe les diapositives et choisit les chants. Le PC et le téléphone doivent être sur le même réseau.", jumeler);
-        var aDistance = Section("À distance", "Contrôler Siloé Stream avec le téléphone de n'importe où, par Internet (passe par le relais MyChurch du VPS). "
+        var aDistance = Section("À distance", "Contrôler Siloé Stream avec le téléphone de n'importe où, par Internet (passe par le relais Siloé Stream du VPS). "
             + "Réglé une fois ici : ensuite, dès que ce PC est allumé, il est joignable, et le téléphone peut même démarrer ou fermer Siloé Stream.", distance);
 
         // l'ordre de la page : Licences (dernière section du son) passe tout en bas

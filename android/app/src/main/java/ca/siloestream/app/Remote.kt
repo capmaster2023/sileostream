@@ -38,7 +38,7 @@ import javax.crypto.spec.SecretKeySpec
 
 enum class Link { NOT_PAIRED, PAIRING, CONNECTING, CONNECTED, OFFLINE }
 
-/** Siloé Stream 1.7.0 : le relais MyChurch (VPS de l'église) quand le PC ne l'a pas encore donné. */
+/** Siloé Stream 1.7.0 : le relais Siloé Stream (VPS de l'église) quand le PC ne l'a pas encore donné. */
 const val RELAIS_DEFAUT = "2-25-216-99.sslip.io"
 
 /** Connexion à Siloé Stream sur le PC : jumelage, authentification HMAC, reconnexion automatique. */
@@ -70,7 +70,7 @@ class Remote(private val context: Context, val store: Store) {
      * « fermeture » ; vide quand Siloé Stream lui-même est relié.
      */
     val appPc = MutableStateFlow("")
-    /** Par où passe la connexion : « wifi » (réseau de l'église) ou « internet » (relais MyChurch). */
+    /** Par où passe la connexion : « wifi » (réseau de l'église) ou « internet » (relais Siloé Stream). */
     val route = MutableStateFlow("")
     /** Siloé Stream 1.7.1 : le rôle de ce téléphone, donné par le PC (« admin », « bible », « chants », « camera »). */
     val role = MutableStateFlow(store.role)
@@ -655,7 +655,7 @@ class Remote(private val context: Context, val store: Store) {
             try {
                 val current = context.packageManager.getPackageInfo(context.packageName, 0).versionName ?: "0"
                 val req = Request.Builder()
-                    .url("https://api.github.com/repos/capmaster2023/MyChurch/releases" + if (current.contains("-")) "?per_page=20" else "/latest")
+                    .url("https://api.github.com/repos/capmaster2023/sileostream/releases" + if (current.contains("-")) "?per_page=20" else "/latest")
                     .header("User-Agent", "SiloeStream-Android")
                     .header("Accept", "application/vnd.github+json")
                     .build()

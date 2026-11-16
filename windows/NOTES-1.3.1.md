@@ -1,6 +1,6 @@
-# MyChurch 1.3.1 : Zoom dans l'église, sans effet miroir
+# Siloé Stream 1.3.1 : Zoom dans l'église, sans effet miroir
 
-**À installer sur le PC (MyChurch-Setup-1.3.1.exe).** Vos chants, sources Display et réglages sont gardés.
+**À installer sur le PC (SiloeStream-Setup-1.3.1.exe).** Vos chants, sources Display et réglages sont gardés.
 
 **Testé automatiquement, pas encore avec Zoom dans l'église : faites un essai (Zoom projeté, MyVirtualCam comme caméra dans Zoom) avant un culte.**
 
@@ -18,7 +18,7 @@ La nouvelle source va directement dans la grille : un clic sur sa tuile l'envoie
 
 ## Où va la fenêtre : dans l'église, en streaming ou les deux
 
-- **Dans l'église** : seulement sur l'écran de projection. MyVirtualCam et OBS ne la reçoivent pas (image noire). C'est le choix pour **projeter Zoom dans l'église** : Zoom ne reçoit plus sa propre fenêtre par MyVirtualCam, donc plus d'effet miroir à l'infini. MyChurch le coche d'office pour Zoom, Teams, Webex, Skype, Discord et WhatsApp ; un autre choix est signalé en rouge.
+- **Dans l'église** : seulement sur l'écran de projection. MyVirtualCam et OBS ne la reçoivent pas (image noire). C'est le choix pour **projeter Zoom dans l'église** : Zoom ne reçoit plus sa propre fenêtre par MyVirtualCam, donc plus d'effet miroir à l'infini. Siloé Stream le coche d'office pour Zoom, Teams, Webex, Skype, Discord et WhatsApp ; un autre choix est signalé en rouge.
 - **En streaming** : seulement vers MyVirtualCam et OBS (Zoom, YouTube, Facebook). L'écran de projection garde l'écran par défaut (noir, fond seul ou l'écran principal choisi).
 - **Les deux** : partout, comme avant.
 
@@ -33,7 +33,7 @@ Les enregistrements gardent ce qui est en direct, quel que soit le choix.
 
 ## La fenêtre se retrouve toute seule
 
-- **Fermée puis rouverte** (Zoom qui change de réunion, un programme relancé) : MyChurch la reprend tout seul, avec le même programme et le même titre, sinon le même type de fenêtre (comme « Faire correspondre le titre, sinon trouver une fenêtre du même type » d'OBS). En attendant, l'écran dit « La fenêtre a été fermée… ».
+- **Fermée puis rouverte** (Zoom qui change de réunion, un programme relancé) : Siloé Stream la reprend tout seul, avec le même programme et le même titre, sinon le même type de fenêtre (comme « Faire correspondre le titre, sinon trouver une fenêtre du même type » d'OBS). En attendant, l'écran dit « La fenêtre a été fermée… ».
 - **Réduite** : la source attend et revient dès que la fenêtre est restaurée (avant, il fallait la réafficher).
 
 Les fenêtres ajoutées avant la 1.3.1 marchent comme avant (les deux, fenêtre entière). Pour la zone client et la fenêtre retrouvée toute seule : **Modifier…** une fois, puis **Enregistrer**.
@@ -46,7 +46,7 @@ Les fenêtres ajoutées avant la 1.3.1 marchent comme avant (les deux, fenêtre 
 
 ## Licence et code source
 
-- MyChurch : GNU GPL version 2 ou ultérieure — https://github.com/capmaster2023/MyChurch
+- Siloé Stream : GNU GPL version 2 ou ultérieure — https://github.com/capmaster2023/sileostream
 - OBS Studio 33.0.1 (libobs) : https://github.com/obsproject/obs-studio/tree/33.0.1
 - FFmpeg 8.0.1 : GNU GPL version 3 — https://ffmpeg.org/releases/
 - NAudio 2.2.1 (MIT) : https://github.com/naudio/NAudio

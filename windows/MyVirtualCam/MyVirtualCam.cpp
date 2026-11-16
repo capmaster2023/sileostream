@@ -1,4 +1,4 @@
-// MyChurch virtual video source. Uses Microsoft's MIT-licensed DirectShow base classes.
+// Siloe Stream virtual video source. Uses Microsoft's MIT-licensed DirectShow base classes.
 #include <streams.h>
 #include <ks.h>
 #include <ksmedia.h>
@@ -82,7 +82,7 @@ public:
         // Limit the live source to 30 fps even in graphs with no reference clock.
         ULONGLONG due = start_ + static_cast<ULONGLONG>(time_ / 10000), now = GetTickCount64();
         if (due > now) Sleep(static_cast<DWORD>(std::min<ULONGLONG>(due - now, 34)));
-        ZeroMemory(data, Bytes); // available forever, black when MyChurch is absent/blank/stale
+        ZeroMemory(data, Bytes); // available forever, black when Siloe Stream is absent/blank/stale
         Open();
         if (memory_ && mutex_) {
             DWORD wait = WaitForSingleObject(mutex_, 5);

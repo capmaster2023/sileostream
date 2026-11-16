@@ -2,7 +2,7 @@
 ; Le dossier « app » (copié en entier, sous-dossiers compris) contient aussi « obs » : libobs (OBS Studio 33.0.1, GNU GPL v2 ou ultérieure)
 ; et COPYING.txt, ainsi que « ffmpeg » : ffmpeg.exe 8.0.1 (gyan.dev, GNU GPL v3) et sa licence, pour le FLAC et la vidéo des enregistrements. VB-CABLE n'est jamais inclus : Siloé Stream le télécharge à la demande depuis le site officiel.
 ; Installation par utilisateur (pas besoin d'être administrateur), au même endroit que la 3.x : la mise à jour la remplace.
-; Chants, réglages, Bibles importées et téléphones jumelés (%APPDATA%\VerseLight) sont gardés.
+; Chants, réglages, Bibles importées et téléphones jumelés (%APPDATA%\SiloeStream) sont gardés.
 Unicode true
 !include "MUI2.nsh"
 
@@ -162,7 +162,7 @@ Section "MyVerse"
   WriteRegDWORD HKCU "${UNINST_KEY}" "NoRepair" 1
 SectionEnd
 
-; Désinstaller : retire le programme, garde chants, réglages et téléphones jumelés (%APPDATA%\VerseLight)
+; Désinstaller : retire le programme, garde chants, réglages et téléphones jumelés (%APPDATA%\SiloeStream)
 Section "Uninstall"
   Call un.FermerMyVerse
   ExecShellWait "runas" "$INSTDIR\SiloeStream.exe" "--virtualcam-uninstall" SW_HIDE

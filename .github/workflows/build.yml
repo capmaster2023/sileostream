@@ -4,8 +4,6 @@ on:
   push:
     branches: [main, dev]
     tags: ['v*']
-    # Siloé Mix (dossier mixeur/) a son propre workflow
-    paths-ignore: ['mixeur/**', '.github/workflows/mixeur.yml']
   pull_request:
   workflow_dispatch:
 
@@ -115,7 +113,7 @@ jobs:
           Copy-Item $licence.FullName out/ffmpeg/LICENSE.txt
           Get-ChildItem $racine -File -Filter "README*" | Select-Object -First 1 | ForEach-Object { Copy-Item $_.FullName out/ffmpeg/README.txt }
           # les tests du cœur relisent les fichiers avec ffprobe, à côté de ffmpeg.exe dans le paquet
-          "MYCHURCH_FFMPEG=$($exe.FullName)" >> $env:GITHUB_ENV
+          "SILOE_FFMPEG=$($exe.FullName)" >> $env:GITHUB_ENV
           $version = @(& $exe.FullName -hide_banner -version)
           $version[0] | Tee-Object -FilePath ci/ffmpeg.txt -Append
           $encodeurs = @(& $exe.FullName -hide_banner -encoders)
@@ -132,8 +130,8 @@ jobs:
           New-Item -ItemType Directory -Force ci | Out-Null
           # 1.7.0 : le relais SiloeStream (Node + ws) tourne pendant les tests « À distance »
           npm install --prefix relais --no-save --no-package-lock ws@8 2>&1 | Out-Host
-          $env:MYCHURCH_OBS = (Resolve-Path "out/obs").Path
-          "ffmpeg des tests : $env:MYCHURCH_FFMPEG"
+          $env:SILOE_OBS = (Resolve-Path "out/obs").Path
+          "ffmpeg des tests : $env:SILOE_FFMPEG"
           dotnet run --project windows/MyVerse.Tests -c Release -- "$PWD/windows/MyVerse/Ressources" 2>&1 | Tee-Object -FilePath ci/tests.log
           if ($LASTEXITCODE -ne 0) { exit 1 }
 
@@ -191,8 +189,8 @@ jobs:
 
       - name: Test automatique (fenêtres, projection, captures d'écran)
         run: |
-          $env:MYCHURCH_TEST_CAM = "1"
-          $env:VERSELIGHT_DATA_DIR = "$env:RUNNER_TEMP\myverse-donnees"
+          $env:SILOE_TEST_CAM = "1"
+          $env:SILOE_DATA_DIR = "$env:RUNNER_TEMP\myverse-donnees"
           New-Item -ItemType Directory -Force ci/autotest | Out-Null
           $p = Start-Process -FilePath "out\SiloeStream\SiloeStream.exe" -ArgumentList @("--autotest", "$PWD\ci\autotest") -PassThru
           $null = $p.Handle
@@ -202,7 +200,7 @@ jobs:
           if ($p.ExitCode -ne 0) {
             # plantage : l'erreur .NET (journal Application de Windows) et le journal de SiloeStream, pour ci-logs
             try { Get-WinEvent -FilterHashtable @{ LogName = 'Application'; ProviderName = '.NET Runtime', 'Application Error' } -MaxEvents 4 -ErrorAction Stop | Format-List TimeCreated, ProviderName, Message | Out-File -Encoding utf8 ci/autotest/plantage.txt } catch { "journal Windows : $($_.Exception.Message)" | Out-File -Encoding utf8 ci/autotest/plantage.txt }
-            Copy-Item "$env:VERSELIGHT_DATA_DIR\journal-myverse.txt" ci/autotest/ -ErrorAction SilentlyContinue
+            Copy-Item "$env:SILOE_DATA_DIR\journal-myverse.txt" ci/autotest/ -ErrorAction SilentlyContinue
             Get-Content ci/autotest/plantage.txt -ErrorAction SilentlyContinue | Select-Object -First 60
           }
           exit $p.ExitCode
@@ -447,8 +445,6 @@ jobs:
           TAG="v$V"
           BETA=()
           if [[ "$V" == *-* ]]; then BETA=(--prerelease --latest=false); fi
-          # 1.9.0 : les versions « MyChurch » (avant le nouveau nom) cherchent MyChurch-Setup-* pour leur mise à jour
-          for f in dl/windows-zip/SiloeStream-Setup-*.exe; do cp "$f" "${f/SiloeStream-Setup-/MyChurch-Setup-}"; done
           FILES=(dl/windows-zip/*.zip dl/windows-zip/*.exe dl/SiloeStream/SiloeStream.apk dl/SiloeStream-debug/SiloeStream-debug.apk)
           ls -la "${FILES[@]}"
           # notes de version : windows/NOTES-<version>.md s'il existe
