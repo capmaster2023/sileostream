@@ -118,6 +118,15 @@ public partial class MainWindow
             item.ToolTip = a.Description;
             menu.Items.Add(item);
         }
+        // 2.0.3 : MyVirtualCam, caméra officielle (l'image de MyStream) : proposée même pas encore dans les médias
+        if (MyVirtualCamAbsente)
+        {
+            if (medias.Count == 0) menu.Items.Add(new Separator());
+            menu.Items.Add(Article("MyVirtualCam (l'image de MyStream)", async () =>
+            {
+                if (await SourceMyVirtualCam() is { } mvc) DefinirPrincipaleEglise(mvc.Id);
+            }));
+        }
         return menu;
     }
 

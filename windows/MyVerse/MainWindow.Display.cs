@@ -58,6 +58,8 @@ public partial class MainWindow
         menu.Items.Add(Article("Images", AjouterImage));
         menu.Items.Add(Article("Vidéos avec audio intégré", AjouterVideo));
         menu.Items.Add(Article("Périphérique de capture vidéo", AjouterCamera));
+        // 2.0.3 : MyVirtualCam, caméra officielle de Siloé Stream (l'image de MyStream), juste à côté des autres caméras
+        menu.Items.Add(Article("MyVirtualCam (l'image de MyStream)", () => AjouterMyVirtualCam(null)));
         menu.Items.Add(Article("Téléphone MyCam (caméra Android)", AjouterMyCam));
         menu.Items.Add(Article("Caméra Sony par Wi-Fi (sans câble)", AjouterCameraWifi));
         menu.Items.Add(Article("Capture de fenêtre", AjouterFenetre));
@@ -74,9 +76,6 @@ public partial class MainWindow
                 Toast($"« {d.Nom} » est dans la grille : un clic l'envoie en direct.");
             }));
         }
-        menu.Items.Add(new Separator());
-        // 1.6.8 : un clic ajoute MyVirtualCam aux médias (l'image de MyStream, à montrer dans l'église) ; installée d'abord au besoin
-        menu.Items.Add(Article("Caméra virtuelle MyVirtualCam", () => AjouterMyVirtualCam(null)));
         return menu;
     }
 
@@ -139,11 +138,17 @@ public partial class MainWindow
         {
             // 1.6.8 : MyVirtualCam (l'image de MyStream) se choisit aussi ; elle reste « Dans l'église seulement » (sinon MyStream
             // se filmerait lui-même, en tunnel sans fin)
+            // 2.0.3 : c'est une caméra officielle de Siloé Stream, comme l'OBS Virtual Camera : toujours en tête de liste, même pas
+            // encore installée (la choisir l'installe)
             var devices = SourcesDisplay.Peripheriques(true);
-            if (devices.Count == 0) { Toast("Aucun périphérique vidéo. Branchez une webcam ou une carte de capture USB/HDMI, puis réessayez."); return; }
+            var mvc = devices.FirstOrDefault(d => SourcesDisplay.EstMyVirtualCam(d.Nom));
+            if (mvc != null) devices.Remove(mvc);
+            devices.Insert(0, mvc ?? new SourcesDisplay.Peripherique(-1, "MyVirtualCam", ""));
             if (ChoisirSource("Périphérique de capture vidéo", "Webcam, carte de capture USB/HDMI, ou MyVirtualCam (l'image de MyStream)", devices,
-                    d => SourcesDisplay.EstMyVirtualCam(d.Nom) ? "MyVirtualCam (l'image de MyStream : Zoom, YouTube)" : d.Nom) is not { } device) return;
-            if (SourcesDisplay.EstMyVirtualCam(device.Nom)) { AjouterMyVirtualCam(device); return; }
+                    d => SourcesDisplay.EstMyVirtualCam(d.Nom)
+                        ? (d.Id.Length > 0 ? "MyVirtualCam · l'image de MyStream (Zoom, YouTube)" : "MyVirtualCam · l'image de MyStream (s'installe au premier choix)")
+                        : d.Nom) is not { } device) return;
+            if (SourcesDisplay.EstMyVirtualCam(device.Nom)) { AjouterMyVirtualCam(device.Id.Length > 0 ? device : null); return; }
             ChoisirDisplay(R.NouveauDisplay(device.Nom, new SourceDisplay { Type = "camera", Peripherique = device.Id }));
         }
         catch (Exception ex) { Toast("Liste des périphériques inaccessible : " + ex.Message); }
@@ -155,30 +160,45 @@ public partial class MainWindow
     /// </summary>
     async void AjouterMyVirtualCam(SourcesDisplay.Peripherique? device)
     {
+        if (R.Annonces.FirstOrDefault(x => x.Source is { EstMyVirtualCam: true }) is { } deja)
+        {
+            R.GrilleAnnonce(deja.Id, true);
+            ChoisirDisplay(deja);
+            Toast($"MyVirtualCam est déjà dans les médias (« {deja.Titre} ») : un clic sur sa tuile montre l'image de MyStream dans l'église.");
+            return;
+        }
+        if (await SourceMyVirtualCam(device) is not { } a) return;
+        R.GrilleAnnonce(a.Id, true);
+        ChoisirDisplay(a);
+        Toast("MyVirtualCam ajoutée aux médias : un clic sur sa tuile montre dans l'église l'image de MyStream (Zoom, YouTube). Elle ne repart jamais sur MyStream.");
+    }
+
+    /// <summary>
+    /// 2.0.3 : MyVirtualCam est une caméra officielle de Siloé Stream, comme l'OBS Virtual Camera dans OBS : elle est proposée partout
+    /// où l'on choisit une caméra (médias, Duo, source principale de l'écran, programme), même pas encore ajoutée aux médias ni installée.
+    /// Rend sa source des médias : celle qui existe, sinon créée une seule fois (installée d'abord au besoin, Windows demande l'autorisation) ;
+    /// null si Windows ne la donne pas. « Dans l'église seulement » : elle ne repart jamais à l'antenne (pas d'image en tunnel sans fin).
+    /// </summary>
+    async Task<Annonce?> SourceMyVirtualCam(SourcesDisplay.Peripherique? device = null)
+    {
+        if (R.Annonces.FirstOrDefault(x => x.Source is { EstMyVirtualCam: true }) is { } deja) return deja;
         try
         {
-            if (R.Annonces.FirstOrDefault(x => x.Source is { EstMyVirtualCam: true }) is { } deja)
-            {
-                R.GrilleAnnonce(deja.Id, true);
-                ChoisirDisplay(deja);
-                Toast($"MyVirtualCam est déjà dans les médias (« {deja.Titre} ») : un clic sur sa tuile montre l'image de MyStream dans l'église.");
-                return;
-            }
             device ??= TrouverMyVirtualCam();
             if (device == null && !MyVirtualCam.Installee)
             {
                 Toast("Installation de MyVirtualCam : acceptez la demande de Windows.");
-                if (!await MyVirtualCam.InstallerEtAttendre(this)) { Toast("MyVirtualCam n'est pas installée."); return; }
+                if (!await MyVirtualCam.InstallerEtAttendre(this)) { Toast("MyVirtualCam n'est pas installée."); return null; }
                 for (int i = 0; i < 10 && (device = TrouverMyVirtualCam()) == null; i++) await Task.Delay(300);
             }
-            if (device == null) { Toast("MyVirtualCam est installée, mais Windows ne la montre pas encore : fermez puis rouvrez Siloé Stream, et réessayez."); return; }
-            var a = R.NouveauDisplay("MyVirtualCam (MyStream)", new SourceDisplay { Type = "camera", Peripherique = device.Id, Diffusion = SourceDisplay.Eglise, Ips = 30, Taille = "720p" });
-            R.GrilleAnnonce(a.Id, true);
-            ChoisirDisplay(a);
-            Toast("MyVirtualCam ajoutée aux médias : un clic sur sa tuile montre dans l'église l'image de MyStream (Zoom, YouTube). Elle ne repart jamais sur MyStream.");
+            if (device == null) { Toast("MyVirtualCam est installée, mais Windows ne la montre pas encore : fermez puis rouvrez Siloé Stream, et réessayez."); return null; }
+            return R.NouveauDisplay("MyVirtualCam (MyStream)", new SourceDisplay { Type = "camera", Peripherique = device.Id, Diffusion = SourceDisplay.Eglise, Ips = 30, Taille = "720p" });
         }
-        catch (Exception ex) { Toast("MyVirtualCam inaccessible : " + ex.Message); }
+        catch (Exception ex) { Toast("MyVirtualCam inaccessible : " + ex.Message); return null; }
     }
+
+    /// <summary>2.0.3 : l'article « MyVirtualCam » des menus, s'il n'est pas déjà dans les médias (sinon il y est sous son nom).</summary>
+    bool MyVirtualCamAbsente => !R.Annonces.Any(x => x.Source is { EstMyVirtualCam: true });
 
     static SourcesDisplay.Peripherique? TrouverMyVirtualCam() => SourcesDisplay.Peripheriques(true).FirstOrDefault(d => SourcesDisplay.EstMyVirtualCam(d.Nom));
 
@@ -385,7 +405,9 @@ public partial class MainWindow
         var menu = MenuAjouterSource();
         var commandes = menu.Items.OfType<MenuItem>().ToList();
         Ouvrir(menu, DisplayAjouter, PlacementMode.Bottom);
-        bool ok = menu.IsOpen && commandes.Count == 8 + R.Duos.Count && commandes.Any(c => c.Header?.ToString() == "Caméra Sony par Wi-Fi (sans câble)") && commandes[0].Header?.ToString() == "Nouveau texte" && commandes[^1].Header?.ToString() == "Caméra virtuelle MyVirtualCam";
+        bool ok = menu.IsOpen && commandes.Count == 8 + R.Duos.Count && commandes.Any(c => c.Header?.ToString() == "Caméra Sony par Wi-Fi (sans câble)") && commandes[0].Header?.ToString() == "Nouveau texte"
+            // 2.0.3 : MyVirtualCam juste après « Périphérique de capture vidéo »
+            && commandes.FindIndex(c => c.Header?.ToString() == "MyVirtualCam (l'image de MyStream)") == commandes.FindIndex(c => c.Header?.ToString() == "Périphérique de capture vidéo") + 1;
         menu.IsOpen = false;
         return ok;
     }

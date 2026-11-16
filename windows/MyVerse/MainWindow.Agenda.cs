@@ -334,7 +334,13 @@ public partial class MainWindow
             Toast("Tape « wokovu 45 » ou « jean 3 16 » en haut, puis Tab ou + pour l'ajouter au programme.");
         }));
         var displays = new MenuItem { Header = "Média de la bibliothèque" };
-        if (R.Annonces.Count == 0) displays.Items.Add(new MenuItem { Header = "(aucun : onglet Médias)", IsEnabled = false });
+        // 2.0.3 : MyVirtualCam, caméra officielle (l'image de MyStream) : proposée même pas encore dans les médias
+        if (MyVirtualCamAbsente)
+            displays.Items.Add(Article("MyVirtualCam (l'image de MyStream)", async () =>
+            {
+                if (await SourceMyVirtualCam() is { } mvc && R.AjouterAnnonceAgenda(mvc.Id) is { } el) ChoisirElement(el);
+            }));
+        if (R.Annonces.Count == 0) displays.Items.Add(new MenuItem { Header = "(aucun autre : onglet Médias)", IsEnabled = false });
         foreach (var a in R.Annonces)
         {
             var id = a.Id;
@@ -354,6 +360,11 @@ public partial class MainWindow
         m.Items.Add(new Separator());
         var principal = new MenuItem { Header = "Écran principal (reste à l'écran)", FontWeight = FontWeights.Bold };
         principal.Items.Add(Article("Fond seul (le style, sans texte)", () => AjouterPrincipal(null)));
+        if (MyVirtualCamAbsente)
+            principal.Items.Add(Article("MyVirtualCam (l'image de MyStream)", async () =>
+            {
+                if (await SourceMyVirtualCam() is { } mvc) AjouterPrincipal(mvc.Id);
+            }));
         var sources = R.Annonces.Where(a => a.Source?.Type != "duo").ToList();
         if (sources.Count > 0) principal.Items.Add(new Separator());
         foreach (var a in sources)

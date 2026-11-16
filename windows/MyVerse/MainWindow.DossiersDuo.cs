@@ -234,8 +234,13 @@ public partial class MainWindow
             Mettre("bible", "", new[] { rf.B, rf.C, Math.Max(1, rf.V1), Math.Max(1, rf.V2 > 0 ? rf.V2 : rf.V1) }, r.Titre);
         }, true));
         m.Items.Add(new Separator());
-        var sources = R.Annonces.Where(a => a.Source?.Type != "duo").ToList();
-        if (sources.Count == 0) m.Items.Add(new MenuItem { Header = "(aucun média : onglet Médias)", IsEnabled = false });
+        // 2.0.3 : MyVirtualCam, caméra officielle (l'image de MyStream) : toujours là, ajoutée aux médias au premier choix
+        m.Items.Add(Article("Display · MyVirtualCam (l'image de MyStream)", async () =>
+        {
+            if (await SourceMyVirtualCam() is { } mvc) Mettre("display", mvc.Id, null, mvc.Titre);
+        }));
+        var sources = R.Annonces.Where(a => a.Source?.Type != "duo" && a.Source is not { EstMyVirtualCam: true }).ToList();
+        if (sources.Count == 0) m.Items.Add(new MenuItem { Header = "(aucun autre média : onglet Médias)", IsEnabled = false });
         foreach (var a in sources)
         {
             var src = a;
