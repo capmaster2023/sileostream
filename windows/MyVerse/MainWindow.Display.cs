@@ -59,6 +59,7 @@ public partial class MainWindow
         menu.Items.Add(Article("Vidéos avec audio intégré", AjouterVideo));
         menu.Items.Add(Article("Périphérique de capture vidéo", AjouterCamera));
         menu.Items.Add(Article("Téléphone MyCam (caméra Android)", AjouterMyCam));
+        menu.Items.Add(Article("Caméra Sony par Wi-Fi (sans câble)", AjouterCameraWifi));
         menu.Items.Add(Article("Capture de fenêtre", AjouterFenetre));
         // les dossiers de l'onglet Duo : un clic les met dans la bibliothèque et dans la grille
         var duos = R.Duos.ToList();
@@ -202,6 +203,25 @@ public partial class MainWindow
         R.GrilleAnnonce(a.Id, true);
         ChoisirDisplay(a);
         Toast($"« {c.Nom} » ajoutée : un clic sur sa tuile l'envoie à l'écran. Le téléphone voit son témoin (rouge : à l'écran, orange : ensuite).");
+    }
+
+    /// <summary>1.9.5 : la caméra Sony reçue par son Wi-Fi, comme Imaging Edge Mobile : une source MyCam de plus.</summary>
+    void AjouterCameraWifi()
+    {
+        var w = new CameraWifiWindow { Owner = this };
+        w.ShowDialog();
+        if (!w.Connectee) return;
+        var nom = App.CameraWifi.Nom;
+        if (R.Annonces.FirstOrDefault(x => x.Source is { Type: "mycam" } s && s.Peripherique == CameraWifi.Id) is { } deja)
+        {
+            ChoisirDisplay(deja);
+            Toast($"« {deja.Titre} » est déjà dans les Médias : son image revient dès que la caméra répond.");
+            return;
+        }
+        var a = R.NouveauDisplay(nom, new SourceDisplay { Type = "mycam", Peripherique = CameraWifi.Id });
+        R.GrilleAnnonce(a.Id, true);
+        ChoisirDisplay(a);
+        Toast($"« {nom} » ajoutée : un clic sur sa tuile l'envoie à l'écran dès que l'image arrive.");
     }
 
     /// <summary>Sous-menu d'une source MyCam : consignes toutes prêtes, ou un message libre.</summary>

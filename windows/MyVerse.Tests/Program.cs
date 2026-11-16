@@ -2230,6 +2230,9 @@ if (Actif())
         "qualités : 4K, 1080p, 720p");
 }
 
+Groupe("Caméra Sony par Wi-Fi (1.9.5)");
+if (Actif()) MyVerse.Tests.CameraWifiTests.RunAsync(Ok).GetAwaiter().GetResult();
+
 Groupe("Enregistrement");
 if (Actif()) MyVerse.Tests.RecordingIntegrationTests.RunAsync(Ok).GetAwaiter().GetResult();
 

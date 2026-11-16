@@ -57,6 +57,8 @@ public partial class App : Application
     public static Audio.PlanificateurDirect Planificateur { get; private set; } = null!;
     public static Audio.ChurchAudioService Audio { get; private set; } = null!;
     public static Telephone Telephone { get; private set; } = null!;
+    /// <summary>1.9.5 : la caméra Sony reçue par son Wi-Fi (source MyCam « sony-wifi »).</summary>
+    public static CameraWifi CameraWifi { get; private set; } = null!;
     /// <summary>Dossier du test automatique (« SiloeStream.exe --autotest dossier »), sinon null.</summary>
     public static string? AutoTest { get; private set; }
     /// <summary>Résultat du contrôle du pare-feu : « ok », « missing », « refused », « error », « demande » ou vide (en cours).</summary>
@@ -154,6 +156,19 @@ public partial class App : Application
         Telephone.DistanceChange += () => Dispatcher.InvokeAsync(MajAgent);
         try { Telephone.Demarrer(); }
         catch (Exception x) { Journal.Erreur("téléphone : démarrage", x); }
+        CameraWifi = new CameraWifi(Telephone.Cameras);
+        try
+        {
+            // la caméra Wi-Fi est dans Display : on la cherche dès le démarrage (sans toucher au Wi-Fi du PC)
+            if (Donnees.Annonces.Any(a => a.Source is { Type: "mycam" } s && s.Peripherique == CameraWifi.Id))
+            {
+                var rc = ReglagesCameraWifi.Lire(Donnees.Dossier);
+                CameraWifi.Nom = rc.Nom;
+                CameraWifi.Adresse = rc.Adresse;
+                CameraWifi.Demarrer();
+            }
+        }
+        catch (Exception x) { Journal.Erreur("caméra Wi-Fi : démarrage", x); }
         _ = Task.Run(() =>
         {
             if (SortieObs.Preparer()) SortieObs.Ecrire(Regie.Etat);
@@ -346,6 +361,7 @@ public partial class App : Application
         SourcesStream?.Dispose();
         MyStream?.Dispose();
         CameraVirtuelle?.Dispose();
+        try { CameraWifi?.Dispose(); } catch (Exception) { }
         try { Telephone?.Dispose(); } catch (Exception) { }
         Journal.Sauver();
         base.OnExit(e);

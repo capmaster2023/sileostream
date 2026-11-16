@@ -97,6 +97,13 @@ L'installation conserve les chants, Bibles, réglages et téléphones jumelés. 
 
 Sur le téléphone, installez l'APK par-dessus l'application existante. Le package Android et la signature existante restent conservés. Le PC et le téléphone doivent être sur le même réseau pour la télécommande.
 
+## Caméra Sony par Wi-Fi (1.9.5)
+
+**Display › + Ajouter une source › Caméra Sony par Wi-Fi (sans câble)** reçoit l'image en direct d'une caméra Sony (α6100…) par son propre Wi-Fi, comme Imaging Edge Mobile.
+La caméra est en **Ctrl w/ Smartphone** ; Siloé Stream connecte le PC à son Wi-Fi (DIRECT-xxxx, avec `netsh`) et la reçoit en PTP/IP (extension Sony SDIO, objet 0xFFFFC002) ou par l'API Web des anciens Sony (`liveviewstream`).
+Les images entrent dans le registre MyCam (`windows/MyVerse.Core/CameraWifi.cs`, identifiant `sony-wifi`) : c'est une source « mycam » comme un téléphone.
+Qualité de l'image de contrôle (environ 1024 × 576). Pour garder Internet : câble réseau ou 2e carte Wi-Fi.
+
 ## Comptes Google (1.9.3)
 
 Le logiciel se connecte avec un compte Google par la page **siloestream.tech/connexion** (bouton **Compte** de la barre de gauche) : la page renvoie le jeton de Google au logiciel, sur `127.0.0.1`, et le relais le vérifie. Les rôles sont ceux de l'église (relais du VPS) : **Admin** (tout), **Versets** (la Bible), **Chants**, **Affichage** (Culte, Médias, Duo : l'église et Zoom) et **Caméraman** (MyCam, sur le téléphone). L'admin gère les membres dans **Réglages › Église et comptes** et peut y rendre la connexion obligatoire.

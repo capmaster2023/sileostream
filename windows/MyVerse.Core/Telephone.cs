@@ -1334,7 +1334,7 @@ boucle();
             case "media":
                 return e.Media?.Type switch
                 {
-                    "mycam" => Cameras.InfoDe(e.Media.Peripherique) is { } i ? "MyCam · " + (i.EnDirect ? i.Resume : "en attente du téléphone") : "MyCam",
+                    "mycam" => Cameras.InfoDe(e.Media.Peripherique) is { } i ? "MyCam · " + (i.EnDirect ? i.Resume : e.Media.Peripherique == CameraWifi.Id ? "en attente de la caméra Wi-Fi" : "en attente du téléphone") : "MyCam",
                     "camera" => "Caméra",
                     "fenetre" => "Capture de fenêtre",
                     "video" => "Vidéo",

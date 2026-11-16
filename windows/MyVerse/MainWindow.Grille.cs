@@ -102,7 +102,8 @@ public partial class MainWindow
         if (a.Source is { Type: "fenetre" } sf) m.Items.Add(MenuDiffusion(a, sf));
         if (a.Source is { Type: "camera", EstMyVirtualCam: false } sc) { m.Items.Add(MenuIpsCamera(a, sc)); m.Items.Add(MenuTailleCamera(a, sc)); }
         if (a.Source?.Type is "camera" or "fenetre") m.Items.Add(Article("Reconnecter la source", ReconnecterSources));
-        if (a.Source?.Type == "mycam") m.Items.Add(MenuMessageCam(a));
+        if (a.Source is { Type: "mycam" } smc && smc.Peripherique == CameraWifi.Id) m.Items.Add(Article("Caméra Wi-Fi : connexion…", AjouterCameraWifi));
+        else if (a.Source?.Type == "mycam") m.Items.Add(MenuMessageCam(a));
         m.Items.Add(new Separator());
         m.Items.Add(Article("Supprimer", () => SupprimerDisplay(a)));
         Ouvrir(m, cible, PlacementMode.MousePoint);
@@ -223,7 +224,7 @@ public partial class MainWindow
         {
             var attente = new TextBlock
             {
-                Text = type == "camera" ? "Caméra" : type == "mycam" ? "MyCam · en attente du téléphone" : type == "fenetre" ? "Fenêtre" : type == "video" ? "Vidéo" : "Image", FontSize = 15,
+                Text = type == "camera" ? "Caméra" : type == "mycam" ? (a.Source?.Peripherique == CameraWifi.Id ? "Caméra Wi-Fi · en attente de la caméra" : "MyCam · en attente du téléphone") : type == "fenetre" ? "Fenêtre" : type == "video" ? "Vidéo" : "Image", FontSize = 15,
                 Foreground = TexteTuile, HorizontalAlignment = HorizontalAlignment.Center, VerticalAlignment = VerticalAlignment.Center, TextWrapping = TextWrapping.Wrap, TextAlignment = TextAlignment.Center, Margin = new Thickness(8, 0, 8, 0),
             };
             vue.Children.Add(attente);
