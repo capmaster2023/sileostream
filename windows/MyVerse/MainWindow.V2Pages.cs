@@ -276,7 +276,7 @@ public partial class MainWindow
         var pile = new StackPanel { Margin = new Thickness(0, 4, 0, 10) };
         v2GrilleSons = new UniformGrid { Columns = 4, Margin = new Thickness(0, 18, -16, 0) };
         pile.Children.Add(v2GrilleSons);
-        var ajouter = V2.Lien("+ Ajouter un micro, un instrument ou une musique", () => Audio.PageSon.Ajouter(this), 15);
+        var ajouter = V2.Lien("+ Ajouter un micro, un instrument ou une musique", () => Audio.ActionsSon.Ajouter(this), 15);
         ajouter.HorizontalAlignment = HorizontalAlignment.Left;
         ajouter.Margin = new Thickness(0, 4, 0, 0);
         pile.Children.Add(ajouter);
@@ -286,7 +286,7 @@ public partial class MainWindow
         var dest = new UniformGrid { Columns = 3, Margin = new Thickness(0, 0, -16, 0) };
         v2DestEglise = V2FaireDest("Dans l'église", false, () => { V2Aller("classique"); MontrerOnglet("son"); Toast("Dans l'église : chaque son se règle avec « Régler » (risque de larsen pour les micros)."); });
         v2DestInternet = V2FaireDest("Sur Internet", true, V2BasculerZoom);
-        v2DestEnregistrer = V2FaireDest("Enregistrer", true, () => { Audio.PageSon.EnregistrerLeCulte(); V2MajDestinations(); });
+        v2DestEnregistrer = V2FaireDest("Enregistrer", true, () => { Audio.ActionsSon.EnregistrerLeCulte(); V2MajDestinations(); });
         dest.Children.Add(v2DestEglise.Bouton);
         dest.Children.Add(v2DestInternet.Bouton);
         dest.Children.Add(v2DestEnregistrer.Bouton);
@@ -396,7 +396,7 @@ public partial class MainWindow
         c.CouperTexte.HorizontalAlignment = HorizontalAlignment.Center;
         c.CouperTexte.VerticalAlignment = VerticalAlignment.Center;
         c.CouperFond = new Border { Height = 48, CornerRadius = new CornerRadius(14), Background = V2.Carte, BorderBrush = V2.RougeBord, BorderThickness = new Thickness(2), Child = c.CouperTexte };
-        var couper = V2.Bouton(c.CouperFond, () => { Audio.PageSon.Couper(s, !s.Coupe); V2MajCarteSon(c); }, "Couper ce son partout (ou le remettre)");
+        var couper = V2.Bouton(c.CouperFond, () => { Audio.ActionsSon.Couper(s, !s.Coupe); V2MajCarteSon(c); }, "Couper ce son partout (ou le remettre)");
         Grid.SetColumn(couper, 2);
         boutons.Children.Add(moins);
         boutons.Children.Add(plus);
@@ -532,12 +532,12 @@ public partial class MainWindow
         var v = c.VirtualSounds.FirstOrDefault();
         if (v == null)
         {
-            Audio.PageSon.NouvelEnvoiZoom();
+            Audio.ActionsSon.NouvelEnvoiZoom();
             Toast("Le son part vers Zoom : dans Zoom, choisis le micro « CABLE Output ». Le câble audio se règle dans Tous les réglages du son.");
         }
         else
         {
-            Audio.PageSon.Allumer(v, !v.Enabled);
+            Audio.ActionsSon.Allumer(v, !v.Enabled);
             Toast(v.Enabled ? "Le son part vers Zoom (micro « CABLE Output »)." : "Le son ne part plus vers Zoom.");
         }
         V2MajDestinations();
