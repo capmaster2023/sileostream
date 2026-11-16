@@ -85,15 +85,13 @@ La capture de fenêtre nécessite une fenêtre ouverte et non réduite (elle att
 
 ## Installation et mises à jour
 
-[Téléchargements de la 1.0.0](https://github.com/capmaster2023/sileostream/releases/tag/v1.0.0) :
+Téléchargements : **https://siloestream.tech** (installateur Windows, version portable, application Android).
 
-- `SiloeStream-Setup-1.0.0.exe` : installateur Windows.
-- `SiloeStream-1.0.0-Windows.zip` : version portable.
+- `SiloeStream-Setup-<version>.exe` : installateur Windows.
+- `SiloeStream-<version>-Windows.zip` : version portable.
 - `SiloeStream.apk` : télécommande Android.
 
-Siloé Stream 1.0 continue Siloé Stream 4.x, publié jusque-là dans un ancien dépôt (historique et anciennes versions). Un PC ou un téléphone en 4.x ne voit pas la 1.0 dans ses mises à jour : installez-la une fois à la main, par-dessus ; les données sont gardées. Les mises à jour suivantes se font de nouveau depuis Siloé Stream.
-
-Aucun jeton GitHub n'est intégré dans l'application.
+Les versions sont publiées dans les *Releases* de ce dépôt privé par GitHub Actions. Le site siloestream.tech (dossier `site`, voir `site/LISEZ-MOI.md`) les lit avec un jeton GitHub en lecture seule gardé sur le serveur et les sert sous la même forme que l'API GitHub : le logiciel et l'application y cherchent leurs mises à jour depuis la 1.9.2. Aucun jeton GitHub n'est intégré dans l'application. Une 1.9.1 ou plus ancienne cherche encore ses mises à jour dans l'ancien dépôt : installez la 1.9.2 une fois à la main, par-dessus ; les données sont gardées.
 
 L'installation conserve les chants, Bibles, réglages et téléphones jumelés. Une DLL MyVirtualCam déjà utilisée est renommée avant la copie de sa nouvelle version; le logiciel qui l'utilise charge la nouvelle caméra à sa prochaine ouverture.
 

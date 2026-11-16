@@ -1,0 +1,422 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Siloé Stream — projection et son pour l'église</title>
+<meta name="description" content="Siloé Stream affiche la Bible, les chants, les images et les caméras sur l'écran de l'église, gère le son du culte et se pilote depuis un téléphone Android.">
+<meta name="theme-color" content="#a8141b">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Siloé Stream — projection et son pour l'église">
+<meta property="og:description" content="Bible, chants, images et caméras sur l'écran de l'église, le son du culte, Zoom et YouTube. Avec la télécommande sur le téléphone.">
+<meta property="og:url" content="https://siloestream.tech/">
+<meta property="og:image" content="https://siloestream.tech/logo.png">
+<link rel="icon" href="/favicon.ico" sizes="any">
+<link rel="apple-touch-icon" href="/logo.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --fond: #fbf7f1;
+  --fond-2: #f4ede3;
+  --surface: #ffffff;
+  --encre: #1e1a17;
+  --encre-2: #4a433d;
+  --discret: #756b63;
+  --trait: #e8dfd3;
+  --rouge: #a8141b;
+  --rouge-bouton: #b4161e;
+  --rouge-survol: #8f1117;
+  --rouge-fond: #f8e8e5;
+  --sur-rouge: #ffffff;
+  --ombre: 0 1px 2px rgba(30, 26, 23, .05), 0 8px 24px rgba(30, 26, 23, .06);
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --fond: #141110;
+    --fond-2: #1a1614;
+    --surface: #1f1a17;
+    --encre: #f4eee7;
+    --encre-2: #d4cbc1;
+    --discret: #a39890;
+    --trait: #332c27;
+    --rouge: #f2676c;
+    --rouge-bouton: #c9262d;
+    --rouge-survol: #dd3a41;
+    --rouge-fond: #2c1918;
+    --sur-rouge: #ffffff;
+    --ombre: 0 1px 2px rgba(0, 0, 0, .3), 0 8px 24px rgba(0, 0, 0, .25);
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --fond: #141110; --fond-2: #1a1614; --surface: #1f1a17; --encre: #f4eee7; --encre-2: #d4cbc1;
+  --discret: #a39890; --trait: #332c27; --rouge: #f2676c; --rouge-bouton: #c9262d; --rouge-survol: #dd3a41;
+  --rouge-fond: #2c1918; --sur-rouge: #ffffff; --ombre: 0 1px 2px rgba(0, 0, 0, .3), 0 8px 24px rgba(0, 0, 0, .25);
+  color-scheme: dark;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0;
+  background: var(--fond);
+  color: var(--encre);
+  font: 400 17px/1.6 "Manrope", system-ui, -apple-system, "Segoe UI", sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+img { max-width: 100%; height: auto; display: block; }
+a { color: var(--rouge); text-underline-offset: 3px; }
+a:focus-visible, button:focus-visible { outline: 3px solid var(--rouge); outline-offset: 3px; border-radius: 6px; }
+.page { width: min(1120px, 100% - 32px); margin-inline: auto; }
+
+/* ------------------------------------------------ en-tête */
+.entete {
+  position: sticky; top: 0; z-index: 10;
+  background: color-mix(in srgb, var(--fond) 88%, transparent);
+  backdrop-filter: saturate(1.4) blur(10px);
+  -webkit-backdrop-filter: saturate(1.4) blur(10px);
+  border-bottom: 1px solid var(--trait);
+}
+.entete .page { display: flex; align-items: center; gap: 24px; height: 64px; }
+.marque { display: flex; align-items: center; gap: 10px; color: var(--encre); text-decoration: none; font-weight: 800; font-size: 19px; letter-spacing: -.01em; }
+.marque img { width: 34px; height: 34px; }
+.nav { display: flex; gap: 22px; margin-left: auto; }
+.nav a { color: var(--encre-2); text-decoration: none; font-weight: 600; font-size: 15px; }
+.nav a:hover { color: var(--rouge); }
+
+/* ------------------------------------------------ boutons */
+.bouton {
+  display: inline-flex; align-items: center; gap: 10px;
+  padding: 13px 22px; border-radius: 12px;
+  font: 700 16px/1.2 inherit; text-decoration: none; cursor: pointer;
+  border: 1px solid transparent; transition: background .15s, border-color .15s, transform .15s;
+}
+.bouton:active { transform: translateY(1px); }
+.bouton svg { width: 20px; height: 20px; flex: none; }
+.bouton.principal { background: var(--rouge-bouton); color: var(--sur-rouge); }
+.bouton.principal:hover { background: var(--rouge-survol); }
+.bouton.second { background: var(--surface); color: var(--encre); border-color: var(--trait); }
+.bouton.second:hover { border-color: var(--rouge); }
+.bouton small { display: block; font-weight: 500; font-size: 12.5px; opacity: .85; margin-top: 2px; }
+
+/* ------------------------------------------------ accueil */
+.accueil { padding: 72px 0 64px; }
+.accueil .page { display: grid; grid-template-columns: 1.15fr .85fr; gap: 48px; align-items: center; }
+.etiquette {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 6px 12px; border-radius: 999px;
+  background: var(--rouge-fond); color: var(--rouge);
+  font-weight: 700; font-size: 13.5px;
+}
+.etiquette::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
+h1 { font-size: clamp(38px, 5.4vw, 60px); line-height: 1.05; letter-spacing: -.035em; font-weight: 800; margin: 18px 0 18px; }
+h1 em { font-style: normal; color: var(--rouge); }
+.chapeau { font-size: 19px; color: var(--encre-2); max-width: 34em; margin: 0 0 30px; }
+.actions { display: flex; flex-wrap: wrap; gap: 12px; }
+.precisions { margin: 18px 0 0; color: var(--discret); font-size: 14.5px; }
+.visuel { position: relative; aspect-ratio: 1; max-width: 420px; justify-self: center; width: 100%; }
+.visuel::before {
+  content: ""; position: absolute; inset: 6%;
+  border-radius: 50%;
+  background: radial-gradient(circle at 50% 40%, var(--surface), var(--fond-2) 70%);
+  box-shadow: var(--ombre);
+}
+.visuel img { position: relative; width: 74%; margin: 13%; }
+
+/* ------------------------------------------------ sections */
+section { padding: 72px 0; }
+.titre-section { max-width: 40em; margin-bottom: 36px; }
+.titre-section p:first-child { margin: 0 0 8px; color: var(--rouge); font-weight: 800; font-size: 14px; letter-spacing: .08em; text-transform: uppercase; }
+h2 { font-size: clamp(28px, 3.6vw, 40px); line-height: 1.12; letter-spacing: -.025em; font-weight: 800; margin: 0 0 12px; }
+.titre-section p:last-child { margin: 0; color: var(--encre-2); font-size: 18px; }
+.bande { background: var(--fond-2); border-block: 1px solid var(--trait); }
+
+/* ------------------------------------------------ fonctions */
+.grille { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 16px; }
+.carte {
+  background: var(--surface); border: 1px solid var(--trait); border-radius: 18px;
+  padding: 24px; box-shadow: var(--ombre);
+}
+.carte h3 { margin: 14px 0 6px; font-size: 18px; letter-spacing: -.01em; }
+.carte p { margin: 0; color: var(--encre-2); font-size: 15.5px; }
+.icone {
+  width: 44px; height: 44px; border-radius: 12px;
+  display: grid; place-items: center;
+  background: var(--rouge-fond); color: var(--rouge);
+}
+.icone svg { width: 24px; height: 24px; }
+
+/* ------------------------------------------------ téléchargements */
+.telechargements { display: grid; grid-template-columns: 1.2fr 1fr 1fr; gap: 16px; }
+.fichier { display: flex; flex-direction: column; gap: 14px; }
+.fichier.vedette { border-color: color-mix(in srgb, var(--rouge) 45%, var(--trait)); }
+.fichier h3 { margin: 0; }
+.fichier .details { color: var(--discret); font-size: 14px; margin: 0; font-variant-numeric: tabular-nums; }
+.fichier .bouton { margin-top: auto; justify-content: center; }
+.note { margin: 22px 0 0; color: var(--discret); font-size: 15px; }
+
+/* ------------------------------------------------ nouveautés */
+.notes { max-width: 760px; }
+.notes .carte { padding: 28px 32px; }
+.notes .entete-notes { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 14px; margin-bottom: 8px; }
+.notes .entete-notes h3 { margin: 0; font-size: 22px; }
+.notes .entete-notes span { color: var(--discret); font-size: 14.5px; }
+.contenu-notes { color: var(--encre-2); }
+.contenu-notes h3, .contenu-notes h4, .contenu-notes h5 { color: var(--encre); font-size: 17px; margin: 20px 0 6px; }
+.contenu-notes ul, .contenu-notes ol { padding-left: 22px; margin: 10px 0; }
+.contenu-notes li { margin: 6px 0; }
+.contenu-notes strong { color: var(--encre); }
+.contenu-notes code { font-size: .9em; background: var(--fond-2); padding: 1px 6px; border-radius: 6px; }
+.vide { color: var(--discret); }
+
+/* ------------------------------------------------ pied */
+.pied { padding: 40px 0 48px; border-top: 1px solid var(--trait); color: var(--discret); font-size: 14.5px; }
+.pied .page { display: flex; flex-wrap: wrap; gap: 16px 32px; justify-content: space-between; align-items: flex-start; }
+.pied p { margin: 0; max-width: 46em; }
+.pied .marque { font-size: 16px; }
+.pied .marque img { width: 26px; height: 26px; }
+
+/* ------------------------------------------------ téléphones */
+@media (max-width: 900px) {
+  .accueil { padding-top: 40px; }
+  .accueil .page { grid-template-columns: 1fr; gap: 24px; }
+  .visuel { max-width: 260px; order: -1; }
+  .telechargements { grid-template-columns: 1fr; }
+}
+@media (max-width: 640px) {
+  body { font-size: 16px; }
+  .nav { display: none; }
+  .entete .bouton { margin-left: auto; padding: 9px 14px; font-size: 14.5px; }
+  section { padding: 52px 0; }
+  .chapeau { font-size: 17.5px; }
+  .actions .bouton { width: 100%; justify-content: center; }
+  .notes .carte { padding: 22px 20px; }
+}
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } .bouton { transition: none; } }
+</style>
+</head>
+<body>
+
+<header class="entete">
+  <div class="page">
+    <a class="marque" href="#"><img src="/logo.png" alt="" width="34" height="34">Siloé Stream</a>
+    <nav class="nav" aria-label="Sections">
+      <a href="#fonctions">Fonctions</a>
+      <a href="#telecharger">Télécharger</a>
+      <a href="#nouveautes">Nouveautés</a>
+    </nav>
+    <a class="bouton principal" href="#telecharger">Télécharger</a>
+  </div>
+</header>
+
+<main>
+  <div class="accueil">
+    <div class="page">
+      <div>
+        <span class="etiquette" id="etiquette-version">Pour Windows et Android</span>
+        <h1>Le culte à l'écran, <em>simplement.</em></h1>
+        <p class="chapeau">Siloé Stream affiche la Bible, les chants, les images et les caméras sur l'écran de l'église, s'occupe du son du culte et se pilote depuis un téléphone.</p>
+        <div class="actions">
+          <a class="bouton principal" href="/telecharger/windows">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12m0 0-5-5m5 5 5-5M4 19h16"/></svg>
+            <span>Télécharger pour Windows<small id="sous-windows">Installateur, Windows 10 et 11</small></span>
+          </a>
+          <a class="bouton second" href="#telecharger">Application Android</a>
+        </div>
+        <p class="precisions">Une fois installé, Siloé Stream vous prévient tout seul quand une nouvelle version sort.</p>
+      </div>
+      <div class="visuel"><img src="/logo.png" alt="Logo de Siloé Stream : une croix au-dessus des eaux" width="256" height="256"></div>
+    </div>
+  </div>
+
+  <section id="fonctions" class="bande">
+    <div class="page">
+      <div class="titre-section">
+        <p>Fonctions</p>
+        <h2>Tout le culte, dans un seul logiciel</h2>
+        <p>Pensé pour être compris par tout le monde : on clique, c'est à l'écran.</p>
+      </div>
+      <div class="grille">
+        <article class="carte">
+          <div class="icone"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="7" height="16" rx="1.5"/><rect x="13" y="4" width="8" height="7" rx="1.5"/><rect x="13" y="13" width="8" height="7" rx="1.5"/></svg></div>
+          <h3>Le déroulé du culte</h3>
+          <p>Toutes les diapositives en vignettes, ce qui est à l'écran et ce qui vient ensuite, toujours sous les yeux.</p>
+        </article>
+        <article class="carte">
+          <div class="icone"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v15H6.5A2.5 2.5 0 0 0 4 20.5z"/><path d="M4 20.5A2.5 2.5 0 0 0 6.5 23H20v-5"/><path d="M12 7v6M9.5 9.5h5"/></svg></div>
+          <h3>La Bible</h3>
+          <p>Louis Segond 1910 et King James incluses, d'autres Bibles à importer. Tapez « jean 3 16 » : c'est à l'écran.</p>
+        </article>
+        <article class="carte">
+          <div class="icone"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg></div>
+          <h3>Les chants</h3>
+          <p>Importez vos recueils ou créez vos chants. On les retrouve par numéro, par titre ou par les paroles.</p>
+        </article>
+        <article class="carte">
+          <div class="icone"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="4" width="20" height="13" rx="2"/><rect x="13" y="9" width="6" height="5" rx="1"/><path d="M8 21h8M12 17v4"/></svg></div>
+          <h3>Images, caméras et Duo</h3>
+          <p>Images, textes, caméras et fenêtres comme Zoom en un clic. Avec Duo, deux contenus à l'écran en même temps.</p>
+        </article>
+        <article class="carte">
+          <div class="icone"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 10v4M7 7v10M11 4v16M15 8v8M19 10v4"/></svg></div>
+          <h3>Le son, pour tout le monde</h3>
+          <p>Le moteur audio d'OBS, réglé tout seul pour les micros, les instruments et la musique. Le culte s'enregistre en MP3 d'un clic.</p>
+        </article>
+        <article class="carte">
+          <div class="icone"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="8" width="20" height="10" rx="2"/><circle cx="8" cy="13" r="2.5"/><path d="M14 12h4M14 15h2M6 18v2M18 18v2"/></svg></div>
+          <h3>Une projection fiable</h3>
+          <p>Le projecteur est reconnu, l'écran ne se met jamais en veille, et la projection revient toute seule si on le rebranche.</p>
+        </article>
+        <article class="carte">
+          <div class="icone"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="6" y="2" width="12" height="20" rx="2.5"/><path d="M11 18h2"/></svg></div>
+          <h3>La télécommande Android</h3>
+          <p>Changez de diapositive depuis votre téléphone, sur le Wi-Fi de l'église ou de la maison par Internet.</p>
+        </article>
+        <article class="carte">
+          <div class="icone"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="6" width="14" height="12" rx="2"/><path d="m16 10 6-3v10l-6-3"/></svg></div>
+          <h3>Zoom, OBS et YouTube</h3>
+          <p>MyVirtualCam envoie l'écran de l'église à Zoom, Teams ou OBS. Le direct YouTube se lance depuis Siloé Stream.</p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section id="telecharger">
+    <div class="page">
+      <div class="titre-section">
+        <p>Télécharger</p>
+        <h2 id="titre-telecharger">La dernière version</h2>
+        <p>Installez Siloé Stream sur l'ordinateur de l'église, puis l'application sur les téléphones qui le pilotent.</p>
+      </div>
+      <div class="telechargements">
+        <article class="carte fichier vedette">
+          <div class="icone"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="4" width="20" height="13" rx="2"/><path d="M8 21h8M12 17v4"/></svg></div>
+          <h3>Windows (conseillé)</h3>
+          <p>L'installateur : raccourcis, caméra virtuelle et mises à jour automatiques.</p>
+          <p class="details" data-fichier="windows">Windows 10 et 11</p>
+          <a class="bouton principal" href="/telecharger/windows">Télécharger l'installateur</a>
+        </article>
+        <article class="carte fichier">
+          <div class="icone"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7a2 2 0 0 1 2-2h4l2 2h6a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2z"/></svg></div>
+          <h3>Version portable</h3>
+          <p>Un dossier à décompresser, sans installation (par exemple sur une clé USB).</p>
+          <p class="details" data-fichier="portable">Fichier .zip</p>
+          <a class="bouton second" href="/telecharger/portable">Télécharger le .zip</a>
+        </article>
+        <article class="carte fichier">
+          <div class="icone"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="6" y="2" width="12" height="20" rx="2.5"/><path d="M11 18h2"/></svg></div>
+          <h3>Application Android</h3>
+          <p>La télécommande. Ouvrez ce lien sur le téléphone et autorisez l'installation si Android le demande.</p>
+          <p class="details" data-fichier="android">Fichier .apk</p>
+          <a class="bouton second" href="/telecharger/android">Télécharger l'application</a>
+        </article>
+      </div>
+      <p class="note">Déjà installé ? Siloé Stream et l'application vous proposent chaque nouvelle version : rien à retélécharger ici.</p>
+    </div>
+  </section>
+
+  <section id="nouveautes" class="bande">
+    <div class="page notes">
+      <div class="titre-section">
+        <p>Nouveautés</p>
+        <h2>Quoi de neuf ?</h2>
+      </div>
+      <article class="carte">
+        <div class="entete-notes"><h3 id="nom-version">Dernière version</h3><span id="date-version"></span></div>
+        <div class="contenu-notes" id="notes"><p class="vide">Les nouveautés de la dernière version s'affichent ici.</p></div>
+      </article>
+    </div>
+  </section>
+</main>
+
+<footer class="pied">
+  <div class="page">
+    <a class="marque" href="#"><img src="/logo.png" alt="" width="26" height="26">Siloé Stream</a>
+    <p>Siloé Stream est un logiciel libre, sous licence GNU GPL version 2 ou ultérieure. Son moteur audio utilise libobs (OBS Studio) ; FFmpeg est inclus pour les enregistrements. Code source disponible sur demande. <span id="annee"></span></p>
+  </div>
+</footer>
+
+<script>
+(() => {
+  const annee = document.getElementById('annee');
+  annee.textContent = '© ' + new Date().getFullYear() + ' Siloé Stream.';
+
+  // Les fichiers de chaque téléchargement (mêmes noms que ceux publiés par la compilation)
+  const motifs = {
+    windows: /^SiloeStream-Setup-.+\.exe$/,
+    portable: /^SiloeStream-.+-Windows\.zip$/,
+    android: /^SiloeStream\.apk$/,
+  };
+  const mo = (octets) => Math.max(1, Math.round(octets / 1048576)) + ' Mo';
+
+  // Notes de version écrites en Markdown simple : titres, listes, gras, code et liens
+  function markdown(texte) {
+    const echapper = (s) => s.replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+    const enLigne = (s) => echapper(s)
+      .replace(/`([^`]+)`/g, '<code>$1</code>')
+      .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
+      .replace(/\[([^\]]+)\]\((https?:\/\/[^)\s]+)\)/g, '<a href="$2" rel="noopener">$1</a>');
+    let html = '', liste = null, para = [];
+    const finPara = () => { if (para.length) { html += '<p>' + enLigne(para.join(' ')) + '</p>'; para = []; } };
+    const finListe = () => {
+      if (!liste) return;
+      html += '<' + liste.type + '>' + liste.items.map((i) => '<li>' + enLigne(i) + '</li>').join('') + '</' + liste.type + '>';
+      liste = null;
+    };
+    for (const ligne of texte.replace(/\r/g, '').split('\n')) {
+      let m;
+      if (!ligne.trim()) { finPara(); finListe(); continue; }
+      if ((m = ligne.match(/^(#{1,4})\s+(.*)$/))) {
+        finPara(); finListe();
+        const n = Math.min(m[1].length + 2, 5);
+        html += '<h' + n + '>' + enLigne(m[2]) + '</h' + n + '>';
+        continue;
+      }
+      if ((m = ligne.match(/^\s{0,3}([-*]|\d+\.)\s+(.*)$/))) {
+        finPara();
+        const type = /\d/.test(m[1]) ? 'ol' : 'ul';
+        if (!liste || liste.type !== type) { finListe(); liste = { type, items: [] }; }
+        liste.items.push(m[2]);
+        continue;
+      }
+      if (liste && /^\s/.test(ligne)) { liste.items[liste.items.length - 1] += ' ' + ligne.trim(); continue; }
+      finListe();
+      para.push(ligne.trim());
+    }
+    finPara(); finListe();
+    return html;
+  }
+
+  fetch('/api/releases/latest', { headers: { Accept: 'application/json' } })
+    .then((r) => (r.ok ? r.json() : Promise.reject(r.status)))
+    .then((v) => {
+      const numero = String(v.tag_name || '').replace(/^v/i, '');
+      if (!numero) return;
+      document.getElementById('etiquette-version').textContent = 'Version ' + numero;
+      document.getElementById('titre-telecharger').textContent = 'Siloé Stream ' + numero;
+
+      for (const [cle, motif] of Object.entries(motifs)) {
+        const f = (v.assets || []).find((a) => motif.test(a.name));
+        const details = document.querySelector('[data-fichier="' + cle + '"]');
+        if (f && details) details.textContent = f.name + ' · ' + mo(f.size);
+        if (f && cle === 'windows') document.getElementById('sous-windows').textContent = 'Version ' + numero + ' · ' + mo(f.size);
+      }
+
+      let notes = String(v.body || '');
+      const titre = notes.match(/^#\s+(.+)\n*/);
+      if (titre) notes = notes.slice(titre[0].length);
+      document.getElementById('nom-version').textContent = titre ? titre[1] : 'Siloé Stream ' + numero;
+      if (v.published_at) {
+        document.getElementById('date-version').textContent = 'Publiée le ' +
+          new Date(v.published_at).toLocaleDateString('fr', { day: 'numeric', month: 'long', year: 'numeric' });
+      }
+      document.getElementById('notes').innerHTML = notes.trim() ? markdown(notes) : '<p class="vide">Pas de notes pour cette version.</p>';
+    })
+    .catch(() => { /* site sans API joignable : les boutons de téléchargement marchent quand même */ });
+})();
+</script>
+</body>
+</html>

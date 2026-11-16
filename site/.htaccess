@@ -1,0 +1,23 @@
+# Siloé Stream — siloestream.tech (hébergement Hostinger, PHP 8)
+DirectoryIndex index.html
+Options -Indexes
+
+RewriteEngine On
+RewriteBase /
+
+# Mises à jour : même forme que l'API GitHub (lue par le logiciel Windows et l'application Android)
+RewriteRule ^api/releases/latest/?$ api/maj.php?quoi=derniere [L,QSA]
+RewriteRule ^api/releases/?$ api/maj.php?quoi=liste [L,QSA]
+
+# Téléchargements de la dernière version : /telecharger/windows, /telecharger/portable, /telecharger/android
+RewriteRule ^telecharger/(windows|portable|android)/?$ api/maj.php?quoi=raccourci&type=$1 [L,QSA]
+# Un fichier d'une version précise : /telecharger/v1.9.2/SiloeStream-Setup-1.9.2.exe
+RewriteRule ^telecharger/([^/]+)/([^/]+)$ api/maj.php?quoi=fichier&tag=$1&nom=$2 [L,QSA]
+
+# Le jeton GitHub ne se lit jamais depuis le Web (ni les notes internes)
+<Files "config.php">
+  Require all denied
+</Files>
+<FilesMatch "\.md$">
+  Require all denied
+</FilesMatch>

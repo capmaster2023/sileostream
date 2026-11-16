@@ -184,7 +184,7 @@ private fun BarreOnglets(actif: Int, sombre: Boolean, camLive: Boolean, permis: 
     }
 }
 
-/** Nouvelle version de l'APK sur GitHub : bandeau or. */
+/** Nouvelle version de l'APK sur siloestream.tech : bandeau or. */
 @Composable
 private fun BandeauMiseAJour(remote: Remote) {
     val context = LocalContext.current

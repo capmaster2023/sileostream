@@ -646,7 +646,7 @@ class Remote(private val context: Context, val store: Store) {
         return ips.sortedBy { ip -> if (mine.contains(ip.substringBeforeLast('.'))) 0 else 1 }
     }
 
-    // ---------------------------------------------------------------- mise à jour (GitHub Releases)
+    // ---------------------------------------------------------------- mise à jour (siloestream.tech)
 
     fun checkUpdate() {
         if (updateChecked) return
@@ -655,7 +655,7 @@ class Remote(private val context: Context, val store: Store) {
             try {
                 val current = context.packageManager.getPackageInfo(context.packageName, 0).versionName ?: "0"
                 val req = Request.Builder()
-                    .url("https://api.github.com/repos/capmaster2023/sileostream/releases" + if (current.contains("-")) "?per_page=20" else "/latest")
+                    .url("https://siloestream.tech/api/releases" + if (current.contains("-")) "?per_page=20" else "/latest")
                     .header("User-Agent", "SiloeStream-Android")
                     .header("Accept", "application/vnd.github+json")
                     .build()

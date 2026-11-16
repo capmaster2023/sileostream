@@ -10,9 +10,17 @@ on:
 permissions:
   contents: write
 
+env:
+  # seules « main » et les tags v* publient une version ; la branche « dev » et les demandes de fusion vérifient seulement
+  PUBLIER: ${{ github.event_name == 'push' && (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/v')) }}
+
 jobs:
   windows:
     name: Siloé Stream Windows (natif)
+    # après Android : la version publiée à la fin de ce job contient les APK, sans gros artefact entre les jobs
+    # (l'espace des artefacts d'un dépôt privé est limité)
+    needs: android
+    if: ${{ !cancelled() }}
     runs-on: windows-latest
     defaults:
       run:
@@ -297,30 +305,48 @@ jobs:
           if (Test-Path "$dir\SiloeStream.exe") { $ok = $false }
           if (-not $ok) { exit 1 }
 
+      # branche « dev » et demandes de fusion : l'installateur à essayer (gardé un jour, ignoré si l'espace GitHub est plein)
       - uses: actions/upload-artifact@v4
-        if: success()
+        if: success() && env.PUBLIER != 'true'
+        continue-on-error: true
         with:
           name: SiloeStream-Setup-${{ steps.v.outputs.version }}
           path: SiloeStream-Setup-*.exe
+          retention-days: 1
 
-      - uses: actions/upload-artifact@v4
-        if: success()
-        with:
-          name: windows-zip
-          path: |
-            SiloeStream-*-Windows.zip
-            SiloeStream-Setup-*.exe
-          retention-days: 3
+      # « main » et tags : les fichiers Windows rejoignent le brouillon créé par le job Android, puis la version est publiée.
+      # siloestream.tech la lit dans la minute : le logiciel et l'application y trouvent leur mise à jour.
+      - name: Publier la version (lue par siloestream.tech)
+        if: success() && env.PUBLIER == 'true' && needs.android.result == 'success'
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          V="${{ steps.v.outputs.version }}"
+          TAG="v$V"
+          BETA=()
+          if [[ "$V" == *-* ]]; then BETA=(--prerelease --latest=false); fi
+          FILES=(SiloeStream-*-Windows.zip SiloeStream-Setup-*.exe)
+          ls -la "${FILES[@]}"
+          # notes de version : windows/NOTES-<version>.md s'il existe
+          if [ -f "windows/NOTES-$V.md" ]; then NOTES=(--notes-file "windows/NOTES-$V.md"); else NOTES=(--notes "Siloé Stream $V : logiciel Windows (installateur et dossier portable) et application Android (SiloeStream.apk)."); fi
+          # une bêta recompilée : son tag suit le nouveau commit
+          if [[ "$V" == *-* ]] && git ls-remote --exit-code --tags origin "refs/tags/$TAG" >/dev/null; then
+            gh api --method PATCH "repos/${GITHUB_REPOSITORY}/git/refs/tags/$TAG" -f sha="$GITHUB_SHA" -F force=true
+          fi
+          gh release upload "$TAG" "${FILES[@]}" --clobber
+          gh release edit "$TAG" --draft=false --title "Siloé Stream $V" "${NOTES[@]}" "${BETA[@]}"
 
       - name: Journal Windows
         if: always()
         run: '"${{ job.status }}" | Out-File -Encoding utf8 ci/windows.status'
       - uses: actions/upload-artifact@v4
         if: always()
+        continue-on-error: true
         with:
           name: ci-windows
           path: ci
-          retention-days: 3
+          retention-days: 1
 
   android:
     name: APK Android
@@ -368,27 +394,51 @@ jobs:
           cp app/build/outputs/apk/release/app-release.apk ../apk/SiloeStream.apk
           cp app/build/outputs/apk/debug/app-debug.apk ../apk/SiloeStream-debug.apk
 
+      # branche « dev » et demandes de fusion : les APK à essayer (gardés un jour, ignorés si l'espace GitHub est plein)
       - uses: actions/upload-artifact@v4
+        if: env.PUBLIER != 'true'
+        continue-on-error: true
         with:
           name: SiloeStream
           path: apk/SiloeStream.apk
+          retention-days: 1
 
       - uses: actions/upload-artifact@v4
+        if: env.PUBLIER != 'true'
+        continue-on-error: true
         with:
           name: SiloeStream-debug
           path: apk/SiloeStream-debug.apk
+          retention-days: 1
+
+      # « main » et tags : les APK vont dans un brouillon de la version, invisible pour siloestream.tech ;
+      # le job Windows y ajoute ses fichiers et la publie
+      - name: Brouillon de la version avec les APK
+        if: env.PUBLIER == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          V=$(tr -d '[:space:]' < VERSION)
+          if [[ "$GITHUB_REF" == refs/tags/v* ]]; then V="${GITHUB_REF#refs/tags/v}"; fi
+          TAG="v$V"
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            gh release upload "$TAG" apk/SiloeStream.apk apk/SiloeStream-debug.apk --clobber
+          else
+            gh release create "$TAG" apk/SiloeStream.apk apk/SiloeStream-debug.apk --draft --target "$GITHUB_SHA" --title "Siloé Stream $V" --notes "Version en préparation."
+          fi
 
       - name: Journal Android
         if: always()
         run: echo "${{ job.status }}" > ci-android.status
       - uses: actions/upload-artifact@v4
         if: always()
+        continue-on-error: true
         with:
           name: ci-android-log
           path: |
             ci-android.log
             ci-android.status
-          retention-days: 3
+          retention-days: 1
 
   report:
     name: Rapport (branche ci-logs)
@@ -424,37 +474,3 @@ jobs:
             if [ -d /tmp/w/autotest ]; then cp -r /tmp/w/autotest autotest; fi
           fi
           git add -A && git commit -qm "CI ${GITHUB_SHA}" && git push -f origin ci-logs
-
-  release:
-    name: Publication (GitHub Release)
-    # la branche « dev » sert à vérifier la compilation : seules « main » et les tags publient une version
-    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/v'))
-    needs: [windows, android]
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/download-artifact@v4
-        with:
-          path: dl
-      - name: Publier la version
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          V=$(tr -d '[:space:]' < VERSION)
-          if [[ "$GITHUB_REF" == refs/tags/v* ]]; then V="${GITHUB_REF#refs/tags/v}"; fi
-          TAG="v$V"
-          BETA=()
-          if [[ "$V" == *-* ]]; then BETA=(--prerelease --latest=false); fi
-          FILES=(dl/windows-zip/*.zip dl/windows-zip/*.exe dl/SiloeStream/SiloeStream.apk dl/SiloeStream-debug/SiloeStream-debug.apk)
-          ls -la "${FILES[@]}"
-          # notes de version : windows/NOTES-<version>.md s'il existe
-          if [ -f "windows/NOTES-$V.md" ]; then NOTES=(--notes-file "windows/NOTES-$V.md"); else NOTES=(--notes "SiloeStream $V : logiciel Windows natif (installateur MyVerse-Setup, dossier portable) et APK Android (SiloeStream.apk)."); fi
-          if gh release view "$TAG" >/dev/null 2>&1; then
-            if [[ "$V" == *-* ]]; then
-              gh api --method PATCH "repos/${GITHUB_REPOSITORY}/git/refs/tags/$TAG" -f sha="$GITHUB_SHA" -F force=true
-            fi
-            gh release upload "$TAG" "${FILES[@]}" --clobber
-            gh release edit "$TAG" --title "Siloé Stream $V" "${NOTES[@]}" "${BETA[@]}"
-          else
-            gh release create "$TAG" "${FILES[@]}" "${BETA[@]}" --target "$GITHUB_SHA" --title "Siloé Stream $V" "${NOTES[@]}"
-          fi

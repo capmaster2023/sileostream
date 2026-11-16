@@ -5,13 +5,13 @@ using System.Text.Json;
 namespace MyVerse;
 
 /// <summary>
-/// Mise à jour de MyVerse : dernière version publiée sur GitHub Releases,
+/// Mise à jour de Siloé Stream : dernière version publiée sur siloestream.tech (le site lit les versions du dépôt GitHub privé),
 /// téléchargement de l'installateur puis installation silencieuse (/S) qui rouvre MyVerse.
 /// </summary>
 public static class MiseAJour
 {
-    public const string Api = "https://api.github.com/repos/capmaster2023/sileostream/releases/latest";
-    public const string Prefixe = "https://github.com/capmaster2023/sileostream/releases/download/";
+    public const string Api = "https://siloestream.tech/api/releases/latest";
+    public const string Prefixe = "https://siloestream.tech/telecharger/";
 
     public sealed record Resultat(bool Disponible, string Version, string Url, string? Erreur);
 
@@ -63,9 +63,9 @@ public static class MiseAJour
         using (r)
         {
             if (r.StatusCode == HttpStatusCode.NotFound)
-                return new Resultat(false, "", "", "Mises à jour inaccessibles : le dépôt GitHub de MyVerse est privé (il doit être public pour que Paramètres › Mise à jour fonctionne).");
+                return new Resultat(false, "", "", "Mises à jour introuvables sur siloestream.tech. Réessayez plus tard.");
             if (!r.IsSuccessStatusCode)
-                return new Resultat(false, "", "", $"Impossible de vérifier les mises à jour (GitHub : {(int)r.StatusCode}). Réessayez plus tard.");
+                return new Resultat(false, "", "", $"Impossible de vérifier les mises à jour (siloestream.tech : {(int)r.StatusCode}). Réessayez plus tard.");
             try
             {
                 using var doc = JsonDocument.Parse(await r.Content.ReadAsStringAsync(t));
@@ -96,7 +96,7 @@ public static class MiseAJour
             }
             catch (Exception e) when (e is JsonException or KeyNotFoundException or InvalidOperationException)
             {
-                return new Resultat(false, "", "", "Réponse de GitHub illisible.");
+                return new Resultat(false, "", "", "Réponse de siloestream.tech illisible.");
             }
         }
     }

@@ -40,7 +40,7 @@ public sealed class ReglagesSon : StackPanel
     public ReglagesSon()
     {
         reparer = new Button { Style = S("BtnOr"), Content = "Réparer", Height = 38, Padding = new Thickness(16, 0, 16, 0), Margin = new Thickness(12, 0, 0, 0), VerticalAlignment = VerticalAlignment.Center };
-        reparer.ToolTip = "Télécharge Siloé Stream sur GitHub et le réinstalle (chants, cultes et réglages gardés)";
+        reparer.ToolTip = "Télécharge Siloé Stream sur siloestream.tech et le réinstalle (chants, cultes et réglages gardés)";
         reparer.Click += (_, _) => ActionsSon.Reparer(reparer, Window.GetWindow(this));
         installer = new Button { Style = S("BtnOr"), Content = "Installer le câble (gratuit)", Height = 40, Padding = new Thickness(16, 0, 16, 0), FontSize = 14, HorizontalAlignment = HorizontalAlignment.Left, Margin = new Thickness(0, 10, 0, 0) };
         installer.ToolTip = "Télécharge VB-CABLE sur vb-audio.com puis lance son installateur (Windows demande votre accord)";

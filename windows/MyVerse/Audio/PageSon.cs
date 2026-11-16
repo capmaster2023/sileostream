@@ -133,13 +133,13 @@ internal static class ActionsSon
     /// <summary>« Réparer » : Siloé Stream se télécharge de nouveau et se réinstalle (chants et réglages gardés).</summary>
     public static async void Reparer(Button bouton, Window? fenetre)
     {
-        if (!Dialogue.Confirmer(fenetre, "Réparer le moteur du son : Siloé Stream télécharge sa dernière version sur GitHub et la réinstalle. Vos chants, cultes et réglages sont gardés. Siloé Stream se fermera puis se rouvrira.", "Réparer")) return;
+        if (!Dialogue.Confirmer(fenetre, "Réparer le moteur du son : Siloé Stream télécharge sa dernière version sur siloestream.tech et la réinstalle. Vos chants, cultes et réglages sont gardés. Siloé Stream se fermera puis se rouvrira.", "Réparer")) return;
         object texte = bouton.Content;
         bouton.IsEnabled = false;
         try
         {
             var r = await MiseAJour.Verifier("0.0.0");
-            if (r.Erreur != null || r.Url.Length == 0) { SonUi.Toast(r.Erreur ?? "Aucun installateur de Siloé Stream trouvé sur GitHub."); return; }
+            if (r.Erreur != null || r.Url.Length == 0) { SonUi.Toast(r.Erreur ?? "Aucun installateur de Siloé Stream trouvé sur siloestream.tech."); return; }
             await MiseAJour.Installer(r.Url, new Progress<int>(n => bouton.Content = $"Téléchargement… {n} %"));
             Journal.Info("réparation du moteur du son : réinstallation de Siloé Stream " + r.Version);
             SonUi.Toast("Installation… Siloé Stream va se fermer puis se rouvrir.");
@@ -243,7 +243,7 @@ public sealed class PageSon : Grid
 
         // ---------------- le moteur du son absent ou en panne : « Réparer »
         reparer = new Button { Style = S("BtnOr"), Content = "Réparer", Height = 40, Padding = new Thickness(18, 0, 18, 0), Margin = new Thickness(14, 0, 0, 0), VerticalAlignment = VerticalAlignment.Center };
-        reparer.ToolTip = "Télécharge Siloé Stream sur GitHub et le réinstalle (chants, cultes et réglages gardés)";
+        reparer.ToolTip = "Télécharge Siloé Stream sur siloestream.tech et le réinstalle (chants, cultes et réglages gardés)";
         reparer.Click += (_, _) => ActionsSon.Reparer(reparer, Window.GetWindow(this));
         var ligneMoteur = new DockPanel();
         DockPanel.SetDock(reparer, Dock.Right);
