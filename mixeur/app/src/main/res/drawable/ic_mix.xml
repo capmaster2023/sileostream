@@ -1,6 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!-- trois faders : deux rails dorés et des curseurs crème, le dernier en bas comme une voie coupée -->
-<vector xmlns:android="http://schemas.android.com/apk/res/android" android:width="108dp" android:height="108dp" android:viewportWidth="108" android:viewportHeight="108">
-    <path android:strokeColor="#E9B54A" android:strokeWidth="4" android:strokeLineCap="round" android:pathData="M38,30 V78 M54,30 V78 M70,30 V78" />
-    <path android:fillColor="#FFF4DC" android:pathData="M31,46 h14 v8 h-14 z M47,36 h14 v8 h-14 z M63,62 h14 v8 h-14 z" />
-</vector>
