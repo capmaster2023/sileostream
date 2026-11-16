@@ -195,7 +195,7 @@
             <Setter.Value>
                 <ControlTemplate TargetType="Button">
                     <Border x:Name="Fond" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}"
-                            BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="11" Padding="{TemplateBinding Padding}">
+                            BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="6" Padding="{TemplateBinding Padding}">
                         <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
                                           RecognizesAccessKey="False" />
                     </Border>
@@ -291,7 +291,7 @@
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="Button">
-                    <Border x:Name="Fond" Background="{TemplateBinding Background}" CornerRadius="8" Padding="{TemplateBinding Padding}">
+                    <Border x:Name="Fond" Background="{TemplateBinding Background}" CornerRadius="6" Padding="{TemplateBinding Padding}">
                         <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" VerticalAlignment="Center" RecognizesAccessKey="False" />
                     </Border>
                     <ControlTemplate.Triggers>
@@ -337,7 +337,7 @@
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="Button">
-                    <Border x:Name="Fond" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="1" CornerRadius="8">
+                    <Border x:Name="Fond" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="1" CornerRadius="6">
                         <Path Data="M0,5 H10 M5,0 V10" Stroke="{TemplateBinding Foreground}" StrokeThickness="1.9" StrokeStartLineCap="Round" StrokeEndLineCap="Round"
                               HorizontalAlignment="Center" VerticalAlignment="Center" />
                     </Border>
@@ -366,7 +366,7 @@
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="Button">
-                    <Border x:Name="Fond" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="1" CornerRadius="9">
+                    <Border x:Name="Fond" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="1" CornerRadius="6">
                         <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" RecognizesAccessKey="False" />
                     </Border>
                     <ControlTemplate.Triggers>
@@ -396,7 +396,7 @@
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="RadioButton">
-                    <Border x:Name="Fond" Background="Transparent" BorderBrush="Transparent" BorderThickness="1" CornerRadius="14" Padding="0,10,0,8">
+                    <Border x:Name="Fond" Background="Transparent" BorderBrush="Transparent" BorderThickness="1" CornerRadius="8" Padding="0,10,0,8">
                         <StackPanel HorizontalAlignment="Center">
                             <Path x:Name="Icone" Data="{TemplateBinding Tag}" Stroke="{TemplateBinding Foreground}" StrokeThickness="1.9"
                                   StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round" Width="23" Height="23" Stretch="Uniform" HorizontalAlignment="Center" />
@@ -433,7 +433,7 @@
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="Button">
-                    <Border x:Name="Fond" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="1" CornerRadius="18" Padding="{TemplateBinding Padding}">
+                    <Border x:Name="Fond" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="1" CornerRadius="6" Padding="{TemplateBinding Padding}">
                         <ContentPresenter VerticalAlignment="Center" RecognizesAccessKey="False" />
                     </Border>
                     <ControlTemplate.Triggers>
@@ -457,7 +457,7 @@
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="RadioButton">
-                    <Border x:Name="Fond" Background="Transparent" BorderBrush="Transparent" BorderThickness="1" CornerRadius="9" Padding="0,8">
+                    <Border x:Name="Fond" Background="Transparent" BorderBrush="Transparent" BorderThickness="1" CornerRadius="6" Padding="0,8">
                         <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" RecognizesAccessKey="False" />
                     </Border>
                     <ControlTemplate.Triggers>
@@ -475,14 +475,14 @@
             </Setter.Value>
         </Setter>
     </Style>
-    <!-- 1.5.0 : le gros bouton Suivant de la barre du bas (bordeaux #930000) -->
+    <!-- 1.5.0 : le gros bouton Suivant de la barre du bas (2.0.1 : bouton clair sur fond graphite) -->
     <Style x:Key="BtnSuivant" TargetType="Button">
         <Setter Property="Foreground" Value="{StaticResource SurPrimaire}" />
         <Setter Property="Background" Value="{StaticResource Primaire}" />
         <Setter Property="FontFamily" Value="{StaticResource Ui}" />
-        <Setter Property="FontSize" Value="21" />
+        <Setter Property="FontSize" Value="17" />
         <Setter Property="FontWeight" Value="ExtraBold" />
-        <Setter Property="Height" Value="60" />
+        <Setter Property="Height" Value="56" />
         <Setter Property="MinWidth" Value="270" />
         <Setter Property="Padding" Value="28,0" />
         <Setter Property="Cursor" Value="Hand" />
@@ -490,7 +490,7 @@
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="Button">
-                    <Border x:Name="Fond" Background="{TemplateBinding Background}" CornerRadius="30" Padding="{TemplateBinding Padding}">
+                    <Border x:Name="Fond" Background="{TemplateBinding Background}" CornerRadius="6" Padding="{TemplateBinding Padding}">
                         <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" RecognizesAccessKey="False" />
                     </Border>
                     <ControlTemplate.Triggers>
@@ -520,7 +520,7 @@
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="Button">
-                    <Border x:Name="Fond" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="1.5" CornerRadius="28">
+                    <Border x:Name="Fond" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="1.5" CornerRadius="6">
                         <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" RecognizesAccessKey="False" />
                     </Border>
                     <ControlTemplate.Triggers>
@@ -552,7 +552,7 @@
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="ToggleButton">
-                    <Border x:Name="Fond" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="1" CornerRadius="12" Padding="{TemplateBinding Padding}">
+                    <Border x:Name="Fond" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="1" CornerRadius="6" Padding="{TemplateBinding Padding}">
                         <DockPanel VerticalAlignment="Center">
                             <Path x:Name="Icone" DockPanel.Dock="Left" Data="{TemplateBinding Tag}" Stroke="{StaticResource Brume}" StrokeThickness="1.8"
                                   StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round" Width="19" Height="19" Stretch="Uniform" VerticalAlignment="Center" Margin="0,0,11,0" />
@@ -593,7 +593,7 @@
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="RadioButton">
-                    <Border x:Name="Fond" Background="Transparent" BorderBrush="Transparent" BorderThickness="1" CornerRadius="12" Padding="14,0" MinHeight="44">
+                    <Border x:Name="Fond" Background="Transparent" BorderBrush="Transparent" BorderThickness="1" CornerRadius="6" Padding="14,0" MinHeight="44">
                         <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                             <Path x:Name="Icone" Data="{TemplateBinding Tag}" Stroke="{TemplateBinding Foreground}" StrokeThickness="1.8"
                                   StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round" Width="20" Height="20" Stretch="Uniform" VerticalAlignment="Center" />
@@ -628,7 +628,7 @@
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="Button">
-                    <Border x:Name="Fond" Background="Transparent" BorderBrush="Transparent" BorderThickness="1" CornerRadius="12" Padding="14,0" MinHeight="44">
+                    <Border x:Name="Fond" Background="Transparent" BorderBrush="Transparent" BorderThickness="1" CornerRadius="6" Padding="14,0" MinHeight="44">
                         <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                             <Path Data="{TemplateBinding Tag}" Stroke="{TemplateBinding Foreground}" StrokeThickness="1.8"
                                   StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round" Width="20" Height="20" Stretch="Uniform" VerticalAlignment="Center" />
@@ -661,7 +661,7 @@
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="Button">
-                    <Border x:Name="Fond" Background="Transparent" BorderBrush="Transparent" BorderThickness="1" CornerRadius="12" Padding="0,9,0,7">
+                    <Border x:Name="Fond" Background="Transparent" BorderBrush="Transparent" BorderThickness="1" CornerRadius="8" Padding="0,9,0,7">
                         <StackPanel HorizontalAlignment="Center">
                             <Path Data="{TemplateBinding Tag}" Stroke="{TemplateBinding Foreground}" StrokeThickness="1.8"
                                   StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round" Width="21" Height="21" Stretch="Uniform" HorizontalAlignment="Center" />
@@ -693,7 +693,7 @@
             <Setter.Value>
                 <ControlTemplate TargetType="RadioButton">
                     <Grid>
-                        <Border x:Name="Fond" Background="Transparent" BorderBrush="Transparent" BorderThickness="1" CornerRadius="9" Padding="14,10,12,10">
+                        <Border x:Name="Fond" Background="Transparent" BorderBrush="Transparent" BorderThickness="1" CornerRadius="6" Padding="14,10,12,10">
                             <ContentPresenter VerticalAlignment="Center" RecognizesAccessKey="False" />
                         </Border>
                         <Border x:Name="Barre" Width="3" CornerRadius="2" Background="{StaticResource OrVif}" HorizontalAlignment="Left" Margin="0,9" Visibility="Collapsed" />
@@ -724,7 +724,7 @@
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="RadioButton">
-                    <Border x:Name="Fond" Background="Transparent" CornerRadius="10" Padding="16,8">
+                    <Border x:Name="Fond" Background="Transparent" CornerRadius="6" Padding="16,8">
                         <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" RecognizesAccessKey="False" />
                     </Border>
                     <ControlTemplate.Triggers>
@@ -754,7 +754,7 @@
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="Button">
-                    <Border x:Name="Fond" Background="{TemplateBinding Background}" CornerRadius="7" Padding="{TemplateBinding Padding}">
+                    <Border x:Name="Fond" Background="{TemplateBinding Background}" CornerRadius="6" Padding="{TemplateBinding Padding}">
                         <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" RecognizesAccessKey="False" />
                     </Border>
                     <ControlTemplate.Triggers>
@@ -789,7 +789,7 @@
             <Setter.Value>
                 <ControlTemplate TargetType="TextBox">
                     <Border x:Name="Cadre" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}"
-                            BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="10" SnapsToDevicePixels="True">
+                            BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="6" SnapsToDevicePixels="True">
                         <ScrollViewer x:Name="PART_ContentHost" Margin="0" Padding="{TemplateBinding Padding}" Focusable="False"
                                       HorizontalScrollBarVisibility="Hidden" VerticalScrollBarVisibility="Hidden" />
                     </Border>
@@ -815,7 +815,7 @@
             <Setter.Value>
                 <ControlTemplate TargetType="TextBox">
                     <Border x:Name="Cadre" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}"
-                            BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="10" SnapsToDevicePixels="True">
+                            BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="6" SnapsToDevicePixels="True">
                         <ScrollViewer x:Name="PART_ContentHost" Margin="0" Padding="{TemplateBinding Padding}" Focusable="False"
                                       HorizontalScrollBarVisibility="{TemplateBinding HorizontalScrollBarVisibility}" VerticalScrollBarVisibility="Auto" />
                     </Border>
@@ -840,7 +840,7 @@
             <Setter.Value>
                 <ControlTemplate TargetType="PasswordBox">
                     <Border x:Name="Cadre" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}"
-                            BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="10">
+                            BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="6">
                         <ScrollViewer x:Name="PART_ContentHost" Padding="{TemplateBinding Padding}" Focusable="False" />
                     </Border>
                     <ControlTemplate.Triggers>
@@ -896,7 +896,7 @@
             <Setter.Value>
                 <ControlTemplate TargetType="RadioButton">
                     <StackPanel Orientation="Horizontal" Background="Transparent">
-                        <Border x:Name="Rond" Width="20" Height="20" CornerRadius="10" BorderThickness="2" BorderBrush="{StaticResource Brume2}" Background="{StaticResource Encre}" VerticalAlignment="Center">
+                        <Border x:Name="Rond" Width="20" Height="20" CornerRadius="6" BorderThickness="2" BorderBrush="{StaticResource Brume2}" Background="{StaticResource Encre}" VerticalAlignment="Center">
                             <Ellipse x:Name="Point" Width="8" Height="8" Fill="{StaticResource SurOr}" Visibility="Collapsed" />
                         </Border>
                         <ContentPresenter Margin="10,0,0,0" VerticalAlignment="Center" RecognizesAccessKey="False" />
@@ -1112,7 +1112,7 @@
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="ToggleButton">
-                    <Border x:Name="Cadre" Background="{StaticResource Encre}" BorderBrush="{StaticResource Nuit3}" BorderThickness="1" CornerRadius="10">
+                    <Border x:Name="Cadre" Background="{StaticResource Encre}" BorderBrush="{StaticResource Nuit3}" BorderThickness="1" CornerRadius="6">
                         <Path HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,12,0" Data="M0,0 L5,5 L10,0" Stroke="{StaticResource Brume}" StrokeThickness="1.6" />
                     </Border>
                     <ControlTemplate.Triggers>
@@ -1145,7 +1145,7 @@
                                           Content="{TemplateBinding SelectionBoxItem}" ContentTemplate="{TemplateBinding SelectionBoxItemTemplate}"
                                           ContentTemplateSelector="{TemplateBinding ItemTemplateSelector}" />
                         <Popup x:Name="PART_Popup" Placement="Bottom" IsOpen="{TemplateBinding IsDropDownOpen}" AllowsTransparency="True" Focusable="False" PopupAnimation="None">
-                            <Border x:Name="Liste" Background="{StaticResource Encre}" BorderBrush="{StaticResource Trait2}" BorderThickness="1" CornerRadius="10" Margin="0,4,0,0"
+                            <Border x:Name="Liste" Background="{StaticResource Encre}" BorderBrush="{StaticResource Trait2}" BorderThickness="1" CornerRadius="6" Margin="0,4,0,0"
                                     MinWidth="{Binding ActualWidth, RelativeSource={RelativeSource TemplatedParent}}" MaxHeight="{TemplateBinding MaxDropDownHeight}" Padding="4">
                                 <ScrollViewer SnapsToDevicePixels="True">
                                     <StackPanel IsItemsHost="True" KeyboardNavigation.DirectionalNavigation="Contained" />
@@ -1196,7 +1196,7 @@
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="ContextMenu">
-                    <Border Background="{StaticResource Encre}" BorderBrush="{StaticResource Trait2}" BorderThickness="1" CornerRadius="10" Padding="4">
+                    <Border Background="{StaticResource Encre}" BorderBrush="{StaticResource Trait2}" BorderThickness="1" CornerRadius="6" Padding="4">
                         <ScrollViewer VerticalScrollBarVisibility="Auto" MaxHeight="640">
                             <StackPanel IsItemsHost="True" KeyboardNavigation.DirectionalNavigation="Cycle" />
                         </ScrollViewer>
@@ -1231,7 +1231,7 @@
                         </Border>
                         <Popup x:Name="PART_Popup" Placement="Right" HorizontalOffset="2" AllowsTransparency="True" Focusable="False" PopupAnimation="None"
                                IsOpen="{Binding IsSubmenuOpen, RelativeSource={RelativeSource TemplatedParent}}">
-                            <Border Background="{StaticResource Encre}" BorderBrush="{StaticResource Trait2}" BorderThickness="1" CornerRadius="10" Padding="4">
+                            <Border Background="{StaticResource Encre}" BorderBrush="{StaticResource Trait2}" BorderThickness="1" CornerRadius="6" Padding="4">
                                 <ScrollViewer VerticalScrollBarVisibility="Auto" MaxHeight="560">
                                     <StackPanel IsItemsHost="True" KeyboardNavigation.DirectionalNavigation="Cycle" />
                                 </ScrollViewer>
@@ -1299,7 +1299,7 @@
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="ListBoxItem">
-                    <Border x:Name="Fond" Background="Transparent" CornerRadius="10" Padding="{TemplateBinding Padding}">
+                    <Border x:Name="Fond" Background="Transparent" CornerRadius="6" Padding="{TemplateBinding Padding}">
                         <ContentPresenter />
                     </Border>
                     <ControlTemplate.Triggers>
@@ -1343,7 +1343,7 @@
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="ListBoxItem">
-                    <Border x:Name="Fond" Background="{StaticResource Encre}" BorderBrush="{StaticResource Nuit3}" BorderThickness="1" CornerRadius="12" Padding="{TemplateBinding Padding}">
+                    <Border x:Name="Fond" Background="{StaticResource Encre}" BorderBrush="{StaticResource Nuit3}" BorderThickness="1" CornerRadius="10" Padding="{TemplateBinding Padding}">
                         <ContentPresenter />
                     </Border>
                     <ControlTemplate.Triggers>
@@ -1386,7 +1386,7 @@
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="ToolTip">
-                    <Border Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="1" CornerRadius="8" Padding="10,6" MaxWidth="420">
+                    <Border Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="1" CornerRadius="6" Padding="10,6" MaxWidth="420">
                         <ContentPresenter>
                             <ContentPresenter.Resources>
                                 <Style TargetType="TextBlock">

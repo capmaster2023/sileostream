@@ -17,7 +17,7 @@ public partial class App : Application
     }
 
     /// <summary>
-    /// Thème de l'interface : « clair » (par défaut) ou « sombre ». Appliqué tout de suite à toutes les fenêtres
+    /// Thème de l'interface : « sombre » (par défaut, 2.0.1) ou « clair ». Appliqué tout de suite à toutes les fenêtres
     /// (les pinceaux de Theme.xaml suivent la palette) et enregistré dans les réglages.
     /// </summary>
     public static void AppliquerApparence(string nom)
@@ -149,7 +149,14 @@ public partial class App : Application
             Shutdown(1);
             return;
         }
-        // thème de l'interface (clair par défaut), avant la première fenêtre
+        // 2.0.1 : le design « régie pro » est sombre ; mis une fois pour tout le monde (le choix reste dans Réglages › Apparence)
+        if (Donnees.Reglages.Design < 2)
+        {
+            Donnees.Reglages.Design = 2;
+            Donnees.Reglages.Apparence = "sombre";
+            try { Donnees.SauverReglages(); } catch (Exception exDesign) { Journal.Erreur("design 2.0.1", exDesign); }
+        }
+        // thème de l'interface (sombre par défaut), avant la première fenêtre
         Palette.Actuelle.Appliquer(Donnees.Reglages.Apparence);
         SortieObs = new SortieObs(Path.Combine(Ressources, "obs"), AutoTest != null ? Path.Combine(dossier, "SiloeStream-OBS") : null);
         Telephone = new Telephone(dossier, Regie, f => Dispatcher.InvokeAsync(f).Task.Unwrap());

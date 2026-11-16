@@ -195,27 +195,6 @@ public sealed partial class Regie
         AgendaModifie();
     }
 
-    /// <summary>
-    /// Siloé Stream 2.0, « Reprendre dimanche dernier » : les cartes d'un autre culte s'ajoutent, copiées, à la fin du culte choisi.
-    /// Rend le nombre de cartes reprises (0 si ce culte n'existe pas ou si c'est le même).
-    /// </summary>
-    public int ReprendreAgenda(string agendaId)
-    {
-        var actuel = Agenda;
-        var source = donnees.Agendas.FirstOrDefault(a => a.Id == agendaId);
-        if (source == null || ReferenceEquals(source, actuel)) return 0;
-        int n = 0;
-        foreach (var e in source.Elements.ToList())
-        {
-            var copie = MyVerse.Audio.AudioConfiguration.Copy(e);
-            copie.Id = Chant.NouvelId();
-            actuel.Elements.Add(copie);
-            n++;
-        }
-        if (n > 0) AgendaModifie();
-        return n;
-    }
-
     ElementAgenda Ajouter(ElementAgenda e, int position = -1)
     {
         var l = Agenda.Elements;

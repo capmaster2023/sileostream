@@ -75,9 +75,9 @@ public sealed class Reglages
     [JsonPropertyName("recueil")] public string Recueil { get; set; } = "";
     [JsonPropertyName("agenda")] public string Agenda { get; set; } = "";
     /// <summary>Thème de l'interface (Siloé Stream 3.1) : « clair » (par défaut) ou « sombre ». À ne pas confondre avec <see cref="Theme"/>, le fond de la projection.</summary>
-    [JsonPropertyName("apparence")] public string Apparence { get; set; } = "clair";
-    /// <summary>Siloé Stream 2.0 : « simple » (les écrans du Grand Bouton, par défaut) ou « complet » (toute la régie, comme en 1.x).</summary>
-    [JsonPropertyName("interface")] public string Interface { get; set; } = "simple";
+    [JsonPropertyName("apparence")] public string Apparence { get; set; } = "sombre";
+    /// <summary>Version du design appliqué (2 = « régie pro » de Siloé Stream 2.0.1 : le thème sombre est mis une fois pour tout le monde).</summary>
+    [JsonPropertyName("design")] public int Design { get; set; }
     /// <summary>
     /// Écran par défaut (Siloé Stream 3.3) : ce qui revient à l'écran quand on retire les paroles. « noir » (l'écran se vide, comme avant),
     /// « fond » (l'habillage sans texte) ou l'id d'un écran principal du déroulé.

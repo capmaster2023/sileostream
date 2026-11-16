@@ -73,7 +73,7 @@
                             <ColumnDefinition Width="Auto" />
                         </Grid.ColumnDefinitions>
                         <TextBlock Text="{Binding Heure}" FontSize="12.5" FontWeight="SemiBold" Foreground="{StaticResource Brume}" VerticalAlignment="Center" Margin="2,0,0,0" />
-                        <Border Grid.Column="1" Width="36" Height="36" CornerRadius="11" Background="{Binding FondType}" VerticalAlignment="Center">
+                        <Border Grid.Column="1" Width="36" Height="36" CornerRadius="10" Background="{Binding FondType}" VerticalAlignment="Center">
                             <Path Data="{Binding Icone}" Stroke="{Binding Couleur}" StrokeThickness="1.9" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round"
                                   Width="18" Height="18" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center" />
                         </Border>
@@ -210,7 +210,7 @@
 
                 <!-- recherche du culte (Ctrl K) : versets, chants (« wokovu 45 »), paroles et versets mal écrits, médias -->
                 <Grid Grid.Column="1" MaxWidth="560" Margin="18,0" VerticalAlignment="Center">
-                    <Border x:Name="RechercheCulte" Background="{StaticResource Encre}" BorderBrush="{StaticResource Nuit3}" BorderThickness="1" CornerRadius="22" Padding="16,0,8,0" Height="44"
+                    <Border x:Name="RechercheCulte" Background="{StaticResource Encre}" BorderBrush="{StaticResource Nuit3}" BorderThickness="1" CornerRadius="6" Padding="16,0,8,0" Height="44"
                             ToolTip="Ctrl K : chercher un verset, un chant ou des paroles">
                         <Grid>
                             <Grid.ColumnDefinitions>
@@ -233,7 +233,7 @@
                     </Border>
                     <Popup x:Name="CmdPopup" PlacementTarget="{Binding ElementName=RechercheCulte}" Placement="Bottom" StaysOpen="False" AllowsTransparency="True" Focusable="False"
                            Width="{Binding ActualWidth, ElementName=RechercheCulte}">
-                        <Border Background="{StaticResource Encre}" BorderBrush="{StaticResource Trait2}" BorderThickness="1" CornerRadius="16" Padding="6" Margin="0,8,0,14">
+                        <Border Background="{StaticResource Encre}" BorderBrush="{StaticResource Trait2}" BorderThickness="1" CornerRadius="10" Padding="6" Margin="0,8,0,14">
                             <StackPanel>
                                 <StackPanel x:Name="CmdResultats" />
                                 <TextBlock x:Name="CmdAide" Margin="10,6,10,4" FontSize="12" Foreground="{StaticResource Brume}" Text="Entrée ou clic : y aller. Maj+Entrée : montrer tout de suite. Tab ou + : ajouter au programme. ↑ ↓ : choisir. × : annuler." TextWrapping="Wrap" />
@@ -274,7 +274,7 @@
         <!-- ==================== colonne de gauche : le programme, ou la Bibliothèque et ses onglets ==================== -->
         <Border Grid.Row="1" Grid.Column="1" BorderBrush="{StaticResource Nuit3}" BorderThickness="0,0,1,0">
             <DockPanel>
-                <Border x:Name="BiblioOnglets" DockPanel.Dock="Top" Margin="14,16,14,2" Background="{StaticResource Nuit2}" CornerRadius="12" Padding="3" Visibility="Collapsed">
+                <Border x:Name="BiblioOnglets" DockPanel.Dock="Top" Margin="14,16,14,2" Background="{StaticResource Nuit2}" CornerRadius="10" Padding="3" Visibility="Collapsed">
                     <UniformGrid Columns="4">
                         <RadioButton x:Name="SegBible" Style="{StaticResource Segment}" GroupName="Segments" Content="Bible" ToolTip="Les Bibles, les livres, les versets" />
                         <RadioButton x:Name="SegChants" Style="{StaticResource Segment}" GroupName="Segments" Content="Chants" ToolTip="Les recueils et les chants" />
@@ -339,7 +339,7 @@
                         <Button x:Name="Nouveau" Style="{StaticResource Btn}" Content="+ Nouveau chant" Height="44" Padding="0" Margin="0,8,0,0"
                                 ToolTip="Taper ou coller un chant : il est rangé tout seul en diapositives" />
                     </StackPanel>
-                    <Border x:Name="NumBoite" DockPanel.Dock="Top" Margin="0,0,0,8" Background="{StaticResource Encre}" BorderBrush="{StaticResource Nuit3}" BorderThickness="1" CornerRadius="11" Padding="12,0,4,0"
+                    <Border x:Name="NumBoite" DockPanel.Dock="Top" Margin="0,0,0,8" Background="{StaticResource Encre}" BorderBrush="{StaticResource Nuit3}" BorderThickness="1" CornerRadius="10" Padding="12,0,4,0"
                             ToolTip="Taper le numéro du chant dans ce recueil (Entrée : ouvrir, puis 1-9 pour les strophes)">
                         <Grid>
                             <Grid.ColumnDefinitions>
@@ -451,7 +451,7 @@
 
                 <!-- recherche de la page : Bible ou chants -->
                 <Grid x:Name="Recherches" Grid.Column="1" Width="330" Margin="18,14,0,0" VerticalAlignment="Top">
-                    <Border x:Name="RechercheBible" Background="{StaticResource Encre}" BorderBrush="{StaticResource Nuit3}" BorderThickness="1" CornerRadius="12" Padding="12,0">
+                    <Border x:Name="RechercheBible" Background="{StaticResource Encre}" BorderBrush="{StaticResource Nuit3}" BorderThickness="1" CornerRadius="10" Padding="12,0">
                         <Grid>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="Auto" />
@@ -466,7 +466,7 @@
                             <Button x:Name="QEffacer" Grid.Column="2" Style="{StaticResource BtnPlat}" Padding="8,4" Content="×" FontSize="18" Foreground="{StaticResource Brume}" Visibility="Collapsed" ToolTip="Effacer la recherche" />
                         </Grid>
                     </Border>
-                    <Border x:Name="RechercheChants" Background="{StaticResource Encre}" BorderBrush="{StaticResource Nuit3}" BorderThickness="1" CornerRadius="12" Padding="12,0" Visibility="Collapsed">
+                    <Border x:Name="RechercheChants" Background="{StaticResource Encre}" BorderBrush="{StaticResource Nuit3}" BorderThickness="1" CornerRadius="10" Padding="12,0" Visibility="Collapsed">
                         <Grid>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="Auto" />
@@ -491,7 +491,7 @@
                         <DockPanel Margin="0,0,0,12">
                             <TextBlock x:Name="CulteEnsuite" DockPanel.Dock="Right" Visibility="Collapsed" />
                             <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                                <Border Background="{StaticResource Direct}" CornerRadius="12" Padding="10,3,12,4" VerticalAlignment="Center">
+                                <Border Background="{StaticResource Direct}" CornerRadius="10" Padding="10,3,12,4" VerticalAlignment="Center">
                                     <StackPanel Orientation="Horizontal">
                                         <Ellipse Width="7" Height="7" Fill="White" VerticalAlignment="Center" Margin="0,1,7,0" />
                                         <TextBlock Text="En direct" FontSize="12.5" FontWeight="ExtraBold" Foreground="White" />
@@ -500,9 +500,9 @@
                                 <TextBlock x:Name="CulteAEcran" FontSize="16" FontWeight="Bold" Foreground="{StaticResource Blanc}" VerticalAlignment="Center" Margin="12,0,0,0" TextTrimming="CharacterEllipsis" />
                             </StackPanel>
                         </DockPanel>
-                        <Border x:Name="CulteApercu" HorizontalAlignment="Left" MaxWidth="760" Background="Black" CornerRadius="16" BorderBrush="{StaticResource Nuit3}" BorderThickness="2.5"
+                        <Border x:Name="CulteApercu" HorizontalAlignment="Left" MaxWidth="760" Background="Black" CornerRadius="10" BorderBrush="{StaticResource Nuit3}" BorderThickness="2.5"
                                 ToolTip="Ce qui est à l'écran">
-                            <Border CornerRadius="14" ClipToBounds="True">
+                            <Border CornerRadius="10" ClipToBounds="True">
                                 <Viewbox Stretch="Uniform">
                                     <local:Rendu x:Name="CulteRendu" Width="1920" Height="1080" Transitions="False" IsHitTestVisible="False" />
                                 </Viewbox>
@@ -544,7 +544,7 @@
                 <ScrollViewer x:Name="DefilGrille" Visibility="Collapsed" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
                     <StackPanel Margin="24,0,22,24">
                         <WrapPanel x:Name="GrilleSources" />
-                        <Border x:Name="GrilleVide" BorderBrush="{StaticResource Trait2}" BorderThickness="1" CornerRadius="12" Padding="24">
+                        <Border x:Name="GrilleVide" BorderBrush="{StaticResource Trait2}" BorderThickness="1" CornerRadius="10" Padding="24">
                             <TextBlock TextWrapping="Wrap" FontSize="14.5" LineHeight="23" Foreground="{StaticResource Brume}" TextAlignment="Center"
                                        Text="La grille est vide. Cliquez le + d'une source à gauche pour l'ajouter ici. Ensuite, un seul clic sur une tuile l'envoie en direct sur l'écran choisi." />
                         </Border>
@@ -592,9 +592,9 @@
                                        Text="Aperçu seulement" TextTrimming="CharacterEllipsis" MaxWidth="150" />
                             <TextBlock Text="Église" FontSize="15" FontWeight="Bold" Foreground="{StaticResource Blanc}" VerticalAlignment="Center" />
                         </DockPanel>
-                        <Border x:Name="EgliseApercu" BorderBrush="{StaticResource Direct}" BorderThickness="2.5" CornerRadius="14" Background="Black"
+                        <Border x:Name="EgliseApercu" BorderBrush="{StaticResource Direct}" BorderThickness="2.5" CornerRadius="10" Background="Black"
                                 ToolTip="Ce qu'on voit dans l'église (l'écran de projection)">
-                            <Border CornerRadius="12" ClipToBounds="True">
+                            <Border CornerRadius="10" ClipToBounds="True">
                                 <Viewbox Stretch="Uniform">
                                     <local:Rendu x:Name="EgliseRendu" Width="1920" Height="1080" Transitions="False" Leger="True" IsHitTestVisible="False" />
                                 </Viewbox>
@@ -636,9 +636,9 @@
                             </Border>
                             <TextBlock Text="MyStream" FontSize="15" FontWeight="Bold" Foreground="{StaticResource Blanc}" VerticalAlignment="Center" />
                         </DockPanel>
-                        <Border x:Name="StreamApercu" BorderBrush="{StaticResource Stream}" BorderThickness="2.5" CornerRadius="14" Background="Black"
+                        <Border x:Name="StreamApercu" BorderBrush="{StaticResource Stream}" BorderThickness="2.5" CornerRadius="10" Background="Black"
                                 ToolTip="Ce qui part sur Zoom et sur YouTube">
-                            <Border CornerRadius="12" ClipToBounds="True">
+                            <Border CornerRadius="10" ClipToBounds="True">
                                 <Viewbox Stretch="Uniform">
                                     <local:Rendu x:Name="StreamRendu" Width="1920" Height="1080" Transitions="False" Leger="True" IsHitTestVisible="False" />
                                 </Viewbox>
@@ -667,15 +667,15 @@
                         <Button x:Name="Decouper" DockPanel.Dock="Right" Style="{StaticResource BtnPetit}" Content="Découper" FontSize="12" Padding="9,4" IsEnabled="False" VerticalAlignment="Center"
                                 ToolTip="Couper la diapositive qui vient en plusieurs (Entrée devant une ligne)" />
                         <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                            <Border Background="{StaticResource Ensuite}" CornerRadius="12" Padding="10,3,11,4" VerticalAlignment="Center">
+                            <Border Background="{StaticResource Ensuite}" CornerRadius="10" Padding="10,3,11,4" VerticalAlignment="Center">
                                 <TextBlock Text="Ensuite" FontSize="12.5" FontWeight="ExtraBold" Foreground="{StaticResource SurEnsuite}" />
                             </Border>
                             <TextBlock x:Name="SuivantLab" FontSize="15" FontWeight="Bold" Foreground="{StaticResource Blanc}" TextTrimming="CharacterEllipsis" MaxWidth="150"
                                        VerticalAlignment="Center" Margin="10,0,0,0" Text="—" />
                         </StackPanel>
                     </DockPanel>
-                    <Border x:Name="SuivantApercu" BorderBrush="{StaticResource Ensuite}" BorderThickness="2.5" CornerRadius="14" Background="{StaticResource Damier}" ToolTip="La diapositive qui vient avec Suivant">
-                        <Border CornerRadius="12" ClipToBounds="True">
+                    <Border x:Name="SuivantApercu" BorderBrush="{StaticResource Ensuite}" BorderThickness="2.5" CornerRadius="10" Background="{StaticResource Damier}" ToolTip="La diapositive qui vient avec Suivant">
+                        <Border CornerRadius="10" ClipToBounds="True">
                             <Viewbox Stretch="Uniform">
                                 <local:Rendu x:Name="SuivantRendu" Width="1920" Height="1080" Transitions="False" Leger="True" IsHitTestVisible="False" />
                             </Viewbox>
@@ -729,7 +729,7 @@
                         </ToggleButton>
                         <StackPanel x:Name="CorpsCoin" Visibility="Collapsed" Margin="2,2,2,14">
                             <TextBlock x:Name="DuoAide" Text="Montre un premier contenu, garde-le dans un coin (touche P), puis montre le second." FontSize="13" Foreground="{StaticResource Brume}" TextWrapping="Wrap" Margin="0,0,0,10" />
-                            <Border x:Name="DuoBoite" Background="{StaticResource Nuit2}" CornerRadius="12" Padding="12,9" Margin="0,0,0,10" Visibility="Collapsed">
+                            <Border x:Name="DuoBoite" Background="{StaticResource Nuit2}" CornerRadius="10" Padding="12,9" Margin="0,0,0,10" Visibility="Collapsed">
                                 <DockPanel>
                                     <TextBlock DockPanel.Dock="Left" Text="Dans le coin" FontSize="12" FontWeight="Bold" Foreground="{StaticResource Brume}" VerticalAlignment="Center" Margin="0,0,10,0" />
                                     <TextBlock x:Name="DuoLibelle" FontSize="13" FontWeight="Bold" Foreground="{StaticResource Blanc}" TextTrimming="CharacterEllipsis" VerticalAlignment="Center" />
@@ -813,7 +813,7 @@
                         <StackPanel Orientation="Horizontal">
                             <TextBlock Text="Suivant" VerticalAlignment="Center" />
                             <Path Data="M0,0 L10,7 L0,14 Z" Fill="{StaticResource SurPrimaire}" VerticalAlignment="Center" Margin="12,1,0,0" />
-                            <Border BorderBrush="#66FFFFFF" BorderThickness="1" CornerRadius="6" Padding="7,1,7,2" Margin="16,2,0,0" VerticalAlignment="Center">
+                            <Border BorderBrush="{StaticResource Brume2}" BorderThickness="1" CornerRadius="6" Padding="7,1,7,2" Margin="16,2,0,0" VerticalAlignment="Center">
                                 <TextBlock Text="Espace" FontSize="11.5" FontWeight="Bold" Foreground="{StaticResource SurPrimaire}" />
                             </Border>
                         </StackPanel>
@@ -846,7 +846,7 @@
 
         <!-- message court, au-dessus de la télécommande -->
         <Border x:Name="ToastBoite" Grid.ColumnSpan="4" Grid.RowSpan="3" HorizontalAlignment="Center" VerticalAlignment="Bottom" Margin="0,0,0,110" Background="{StaticResource Blanc}" BorderThickness="0"
-                CornerRadius="12" Padding="18,11" MaxWidth="900" Opacity="0" IsHitTestVisible="False">
+                CornerRadius="10" Padding="18,11" MaxWidth="900" Opacity="0" IsHitTestVisible="False">
             <TextBlock x:Name="ToastTexte" TextWrapping="Wrap" Foreground="{StaticResource Page}" FontSize="14" />
         </Border>
     </Grid>

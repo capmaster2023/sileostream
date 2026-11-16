@@ -11,7 +11,7 @@ namespace MyVerse.Ui;
 /// ouvre la régie, affiche des versets et des chants, ouvre la projection et chaque fenêtre,
 /// enregistre des captures d'écran et un compte rendu (autotest.txt), puis ferme Siloé Stream (code 0 = tout va bien).
 /// </summary>
-public static partial class AutoTest
+public static class AutoTest
 {
     static readonly List<string> echecs = new();
     static readonly List<string> log = new();
@@ -1602,9 +1602,6 @@ public static partial class AutoTest
             catch (Exception x) { Echec("serveur des téléphones : " + x.Message); }
             Ok(File.Exists(Path.Combine(App.SortieObs.Dossier, "etat.json")), "sortie OBS (etat.json)");
             Ok(File.Exists(App.SortieObs.Page), "page OBS (ecran.html)");
-            // 2.0.0 : les écrans simples (Bonjour, la Régie au gros Suivant, la barre magique, Préparer, le son, le direct)
-            try { await TestVersion2(w); }
-            catch (Exception x) { Echec("2.0.0 : " + x); }
         }
         catch (Exception x) { Echec("exception : " + x); }
         lock (log)

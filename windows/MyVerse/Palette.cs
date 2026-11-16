@@ -4,7 +4,8 @@ using System.Windows.Media;
 namespace MyVerse.Ui;
 
 /// <summary>
-/// Les couleurs de l'interface : thème clair par défaut (Siloé Stream 1.5.0 : blanc chaud et bordeaux #930000), thème sombre (noyer) au choix (Réglages › Apparence ou barre de gauche).
+/// Les couleurs de l'interface. Siloé Stream 2.0.1, design « régie pro » : graphite sombre par défaut, clair au choix (Réglages › Apparence ou barre de gauche).
+/// Couleurs de sens, jamais décoratives : rouge = à l'antenne, ambre = suivant, vert = prêt et niveaux, bleu = sélection.
 /// Chaque pinceau de Theme.xaml est lié à une couleur d'ici : changer de thème met à jour d'un coup toute l'interface,
 /// fenêtres ouvertes et éléments construits en C# compris (ils utilisent les mêmes pinceaux).
 /// Les noms viennent des versions précédentes : « Blanc » est le texte, « Encre » et « Nuit » le fond des cartes, « Or » l'accent.
@@ -15,67 +16,67 @@ public sealed class Palette : INotifyPropertyChanged
     static readonly Dictionary<string, (string Clair, string Sombre)> Couleurs = new()
     {
         // fonds (1.5.0 : blanc chaud en clair ; noyer très foncé en sombre)
-        ["Page"] = ("#FAF7F7", "#15110E"),
-        ["Rail"] = ("#F3EEEE", "#100D0A"),
-        ["RailActif"] = ("#FBE9E9", "#2C1D1A"),
-        ["Encre"] = ("#FFFFFF", "#1E1915"),
-        ["Nuit"] = ("#FFFFFF", "#1E1915"),
-        ["Nuit2"] = ("#F6F1F1", "#28211B"),
-        ["Nuit3"] = ("#E8E0E0", "#3A2F27"),
-        ["Trait"] = ("#EFE8E8", "#2C241E"),
-        ["Trait2"] = ("#D6CACA", "#4D4137"),
+        ["Page"] = ("#F6F7F9", "#0E0F11"),
+        ["Rail"] = ("#EEF0F3", "#16181C"),
+        ["RailActif"] = ("#E1E6EE", "#23272E"),
+        ["Encre"] = ("#FFFFFF", "#16181C"),
+        ["Nuit"] = ("#FFFFFF", "#16181C"),
+        ["Nuit2"] = ("#F1F3F6", "#1E2126"),
+        ["Nuit3"] = ("#DDE1E7", "#2A2E35"),
+        ["Trait"] = ("#E6E9EE", "#23262C"),
+        ["Trait2"] = ("#C9CED6", "#3A3F48"),
         // textes
-        ["Blanc"] = ("#1E1818", "#F4EADB"),
-        ["Encre2"] = ("#463D3D", "#D2C4B2"),
-        ["Brume"] = ("#6E6262", "#A8998A"),
-        ["Brume2"] = ("#857979", "#8E8072"),
+        ["Blanc"] = ("#14161A", "#ECEEF1"),
+        ["Encre2"] = ("#3B4048", "#C3C8D0"),
+        ["Brume"] = ("#5F6670", "#9BA1AB"),
+        ["Brume2"] = ("#6B727D", "#8A909A"),
         // accent (1.5.0) : bordeaux #930000
-        ["Or"] = ("#930000", "#F07A6E"),
-        ["Or2"] = ("#6E0000", "#FF9D93"),
-        ["OrVif"] = ("#930000", "#D8463B"),
-        ["OrLeger"] = ("#FBEDED", "#2E1715"),
-        ["OrBord"] = ("#EBC4C4", "#5C2A25"),
+        ["Or"] = ("#2F6FEB", "#4C8DFF"),
+        ["Or2"] = ("#2459C9", "#7AABFF"),
+        ["OrVif"] = ("#2F6FEB", "#4C8DFF"),
+        ["OrLeger"] = ("#E8F0FE", "#16233A"),
+        ["OrBord"] = ("#BBD0FA", "#2A4370"),
         ["SurOr"] = ("#FFFFFF", "#FFFFFF"),
-        ["OrDegrade"] = ("#930000", "#930000"),
-        ["OrDegradeClair"] = ("#B01E1E", "#B3261E"),
+        ["OrDegrade"] = ("#2F6FEB", "#4C8DFF"),
+        ["OrDegradeClair"] = ("#2F6FEB", "#4C8DFF"),
         // bouton principal (Suivant, Importer…) : bordeaux #930000 dans les deux thèmes
-        ["Primaire"] = ("#930000", "#930000"),
-        ["PrimaireSurvol"] = ("#AD1616", "#B01818"),
-        ["SurPrimaire"] = ("#FFFFFF", "#FFFFFF"),
+        ["Primaire"] = ("#14161A", "#ECEEF1"),
+        ["PrimaireSurvol"] = ("#2B2F36", "#FFFFFF"),
+        ["SurPrimaire"] = ("#FFFFFF", "#0E0F11"),
         // ce qui vient avec Suivant (1.5.0) : or, à côté du rouge du direct
-        ["Ensuite"] = ("#D9981E", "#F2B33D"),
-        ["SurEnsuite"] = ("#241804", "#231804"),
+        ["Ensuite"] = ("#D98A00", "#F5A623"),
+        ["SurEnsuite"] = ("#1A1205", "#1A1205"),
         // MyStream (1.6.0) : l'écran envoyé sur Internet (Zoom, YouTube)
-        ["Stream"] = ("#4F46E5", "#9EA3FF"),
-        ["StreamLeger"] = ("#EEF0FF", "#1D1F3A"),
+        ["Stream"] = ("#4F46E5", "#8B93FF"),
+        ["StreamLeger"] = ("#EEF0FF", "#1B1D33"),
         // en direct, sourdine, erreurs
-        ["Rouge"] = ("#E0312B", "#FF4D40"),
-        ["Direct"] = ("#E0312B", "#FF4D40"),
-        ["RougeLeger"] = ("#FFF1F0", "#2D1614"),
-        ["RougeBord"] = ("#F6C4C0", "#6A2620"),
-        ["RougeTexte"] = ("#B3261E", "#FF8A7F"),
-        ["Danger"] = ("#B3261E", "#FF8A7F"),
+        ["Rouge"] = ("#DC3D43", "#E5484D"),
+        ["Direct"] = ("#DC3D43", "#E5484D"),
+        ["RougeLeger"] = ("#FFF0F0", "#2A1517"),
+        ["RougeBord"] = ("#F5C2C4", "#5C2326"),
+        ["RougeTexte"] = ("#C42B31", "#FF6369"),
+        ["Danger"] = ("#C42B31", "#FF6369"),
         // projection et moteur actifs
-        ["Vert"] = ("#15803D", "#4ADE80"),
-        ["VertLeger"] = ("#E8F6EE", "#12261A"),
+        ["Vert"] = ("#18794E", "#30A46C"),
+        ["VertLeger"] = ("#E9F7EF", "#11251A"),
         // types d'éléments du programme (icônes des lignes, groupes de vignettes)
-        ["TypeAccueil"] = ("#64748B", "#A3B1C6"),
-        ["TypeChant"] = ("#2563EB", "#7AA7FF"),
-        ["TypeLecture"] = ("#7C3AED", "#B794F6"),
-        ["TypeDisplay"] = ("#DB2777", "#F58FB6"),
-        ["TypeDuo"] = ("#0F766E", "#4FD1C5"),
-        ["TypePrincipal"] = ("#A16207", "#E3B762"),
+        ["TypeAccueil"] = ("#64748B", "#9BA1AB"),
+        ["TypeChant"] = ("#2F6FEB", "#6E9BFF"),
+        ["TypeLecture"] = ("#7C3AED", "#A78BFA"),
+        ["TypeDisplay"] = ("#C2417B", "#F07FB0"),
+        ["TypeDuo"] = ("#0F766E", "#3FC1B0"),
+        ["TypePrincipal"] = ("#A16207", "#E5B455"),
         // divers
-        ["BleuFonce"] = ("#152C91", "#9DB0FF"),
-        ["Marque"] = ("#FBE3E3", "#3A1F1C"),
+        ["BleuFonce"] = ("#1D3FA8", "#9DB0FF"),
+        ["Marque"] = ("#E8F0FE", "#1B2A45"),
         ["Surligne"] = ("#FFE9A8", "#4A3A12"),
-        ["TuileFond"] = ("#17130E", "#0E0C09"),
-        ["TuileSource"] = ("#2A241C", "#26211A"),
-        ["TuileTexte"] = ("#D9CFC0", "#A99F92"),
-        ["VuFond"] = ("#EEE7E7", "#2B241E"),
-        ["VuCrete"] = ("#F9DCDA", "#3F2427"),
-        ["DamierA"] = ("#F5F1F1", "#1C1814"),
-        ["DamierB"] = ("#E9E2E2", "#26201B"),
+        ["TuileFond"] = ("#111316", "#0B0C0E"),
+        ["TuileSource"] = ("#1E2126", "#1E2126"),
+        ["TuileTexte"] = ("#C3C8D0", "#9BA1AB"),
+        ["VuFond"] = ("#E6E9EE", "#1E2126"),
+        ["VuCrete"] = ("#FAD9DA", "#3A1F22"),
+        ["DamierA"] = ("#F1F3F6", "#16181C"),
+        ["DamierB"] = ("#E3E6EB", "#1E2126"),
     };
 
     public static Palette Actuelle { get; } = new();
