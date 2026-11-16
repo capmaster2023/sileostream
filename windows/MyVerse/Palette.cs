@@ -4,8 +4,8 @@ using System.Windows.Media;
 namespace MyVerse.Ui;
 
 /// <summary>
-/// Les couleurs de l'interface. Siloé Stream 2.0.1, design « régie pro » : graphite sombre par défaut, clair au choix (Réglages › Apparence ou barre de gauche).
-/// Couleurs de sens, jamais décoratives : rouge = à l'antenne, ambre = suivant, vert = prêt et niveaux, bleu = sélection.
+/// Les couleurs de l'interface. Siloé Stream 2.0.2, design « Conducteur » : sombre chaud par défaut, clair au choix (Réglages › Apparence ou barre de gauche).
+/// Couleurs de sens : or = À L'ÉCRAN (l'église), rouge = À L'ANTENNE (YouTube, Zoom, MyStream), bordeaux = ENVOYER À L'ANTENNE, vert = prêt.
 /// Chaque pinceau de Theme.xaml est lié à une couleur d'ici : changer de thème met à jour d'un coup toute l'interface,
 /// fenêtres ouvertes et éléments construits en C# compris (ils utilisent les mêmes pinceaux).
 /// Les noms viennent des versions précédentes : « Blanc » est le texte, « Encre » et « Nuit » le fond des cartes, « Or » l'accent.
@@ -16,67 +16,72 @@ public sealed class Palette : INotifyPropertyChanged
     static readonly Dictionary<string, (string Clair, string Sombre)> Couleurs = new()
     {
         // fonds (1.5.0 : blanc chaud en clair ; noyer très foncé en sombre)
-        ["Page"] = ("#F6F7F9", "#0E0F11"),
-        ["Rail"] = ("#EEF0F3", "#16181C"),
-        ["RailActif"] = ("#E1E6EE", "#23272E"),
-        ["Encre"] = ("#FFFFFF", "#16181C"),
-        ["Nuit"] = ("#FFFFFF", "#16181C"),
-        ["Nuit2"] = ("#F1F3F6", "#1E2126"),
-        ["Nuit3"] = ("#DDE1E7", "#2A2E35"),
-        ["Trait"] = ("#E6E9EE", "#23262C"),
-        ["Trait2"] = ("#C9CED6", "#3A3F48"),
+        ["Page"] = ("#FAF8F5", "#141011"),
+        ["Rail"] = ("#F2EEE9", "#1D1718"),
+        ["RailActif"] = ("#EAE3DC", "#2A2124"),
+        ["Encre"] = ("#FFFFFF", "#1D1718"),
+        ["Nuit"] = ("#FFFFFF", "#1D1718"),
+        ["Nuit2"] = ("#F5F1EC", "#271F21"),
+        ["Nuit3"] = ("#E3DCD4", "#382C2F"),
+        ["Trait"] = ("#ECE6DF", "#2C2325"),
+        ["Trait2"] = ("#D3CAC0", "#4A3F41"),
         // textes
-        ["Blanc"] = ("#14161A", "#ECEEF1"),
-        ["Encre2"] = ("#3B4048", "#C3C8D0"),
-        ["Brume"] = ("#5F6670", "#9BA1AB"),
-        ["Brume2"] = ("#6B727D", "#8A909A"),
+        ["Blanc"] = ("#1E1718", "#F4EDE4"),
+        ["Encre2"] = ("#463D3D", "#D9CFC6"),
+        ["Brume"] = ("#6B5F61", "#B5A8A0"),
+        ["Brume2"] = ("#7A6E70", "#8F8279"),
         // accent (1.5.0) : bordeaux #930000
-        ["Or"] = ("#2F6FEB", "#4C8DFF"),
-        ["Or2"] = ("#2459C9", "#7AABFF"),
-        ["OrVif"] = ("#2F6FEB", "#4C8DFF"),
-        ["OrLeger"] = ("#E8F0FE", "#16233A"),
-        ["OrBord"] = ("#BBD0FA", "#2A4370"),
-        ["SurOr"] = ("#FFFFFF", "#FFFFFF"),
-        ["OrDegrade"] = ("#2F6FEB", "#4C8DFF"),
-        ["OrDegradeClair"] = ("#2F6FEB", "#4C8DFF"),
+        ["Or"] = ("#9A6B0E", "#E3B04B"),
+        ["Or2"] = ("#7C560B", "#F0C870"),
+        ["OrVif"] = ("#B07A10", "#E3B04B"),
+        ["OrLeger"] = ("#FBF3E1", "#2E2414"),
+        ["OrBord"] = ("#E8D3A6", "#6B5320"),
+        ["SurOr"] = ("#FFFFFF", "#1A1205"),
+        ["OrDegrade"] = ("#9A6B0E", "#E3B04B"),
+        ["OrDegradeClair"] = ("#9A6B0E", "#E3B04B"),
         // bouton principal (Suivant, Importer…) : bordeaux #930000 dans les deux thèmes
-        ["Primaire"] = ("#14161A", "#ECEEF1"),
-        ["PrimaireSurvol"] = ("#2B2F36", "#FFFFFF"),
-        ["SurPrimaire"] = ("#FFFFFF", "#0E0F11"),
+        ["Primaire"] = ("#1E1718", "#F4EDE4"),
+        ["PrimaireSurvol"] = ("#3A3133", "#FFFFFF"),
+        ["SurPrimaire"] = ("#FFFFFF", "#141011"),
         // ce qui vient avec Suivant (1.5.0) : or, à côté du rouge du direct
-        ["Ensuite"] = ("#D98A00", "#F5A623"),
-        ["SurEnsuite"] = ("#1A1205", "#1A1205"),
+        ["Ensuite"] = ("#6B5F61", "#B5A8A0"),
+        ["SurEnsuite"] = ("#FFFFFF", "#141011"),
         // MyStream (1.6.0) : l'écran envoyé sur Internet (Zoom, YouTube)
-        ["Stream"] = ("#4F46E5", "#8B93FF"),
-        ["StreamLeger"] = ("#EEF0FF", "#1B1D33"),
+        ["Stream"] = ("#B3261E", "#FF8F8F"),
+        ["StreamLeger"] = ("#FBEDED", "#3A1A1C"),
         // en direct, sourdine, erreurs
-        ["Rouge"] = ("#DC3D43", "#E5484D"),
-        ["Direct"] = ("#DC3D43", "#E5484D"),
-        ["RougeLeger"] = ("#FFF0F0", "#2A1517"),
-        ["RougeBord"] = ("#F5C2C4", "#5C2326"),
-        ["RougeTexte"] = ("#C42B31", "#FF6369"),
-        ["Danger"] = ("#C42B31", "#FF6369"),
+        ["Rouge"] = ("#C42B31", "#D13B40"),
+        ["Direct"] = ("#C42B31", "#D13B40"),
+        ["RougeLeger"] = ("#FFF0F0", "#3A1A1C"),
+        ["RougeBord"] = ("#F5C2C4", "#6A2A2D"),
+        ["RougeTexte"] = ("#B3261E", "#FF8F8F"),
+        ["Danger"] = ("#B3261E", "#FF8F8F"),
         // projection et moteur actifs
-        ["Vert"] = ("#18794E", "#30A46C"),
-        ["VertLeger"] = ("#E9F7EF", "#11251A"),
+        ["Vert"] = ("#18794E", "#5BC98B"),
+        ["VertLeger"] = ("#E9F7EF", "#16271D"),
         // types d'éléments du programme (icônes des lignes, groupes de vignettes)
-        ["TypeAccueil"] = ("#64748B", "#9BA1AB"),
-        ["TypeChant"] = ("#2F6FEB", "#6E9BFF"),
-        ["TypeLecture"] = ("#7C3AED", "#A78BFA"),
-        ["TypeDisplay"] = ("#C2417B", "#F07FB0"),
-        ["TypeDuo"] = ("#0F766E", "#3FC1B0"),
-        ["TypePrincipal"] = ("#A16207", "#E5B455"),
+        ["TypeAccueil"] = ("#64748B", "#B5A8A0"),
+        ["TypeChant"] = ("#2F6FEB", "#8FB4FF"),
+        ["TypeLecture"] = ("#7C3AED", "#C9A6FF"),
+        ["TypeDisplay"] = ("#C2417B", "#F59BC0"),
+        ["TypeDuo"] = ("#0F766E", "#63D2C3"),
+        ["TypePrincipal"] = ("#A16207", "#E3B04B"),
         // divers
         ["BleuFonce"] = ("#1D3FA8", "#9DB0FF"),
-        ["Marque"] = ("#E8F0FE", "#1B2A45"),
+        ["Marque"] = ("#FBF3E1", "#3A2A16"),
         ["Surligne"] = ("#FFE9A8", "#4A3A12"),
-        ["TuileFond"] = ("#111316", "#0B0C0E"),
-        ["TuileSource"] = ("#1E2126", "#1E2126"),
-        ["TuileTexte"] = ("#C3C8D0", "#9BA1AB"),
-        ["VuFond"] = ("#E6E9EE", "#1E2126"),
+        ["TuileFond"] = ("#141011", "#0E0B0C"),
+        ["TuileSource"] = ("#271F21", "#271F21"),
+        ["TuileTexte"] = ("#D9CFC6", "#B5A8A0"),
+        ["VuFond"] = ("#ECE6DF", "#271F21"),
         ["VuCrete"] = ("#FAD9DA", "#3A1F22"),
-        ["DamierA"] = ("#F1F3F6", "#16181C"),
-        ["DamierB"] = ("#E3E6EB", "#1E2126"),
+        ["DamierA"] = ("#F5F1EC", "#1D1718"),
+        ["DamierB"] = ("#EAE3DC", "#271F21"),
+        // 2.0.2, design « Conducteur » : l'or pour ce qui est À L'ÉCRAN (l'église), le bordeaux pour ENVOYER À L'ANTENNE
+        ["Ecran"] = ("#B07A10", "#E3B04B"),
+        ["SurEcran"] = ("#FFFFFF", "#1A1205"),
+        ["Antenne"] = ("#930000", "#930000"),
+        ["SurAntenne"] = ("#FFFFFF", "#FFFFFF"),
     };
 
     public static Palette Actuelle { get; } = new();
@@ -169,4 +174,8 @@ public sealed class Palette : INotifyPropertyChanged
     public Color VuCrete => C(nameof(VuCrete));
     public Color DamierA => C(nameof(DamierA));
     public Color DamierB => C(nameof(DamierB));
+    public Color Ecran => C(nameof(Ecran));
+    public Color SurEcran => C(nameof(SurEcran));
+    public Color Antenne => C(nameof(Antenne));
+    public Color SurAntenne => C(nameof(SurAntenne));
 }

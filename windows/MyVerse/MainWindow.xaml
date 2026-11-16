@@ -64,7 +64,7 @@
         <DataTemplate x:Key="ModeleAgenda">
             <Border x:Name="Cadre" Background="Transparent" BorderBrush="Transparent" BorderThickness="1.5" CornerRadius="13">
                 <Grid>
-                    <Border x:Name="Barre" Width="4" HorizontalAlignment="Left" Margin="0,8" CornerRadius="2" Background="{StaticResource Direct}" Visibility="Collapsed" />
+                    <Border x:Name="Barre" Width="4" HorizontalAlignment="Left" Margin="0,8" CornerRadius="2" Background="{StaticResource Ecran}" Visibility="Collapsed" />
                     <Grid Margin="8,9,8,9">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="46" />
@@ -82,8 +82,8 @@
                             <TextBlock Text="{Binding Detail}" FontSize="12.5" Foreground="{StaticResource Brume}" TextTrimming="CharacterEllipsis" Margin="0,2,0,0" />
                         </StackPanel>
                         <StackPanel Grid.Column="3" VerticalAlignment="Center" HorizontalAlignment="Right">
-                            <Border x:Name="EnCours" Background="{StaticResource Direct}" CornerRadius="10" Padding="8,2,9,3" HorizontalAlignment="Right" Visibility="Collapsed">
-                                <TextBlock Text="En direct" FontSize="11" FontWeight="ExtraBold" Foreground="White" />
+                            <Border x:Name="EnCours" Background="{StaticResource Ecran}" CornerRadius="4" Padding="8,2,9,3" HorizontalAlignment="Right" Visibility="Collapsed">
+                                <TextBlock Text="À L'ÉCRAN" FontSize="11" FontWeight="ExtraBold" Foreground="{StaticResource SurEcran}" />
                             </Border>
                             <Border x:Name="Defaut" Background="{StaticResource OrLeger}" BorderBrush="{StaticResource OrBord}" BorderThickness="1" CornerRadius="10" Padding="8,1,8,2" Margin="0,4,0,0"
                                     HorizontalAlignment="Right" Visibility="Collapsed" ToolTip="Écran de repos : Effacer revient dessus">
@@ -487,7 +487,8 @@
             <Grid x:Name="Centre">
                 <!-- Culte : l'écran en direct en grand, puis toutes les diapositives du culte, groupées par élément du programme -->
                 <DockPanel x:Name="CentreAgenda" Visibility="Collapsed">
-                    <StackPanel x:Name="CulteLive" DockPanel.Dock="Top" Margin="26,20,26,16">
+                    <!-- 2.0.2 : l'écran en direct est À L'ÉCRAN, dans la colonne de droite ; le centre montre le conducteur (les diapositives du culte) -->
+                    <StackPanel x:Name="CulteLive" DockPanel.Dock="Top" Margin="26,20,26,16" Visibility="Collapsed">
                         <DockPanel Margin="0,0,0,12">
                             <TextBlock x:Name="CulteEnsuite" DockPanel.Dock="Right" Visibility="Collapsed" />
                             <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
@@ -520,10 +521,10 @@
                         </WrapPanel>
                     </StackPanel>
                     <Grid>
-                        <ScrollViewer x:Name="DefilVignettes" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Padding="24,0,10,24">
+                        <ScrollViewer x:Name="DefilVignettes" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Padding="24,18,10,24">
                             <StackPanel x:Name="Vignettes" />
                         </ScrollViewer>
-                        <TextBlock x:Name="VignettesVide" Margin="26,4,26,0" VerticalAlignment="Top" TextWrapping="Wrap" FontSize="15" LineHeight="26" Foreground="{StaticResource Brume}" IsHitTestVisible="False"
+                        <TextBlock x:Name="VignettesVide" Margin="26,22,26,0" VerticalAlignment="Top" TextWrapping="Wrap" FontSize="15" LineHeight="26" Foreground="{StaticResource Brume}" IsHitTestVisible="False"
                                    Text="1. « + Ajouter au programme » à gauche : un chant, un passage, un média ou le compte à rebours d'accueil.&#x0a;2. Ou cherche en haut (Ctrl K) : « wokovu 45 », « jean 3 16 »… puis Tab.&#x0a;3. Pendant le culte : un clic sur une image la montre ; le gros bouton Suivant (ou Espace) passe à la suivante." />
                     </Grid>
                 </DockPanel>
@@ -585,59 +586,69 @@
                 <StackPanel x:Name="Colonne" Margin="16,20,18,20">
                     <StackPanel x:Name="ControleHaut" Visibility="Collapsed" />
 
-                    <!-- 1.6.0 : les deux écrans : l'église (le projecteur) et MyStream (Zoom et YouTube) -->
+                    <!-- 2.0.2, design « Conducteur » : À L'ÉCRAN (l'église, le projecteur), ENVOYER À L'ANTENNE, puis À L'ANTENNE (MyStream : YouTube, Zoom).
+                         Chaque écran a sa source principale (le menu) et un bouton pour y revenir, qui n'agit que sur lui. -->
                     <StackPanel x:Name="Ecrans" Margin="0,0,0,18">
                         <DockPanel Margin="0,0,0,8">
                             <TextBlock x:Name="EgliseEtat" DockPanel.Dock="Right" FontSize="12.5" FontWeight="SemiBold" Foreground="{StaticResource Brume}" VerticalAlignment="Center"
-                                       Text="Aperçu seulement" TextTrimming="CharacterEllipsis" MaxWidth="150" />
-                            <TextBlock Text="Église" FontSize="15" FontWeight="Bold" Foreground="{StaticResource Blanc}" VerticalAlignment="Center" />
+                                       Text="Aperçu seulement" TextTrimming="CharacterEllipsis" MaxWidth="170" />
+                            <TextBlock Text="À L'ÉCRAN" FontSize="12.5" FontWeight="ExtraBold" Foreground="{StaticResource Ecran}" VerticalAlignment="Center" />
                         </DockPanel>
-                        <Border x:Name="EgliseApercu" BorderBrush="{StaticResource Direct}" BorderThickness="2.5" CornerRadius="10" Background="Black"
-                                ToolTip="Ce qu'on voit dans l'église (l'écran de projection)">
+                        <Border x:Name="EgliseApercu" BorderBrush="{StaticResource Ecran}" BorderThickness="2.5" CornerRadius="10" Background="Black"
+                                ToolTip="À L'ÉCRAN : ce qu'on voit dans l'église (l'écran de projection). Un clic dans le programme ou sur une diapositive l'y met.">
                             <Border CornerRadius="10" ClipToBounds="True">
                                 <Viewbox Stretch="Uniform">
                                     <local:Rendu x:Name="EgliseRendu" Width="1920" Height="1080" Transitions="False" Leger="True" IsHitTestVisible="False" />
                                 </Viewbox>
                             </Border>
                         </Border>
-                        <!-- 1.8.0 : l'église a aussi sa source principale (son écran par défaut) et un bouton pour y revenir -->
+                        <!-- la source principale de l'écran (son écran par défaut) et le bouton pour y revenir -->
                         <DockPanel Margin="0,10,0,0">
-                            <Button x:Name="EgliseChoisir" DockPanel.Dock="Right" Style="{StaticResource BtnPetit}" Content="Source" FontSize="12.5" Padding="10,0" Height="40" Margin="8,0,0,0"
-                                    ToolTip="Choisir la source principale de l'église : noir, fond seul, ou un média (caméra, image, vidéo, fenêtre)" />
-                            <Button x:Name="EgliseRetour" Style="{StaticResource BtnContour}" Height="40" Padding="0"
-                                    ToolTip="Touche Échap : l'église revient sur sa source principale">
+                            <Button x:Name="EgliseRetour" DockPanel.Dock="Right" Style="{StaticResource BtnContour}" Height="38" Padding="10,0" Margin="8,0,0,0"
+                                    ToolTip="Échap : l'écran revient sur sa source principale (l'antenne ne change pas)">
                                 <StackPanel Orientation="Horizontal">
-                                    <Path Data="{StaticResource IconeAnnuler}" Stroke="{StaticResource Direct}" StrokeThickness="2.2" StrokeLineJoin="Round" StrokeStartLineCap="Round" StrokeEndLineCap="Round"
-                                          Width="16" Height="16" Stretch="Uniform" VerticalAlignment="Center" Margin="0,0,8,0" />
-                                    <TextBlock Text="Source principale" FontSize="13.5" VerticalAlignment="Center" />
-                                    <Border Style="{StaticResource Touche}" Margin="8,0,0,0">
-                                        <TextBlock Text="Échap" FontFamily="{StaticResource Mono}" FontSize="11" FontWeight="SemiBold" Foreground="{StaticResource Brume}" />
-                                    </Border>
+                                    <Path Data="{StaticResource IconeAnnuler}" Stroke="{StaticResource Ecran}" StrokeThickness="2.2" StrokeLineJoin="Round" StrokeStartLineCap="Round" StrokeEndLineCap="Round"
+                                          Width="14" Height="14" Stretch="Uniform" VerticalAlignment="Center" Margin="0,0,7,0" />
+                                    <TextBlock Text="Revenir" FontSize="13" VerticalAlignment="Center" />
                                 </StackPanel>
+                            </Button>
+                            <TextBlock DockPanel.Dock="Left" Text="Source principale" FontSize="12.5" Foreground="{StaticResource Brume}" VerticalAlignment="Center" Margin="0,0,8,0" />
+                            <Button x:Name="EgliseChoisir" Style="{StaticResource BtnPetit}" Height="38" Padding="10,0" HorizontalContentAlignment="Stretch"
+                                    ToolTip="Choisir la source principale de l'écran : noir, fond seul, ou un média (caméra, image, vidéo, fenêtre)">
+                                <DockPanel>
+                                    <Path DockPanel.Dock="Right" Data="M0,0 L4,4 L8,0" Stroke="{StaticResource Brume}" StrokeThickness="1.6" StrokeStartLineCap="Round" StrokeEndLineCap="Round"
+                                          VerticalAlignment="Center" Margin="8,1,0,0" />
+                                    <TextBlock x:Name="EgliseSourceNom" Text="Noir" FontSize="13" TextTrimming="CharacterEllipsis" VerticalAlignment="Center" />
+                                </DockPanel>
                             </Button>
                         </DockPanel>
                         <TextBlock x:Name="EgliseInfo" FontSize="12" Foreground="{StaticResource Brume}" TextWrapping="Wrap" Margin="2,7,0,0" LineHeight="17" />
-                        <!-- 1.6.4 : ce que montre l'église part aussi sur MyStream (et le suit) jusqu'à « Source principale » -->
-                        <Button x:Name="EnvoyerStream" Style="{StaticResource BtnContour}" Height="40" Padding="0" Margin="0,10,0,0"
-                                ToolTip="Touche S : MyStream montre aussi ce que montre l'église (paroles, versets, images…) et le suit, jusqu'à « Source principale » (M)">
+
+                        <!-- ENVOYER À L'ANTENNE : ce qui est à l'écran part aussi sur MyStream (YouTube, Zoom) et le suit, jusqu'à « Revenir » de l'antenne -->
+                        <Button x:Name="EnvoyerStream" Style="{StaticResource BtnContour}" Height="60" Padding="12,0" Margin="0,14,0,0"
+                                Background="{StaticResource Antenne}" BorderBrush="{StaticResource Antenne}"
+                                ToolTip="Touche S : ce qui est À L'ÉCRAN part aussi à l'antenne (YouTube, Zoom, MyStream) et la suit, jusqu'à « Revenir » de l'antenne (M)">
                             <StackPanel Orientation="Horizontal">
-                                <Path x:Name="EnvoyerStreamIcone" Data="{StaticResource IconeEnvoyerStream}" Stroke="{StaticResource Stream}" StrokeThickness="2.2" StrokeLineJoin="Round"
-                                      StrokeStartLineCap="Round" StrokeEndLineCap="Round" Width="16" Height="16" Stretch="Uniform" VerticalAlignment="Center" Margin="0,0,8,0" />
-                                <TextBlock x:Name="EnvoyerStreamTexte" Text="Envoyer dans le stream" FontSize="13.5" VerticalAlignment="Center" />
-                                <Border Style="{StaticResource Touche}" Margin="8,0,0,0">
-                                    <TextBlock Text="S" FontFamily="{StaticResource Mono}" FontSize="11" FontWeight="SemiBold" Foreground="{StaticResource Brume}" />
+                                <Path x:Name="EnvoyerStreamIcone" Data="M12,4 V19 M6,13 L12,19 L18,13" Stroke="{StaticResource SurAntenne}" StrokeThickness="2.4" StrokeLineJoin="Round"
+                                      StrokeStartLineCap="Round" StrokeEndLineCap="Round" Width="18" Height="18" Stretch="Uniform" VerticalAlignment="Center" Margin="0,0,12,0" />
+                                <StackPanel VerticalAlignment="Center">
+                                    <TextBlock x:Name="EnvoyerStreamTexte" Text="ENVOYER À L'ANTENNE" FontSize="14.5" FontWeight="ExtraBold" Foreground="{StaticResource SurAntenne}" />
+                                    <TextBlock x:Name="EnvoyerStreamSous" Text="YouTube · Zoom · MyStream" FontSize="11.5" FontWeight="SemiBold" Foreground="{StaticResource SurAntenne}" Opacity="0.85" />
+                                </StackPanel>
+                                <Border x:Name="EnvoyerStreamTouche" BorderBrush="{StaticResource SurAntenne}" BorderThickness="1" CornerRadius="4" Padding="7,1,7,2" Margin="14,0,0,0" VerticalAlignment="Center">
+                                    <TextBlock x:Name="EnvoyerStreamToucheTexte" Text="S" FontFamily="{StaticResource Mono}" FontSize="11" FontWeight="SemiBold" Foreground="{StaticResource SurAntenne}" />
                                 </Border>
                             </StackPanel>
                         </Button>
 
                         <DockPanel Margin="0,16,0,8">
-                            <Border x:Name="StreamPastille" DockPanel.Dock="Right" CornerRadius="10" Padding="9,3,10,4" Background="{StaticResource StreamLeger}" VerticalAlignment="Center">
-                                <TextBlock x:Name="StreamPastilleTexte" FontSize="11.5" FontWeight="Bold" Foreground="{StaticResource Stream}" Text="Zoom · YouTube" />
+                            <Border x:Name="StreamPastille" DockPanel.Dock="Right" CornerRadius="6" Padding="9,3,10,4" Background="{StaticResource StreamLeger}" VerticalAlignment="Center">
+                                <TextBlock x:Name="StreamPastilleTexte" FontSize="11.5" FontWeight="Bold" Foreground="{StaticResource Stream}" Text="YouTube · Zoom · MyStream" />
                             </Border>
-                            <TextBlock Text="MyStream" FontSize="15" FontWeight="Bold" Foreground="{StaticResource Blanc}" VerticalAlignment="Center" />
+                            <TextBlock Text="À L'ANTENNE" FontSize="12.5" FontWeight="ExtraBold" Foreground="{StaticResource RougeTexte}" VerticalAlignment="Center" />
                         </DockPanel>
-                        <Border x:Name="StreamApercu" BorderBrush="{StaticResource Stream}" BorderThickness="2.5" CornerRadius="10" Background="Black"
-                                ToolTip="Ce qui part sur Zoom et sur YouTube">
+                        <Border x:Name="StreamApercu" BorderBrush="{StaticResource Direct}" BorderThickness="2.5" CornerRadius="10" Background="Black"
+                                ToolTip="À L'ANTENNE : ce qui part sur YouTube, Zoom et MyStream">
                             <Border CornerRadius="10" ClipToBounds="True">
                                 <Viewbox Stretch="Uniform">
                                     <local:Rendu x:Name="StreamRendu" Width="1920" Height="1080" Transitions="False" Leger="True" IsHitTestVisible="False" />
@@ -645,25 +656,30 @@
                             </Border>
                         </Border>
                         <DockPanel Margin="0,10,0,0">
-                            <Button x:Name="StreamChoisir" DockPanel.Dock="Right" Style="{StaticResource BtnPetit}" Content="Source" FontSize="12.5" Padding="10,0" Height="40" Margin="8,0,0,0"
-                                    ToolTip="Choisir ce que montre MyStream : sa source principale (caméra, MyCam, image, vidéo, fenêtre)" />
-                            <Button x:Name="StreamRetour" Style="{StaticResource BtnContour}" Height="40" Padding="0"
-                                    ToolTip="Touche M : MyStream revient sur sa source principale et ne suit plus l'église ; l'église garde ce qu'elle montre">
+                            <Button x:Name="StreamRetour" DockPanel.Dock="Right" Style="{StaticResource BtnContour}" Height="38" Padding="10,0" Margin="8,0,0,0"
+                                    ToolTip="Touche M : l'antenne revient sur sa source principale et ne suit plus l'écran (l'écran de l'église ne change pas)">
                                 <StackPanel Orientation="Horizontal">
-                                    <Path Data="{StaticResource IconeAnnuler}" Stroke="{StaticResource Stream}" StrokeThickness="2.2" StrokeLineJoin="Round" StrokeStartLineCap="Round" StrokeEndLineCap="Round"
-                                          Width="16" Height="16" Stretch="Uniform" VerticalAlignment="Center" Margin="0,0,8,0" />
-                                    <TextBlock Text="Source principale" FontSize="13.5" VerticalAlignment="Center" />
-                                    <Border Style="{StaticResource Touche}" Margin="8,0,0,0">
-                                        <TextBlock Text="M" FontFamily="{StaticResource Mono}" FontSize="11" FontWeight="SemiBold" Foreground="{StaticResource Brume}" />
-                                    </Border>
+                                    <Path Data="{StaticResource IconeAnnuler}" Stroke="{StaticResource RougeTexte}" StrokeThickness="2.2" StrokeLineJoin="Round" StrokeStartLineCap="Round" StrokeEndLineCap="Round"
+                                          Width="14" Height="14" Stretch="Uniform" VerticalAlignment="Center" Margin="0,0,7,0" />
+                                    <TextBlock Text="Revenir" FontSize="13" VerticalAlignment="Center" />
                                 </StackPanel>
+                            </Button>
+                            <TextBlock DockPanel.Dock="Left" Text="Source principale" FontSize="12.5" Foreground="{StaticResource Brume}" VerticalAlignment="Center" Margin="0,0,8,0" />
+                            <Button x:Name="StreamChoisir" Style="{StaticResource BtnPetit}" Height="38" Padding="10,0" HorizontalContentAlignment="Stretch"
+                                    ToolTip="Choisir la source principale de l'antenne (caméra, MyCam, image, vidéo, fenêtre)">
+                                <DockPanel>
+                                    <Path DockPanel.Dock="Right" Data="M0,0 L4,4 L8,0" Stroke="{StaticResource Brume}" StrokeThickness="1.6" StrokeStartLineCap="Round" StrokeEndLineCap="Round"
+                                          VerticalAlignment="Center" Margin="8,1,0,0" />
+                                    <TextBlock x:Name="StreamSourceNom" Text="Aucune" FontSize="13" TextTrimming="CharacterEllipsis" VerticalAlignment="Center" />
+                                </DockPanel>
                             </Button>
                         </DockPanel>
                         <TextBlock x:Name="StreamInfo" FontSize="12" Foreground="{StaticResource Brume}" TextWrapping="Wrap" Margin="2,7,0,0" LineHeight="17"
-                                   Text="Pas de source principale : MyStream montre comme l'église." />
+                                   Text="Pas de source principale : l'antenne montre comme l'écran." />
                     </StackPanel>
 
-                    <DockPanel Margin="0,0,0,12">
+                    <!-- 2.0.2 : plus de zone « Ensuite » séparée (ce qui est choisi va À L'ÉCRAN) ; Suivant dit ce qui vient, en bas -->
+                    <DockPanel Margin="0,0,0,12" Visibility="Collapsed">
                         <Button x:Name="Decouper" DockPanel.Dock="Right" Style="{StaticResource BtnPetit}" Content="Découper" FontSize="12" Padding="9,4" IsEnabled="False" VerticalAlignment="Center"
                                 ToolTip="Couper la diapositive qui vient en plusieurs (Entrée devant une ligne)" />
                         <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
@@ -674,14 +690,14 @@
                                        VerticalAlignment="Center" Margin="10,0,0,0" Text="—" />
                         </StackPanel>
                     </DockPanel>
-                    <Border x:Name="SuivantApercu" BorderBrush="{StaticResource Ensuite}" BorderThickness="2.5" CornerRadius="10" Background="{StaticResource Damier}" ToolTip="La diapositive qui vient avec Suivant">
+                    <Border x:Name="SuivantApercu" Visibility="Collapsed" BorderBrush="{StaticResource Ensuite}" BorderThickness="2.5" CornerRadius="10" Background="{StaticResource Damier}" ToolTip="La diapositive qui vient avec Suivant">
                         <Border CornerRadius="10" ClipToBounds="True">
                             <Viewbox Stretch="Uniform">
                                 <local:Rendu x:Name="SuivantRendu" Width="1920" Height="1080" Transitions="False" Leger="True" IsHitTestVisible="False" />
                             </Viewbox>
                         </Border>
                     </Border>
-                    <TextBlock x:Name="SuivantTexte" FontSize="12.5" Foreground="{StaticResource Brume}" TextWrapping="Wrap" Margin="2,6,0,0" />
+                    <TextBlock x:Name="SuivantTexte" Visibility="Collapsed" FontSize="12.5" Foreground="{StaticResource Brume}" TextWrapping="Wrap" Margin="2,6,0,0" />
 
                     <Button x:Name="Afficher" Style="{StaticResource BtnContour}" Height="48" Padding="0" Margin="0,14,0,0" ToolTip="Entrée : montrer ce qui est choisi">
                         <StackPanel Orientation="Horizontal">
@@ -811,8 +827,10 @@
                     </Button>
                     <Button x:Name="Suiv" Style="{StaticResource BtnSuivant}" Margin="14,0,0,0" ToolTip="Suivant (flèche droite ou Espace)">
                         <StackPanel Orientation="Horizontal">
-                            <TextBlock Text="Suivant" VerticalAlignment="Center" />
+                            <TextBlock Text="SUIVANT" VerticalAlignment="Center" />
                             <Path Data="M0,0 L10,7 L0,14 Z" Fill="{StaticResource SurPrimaire}" VerticalAlignment="Center" Margin="12,1,0,0" />
+                            <!-- 2.0.2 : ce qui vient avec Suivant (« Jean 3:17 ») -->
+                            <TextBlock x:Name="SuivProchain" FontSize="14" FontWeight="SemiBold" Opacity="0.72" VerticalAlignment="Center" Margin="14,0,0,0" MaxWidth="260" TextTrimming="CharacterEllipsis" />
                             <Border BorderBrush="{StaticResource Brume2}" BorderThickness="1" CornerRadius="6" Padding="7,1,7,2" Margin="16,2,0,0" VerticalAlignment="Center">
                                 <TextBlock Text="Espace" FontSize="11.5" FontWeight="Bold" Foreground="{StaticResource SurPrimaire}" />
                             </Border>

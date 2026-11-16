@@ -235,13 +235,13 @@ public partial class MainWindow
         {
             bool live = pos is int q && v.Element == cur && v.Index == q;
             bool next = !live && suivante is { } s && v.Element == s.E && v.Index == s.I;
-            v.Anneau.BorderBrush = live ? Pinceau("Direct") : next ? Pinceau("Ensuite") : Brushes.Transparent;
+            v.Anneau.BorderBrush = live ? Pinceau("Ecran") : next ? Pinceau("Ensuite") : Brushes.Transparent;
             v.Badge.Visibility = live || next ? Visibility.Visible : Visibility.Collapsed;
             if (live || next)
             {
-                v.Badge.Background = Pinceau(live ? "Direct" : "Ensuite");
+                v.Badge.Background = Pinceau(live ? "Ecran" : "Ensuite");
                 v.BadgeTexte.Text = live ? (noir ? "Écran noir" : "À l'écran") : "Ensuite";
-                v.BadgeTexte.Foreground = live ? Brushes.White : Pinceau("SurEnsuite");
+                v.BadgeTexte.Foreground = Pinceau(live ? "SurEcran" : "SurEnsuite");
             }
             if (live) directe = v;
         }
@@ -291,6 +291,8 @@ public partial class MainWindow
     {
         var s = R.Prochaine();
         SuivantLab.Text = s?.Label ?? "—";
+        // 2.0.2 : le gros bouton Suivant dit ce qui vient
+        SuivProchain.Text = s?.Label ?? "";
         SuivantLab.ToolTip = s?.Label;
         SuivantTexte.Text = s == null ? "Rien après." : "";
         SuivantApercu.ToolTip = s != null && s.Texte.Length > 0 ? s.Label + " : " + s.Texte.Replace("\r", "").Replace("\n", " ") : "La diapositive qui vient avec Suivant";
@@ -307,7 +309,7 @@ public partial class MainWindow
     // ------------------------------------------------------------ pour le test automatique
     public int TestVignettes => vignettes.Count;
     /// <summary>« Jean 3:16 · À l'écran » : la vignette en direct (vide s'il n'y en a pas).</summary>
-    public string TestVignetteDirecte => vignettes.FirstOrDefault(v => v.Badge.Visibility == Visibility.Visible && v.Badge.Background == Pinceau("Direct")) is { } v
+    public string TestVignetteDirecte => vignettes.FirstOrDefault(v => v.Badge.Visibility == Visibility.Visible && v.Badge.Background == Pinceau("Ecran")) is { } v
         ? NomDiapo(v.Element, R.Diapos(v.Element)[v.Index]) + " · " + v.BadgeTexte.Text : "";
     public string TestVignetteSuivante => vignettes.FirstOrDefault(v => v.Badge.Visibility == Visibility.Visible && v.BadgeTexte.Text == "Ensuite") is { } v
         ? NomDiapo(v.Element, R.Diapos(v.Element)[v.Index]) : "";

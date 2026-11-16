@@ -1,6 +1,6 @@
-# Siloé Stream 2.0.1
+# Siloé Stream 2.0.2
 
-Design « régie pro » (2.0.1) : fond graphite, couleurs de sens (rouge = à l'antenne, ambre = suivant, vert = prêt, bleu = sélection), thème sombre par défaut, clair au choix. Les couleurs sont dans `windows/MyVerse/Palette.cs`.
+Design « Conducteur » (2.0.2) : **À L'ÉCRAN** (l'église, en or), **ENVOYER À L'ANTENNE** (touche S), **À L'ANTENNE** (YouTube, Zoom, MyStream, en rouge) ; chaque écran a sa source principale et son bouton **Revenir** (Échap pour l'écran, M pour l'antenne). Thème sombre chaud par défaut, clair au choix. Les couleurs sont dans `windows/MyVerse/Palette.cs`.
 
 Logiciel Windows autonome de projection pour l'église, avec télécommande Android. Bible, chants et sources Display partent directement sur l'écran choisi dans **Projection**. Le son passe par le moteur audio d'OBS Studio (libobs), dans une page **Son** faite pour être comprise par tout le monde.
 

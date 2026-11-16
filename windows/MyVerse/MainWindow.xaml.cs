@@ -1037,7 +1037,7 @@ public partial class MainWindow : Window
         ImagesDuo();
         App.SortieObs.Ecrire(diffusion);
         bool rien = e.Vide && e.Duo == null;
-        Apercu.BorderBrush = Pinceau(rien ? "Nuit3" : "Direct");
+        Apercu.BorderBrush = Pinceau(rien ? "Nuit3" : "Ecran");
         Apercu.Background = rien || e.Theme == "transparent" ? Pinceau("Damier") : Brushes.Black;
         // écran noir : le bouton « Noir » s'inverse
         if (noir) { NoirBtn.Background = Pinceau("Blanc"); NoirBtn.Foreground = Pinceau("Page"); NoirBtn.BorderBrush = Pinceau("Blanc"); }

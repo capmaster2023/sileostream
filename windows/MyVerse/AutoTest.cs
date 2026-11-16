@@ -580,7 +580,7 @@ public static class AutoTest
         // « Envoyer dans le stream » (touche S) : le verset part sur MyStream, et la suite aussi
         w.TestEnvoyerStream();
         await Attendre(1500);
-        Ok(R.StreamSuitEglise && w.TestEtatStream.Mode == "verset" && w.TestEnvoyerTexte == "MyStream suit l'église",
+        Ok(R.StreamSuitEglise && w.TestEtatStream.Mode == "verset" && w.TestEnvoyerTexte == "L'ANTENNE SUIT L'ÉCRAN",
             $"1.6.4 : « Envoyer dans le stream » : le verset part sur MyStream (« {w.TestEnvoyerTexte} »)");
         if (App.CameraVirtuelle != null)
         {
@@ -594,7 +594,7 @@ public static class AutoTest
         // « Source principale » (touche M) : MyStream revient sur la caméra, l'église garde le verset
         w.TestRetourStream();
         await Attendre(800);
-        Ok(R.StreamSurPrincipale && w.TestEtatStream is { Mode: "media" } && R.Etat.Mode == "verset" && w.TestEnvoyerTexte == "Envoyer dans le stream",
+        Ok(R.StreamSurPrincipale && w.TestEtatStream is { Mode: "media" } && R.Etat.Mode == "verset" && w.TestEnvoyerTexte == "ENVOYER À L'ANTENNE",
             "1.6.4 : « Source principale » : MyStream revient sur la caméra, l'église garde le verset");
         R.Bouger(1);
         await Attendre(800);

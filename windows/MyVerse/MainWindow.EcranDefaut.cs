@@ -53,7 +53,7 @@ public partial class MainWindow
     void MajCulteLive(EtatEcran e, Suivante? s)
     {
         CulteRendu.Afficher(e);
-        CulteApercu.BorderBrush = Pinceau(e.Vide && e.Duo == null ? "Nuit3" : "Direct");
+        CulteApercu.BorderBrush = Pinceau(e.Vide && e.Duo == null ? "Nuit3" : "Ecran");
         var a = AEcran(e);
         CulteAEcran.Text = a.Length > 0 ? char.ToUpperInvariant(a[0]) + a[1..] : "";
         CulteEnsuite.Text = "Ensuite : " + (s?.Label ?? "rien");

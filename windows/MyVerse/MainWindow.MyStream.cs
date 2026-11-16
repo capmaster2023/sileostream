@@ -85,9 +85,11 @@ public partial class MainWindow
     /// <summary>1.8.0 : sous l'église, sa source principale ; les boutons « Église » / « Stream » des tuiles s'allument.</summary>
     void MajInfoEglise()
     {
+        // 2.0.2 : le menu de l'écran montre le nom de sa source principale
+        EgliseSourceNom.Text = R.LibelleEcranDefaut;
         EgliseInfo.Text = R.Cible is CibleDefaut
-            ? $"L'église montre sa source principale : {R.LibelleEcranDefaut}."
-            : $"Source principale de l'église : {R.LibelleEcranDefaut} (Échap pour y revenir).";
+            ? $"L'écran montre sa source principale : {R.LibelleEcranDefaut}."
+            : "Échap ou « Revenir » : l'écran revient sur sa source principale.";
         MajBoutonsTuiles();
     }
 
@@ -147,46 +149,52 @@ public partial class MainWindow
         bool suit = R.StreamSuitEglise;
         StreamRetour.IsEnabled = p != null || suit;
         EnvoyerStream.IsEnabled = true;
-        string retour = p != null ? "revenir sur " + p.Titre : "arrêter (MyStream noir)";
+        string retour = p != null ? "revenir sur " + p.Titre : "arrêter (antenne noire)";
+        // 2.0.2 : le menu de l'antenne montre le nom de sa source principale
+        StreamSourceNom.Text = p != null ? p.Titre : "Aucune (noir)";
+        // 2.0.2, design « Conducteur » : « ENVOYER À L'ANTENNE » en bordeaux ; quand l'antenne suit l'écran, le bouton le dit (un clic ou M : l'antenne revient)
+        var texte = Pinceau(suit ? "RougeTexte" : "SurAntenne");
         if (suit)
         {
-            EnvoyerStream.Background = Pinceau("StreamLeger");
-            EnvoyerStream.BorderBrush = Pinceau("Stream");
-            EnvoyerStreamTexte.Text = "MyStream suit l'église";
-            EnvoyerStreamTexte.Foreground = Pinceau("Stream");
-            EnvoyerStream.ToolTip = "MyStream montre ce que montre l'église et la suit. Cliquez ici (ou M) pour " + retour + ".";
-            StreamRetour.BorderBrush = Pinceau("Stream");
+            EnvoyerStream.Background = Pinceau("RougeLeger");
+            EnvoyerStream.BorderBrush = Pinceau("Antenne");
+            EnvoyerStreamTexte.Text = "L'ANTENNE SUIT L'ÉCRAN";
+            EnvoyerStreamSous.Text = "Un clic (ou M) : " + retour;
+            EnvoyerStream.ToolTip = "L'antenne (YouTube, Zoom, MyStream) montre ce qui est à l'écran et le suit. Cliquez ici (ou M) pour " + retour + ".";
+            StreamRetour.BorderBrush = Pinceau("Direct");
         }
         else
         {
-            EnvoyerStream.ClearValue(BackgroundProperty);
-            EnvoyerStream.ClearValue(BorderBrushProperty);
-            EnvoyerStreamTexte.Text = "Envoyer dans le stream";
-            EnvoyerStreamTexte.ClearValue(TextBlock.ForegroundProperty);
-            EnvoyerStream.ToolTip = "Touche S : MyStream montre aussi ce que montre l'église (paroles, versets, images…) et le suit, jusqu'à « Source principale » (M)";
+            EnvoyerStream.Background = Pinceau("Antenne");
+            EnvoyerStream.BorderBrush = Pinceau("Antenne");
+            EnvoyerStreamTexte.Text = "ENVOYER À L'ANTENNE";
+            EnvoyerStreamSous.Text = "YouTube · Zoom · MyStream";
+            EnvoyerStream.ToolTip = "Touche S : ce qui est À L'ÉCRAN part aussi à l'antenne (YouTube, Zoom, MyStream) et la suit, jusqu'à « Revenir » de l'antenne (M)";
             StreamRetour.ClearValue(BorderBrushProperty);
         }
+        EnvoyerStreamTexte.Foreground = EnvoyerStreamSous.Foreground = EnvoyerStreamToucheTexte.Foreground = texte;
+        EnvoyerStreamIcone.Stroke = EnvoyerStreamTouche.BorderBrush = texte;
         if (suit)
         {
-            StreamInfo.Text = $"MyStream suit l'église : ce qu'elle montre part sur Zoom et YouTube. Re-cliquez « MyStream suit l'église » (ou M) : {retour}.";
+            StreamInfo.Text = $"L'antenne suit l'écran : ce qu'il montre part sur YouTube, Zoom et MyStream. Un clic sur le bouton (ou M) : {retour}.";
             return;
         }
         if (p == null)
         {
             // 1.6.6 : rien de choisi pour Internet : MyStream reste noir (les paroles et les versets restent dans l'église)
             StreamInfo.Text = etatStream is { Mode: "media", Media: not null }
-                ? "MyStream montre une source « MyStream seulement ». Sans source principale, il est noir le reste du temps."
+                ? "L'antenne montre une source « MyStream seulement ». Sans source principale, elle est noire le reste du temps."
                 : R.AucuneSourceStream
-                    ? "Aucune source : MyStream reste noir. « Source » pour en choisir une, ou « Envoyer dans le stream »."
+                    ? "Aucune source : l'antenne reste noire. Choisissez sa source principale, ou « ENVOYER À L'ANTENNE »."
                     : R.SourcesStreamPossibles.Count == 0
-                        ? "Pas de source : MyStream reste noir. Ajoutez une caméra (Bibliothèque › Médias) : montrée, elle devient sa source principale."
-                        : "Pas de source principale : MyStream reste noir. Montrez une caméra (elle le devient), ou « Source ».";
+                        ? "Pas de source : l'antenne reste noire. Ajoutez une caméra (Bibliothèque › Médias) : montrée, elle devient sa source principale."
+                        : "Pas de source principale : l'antenne reste noire. Montrez une caméra (elle le devient), ou choisissez sa source principale.";
             return;
         }
         string statut = App.SourcesStream.Statut is { Length: > 0 } s && App.SourcesStream.Image == null ? " (" + s.TrimEnd('.') + ")" : "";
         StreamInfo.Text = etatStream is { Mode: "media" } e && e.Media != null && e.Media != p.Source
-            ? $"MyStream montre une source « MyStream seulement ». Source principale : {p.Titre}{statut}."
-            : $"MyStream montre {p.Titre}{statut}, quoi que montre l'église.";
+            ? $"L'antenne montre une source « MyStream seulement ». Source principale : {p.Titre}{statut}."
+            : $"L'antenne montre {p.Titre}{statut}, quoi que montre l'écran.";
     }
 
     /// <summary>

@@ -123,14 +123,14 @@ public partial class MainWindow
                 BarreProgres.Children.Add(new Border
                 {
                     Width = 20, Height = 4, CornerRadius = new CornerRadius(2), Margin = new Thickness(0, 0, 4, 0),
-                    Background = Pinceau(i <= k ? "Direct" : "Nuit3"),
+                    Background = Pinceau(i <= k ? "Ecran" : "Nuit3"),
                 });
         }
         else
         {
             var fond = new Grid { Width = 160, Height = 4 };
             fond.Children.Add(new Border { CornerRadius = new CornerRadius(2), Background = Pinceau("Nuit3") });
-            fond.Children.Add(new Border { CornerRadius = new CornerRadius(2), Background = Pinceau("Direct"), HorizontalAlignment = HorizontalAlignment.Left, Width = 160.0 * (k + 1) / n });
+            fond.Children.Add(new Border { CornerRadius = new CornerRadius(2), Background = Pinceau("Ecran"), HorizontalAlignment = HorizontalAlignment.Left, Width = 160.0 * (k + 1) / n });
             BarreProgres.Children.Add(fond);
         }
     }
