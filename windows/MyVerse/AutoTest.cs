@@ -870,6 +870,11 @@ public static class AutoTest
             App.Donnees.Reglages.Obs.Actif = false;
             w.TestOngletAnnonces();
             Ok(w.TestMenuSources(), "Display : menu déroulant d'ajout et commandes accessibles");
+            // 2.1.0 : « Commencer le culte » : le projecteur, YouTube, le son et les caméras sont vérifiés (sans rien lancer ici)
+            var verifs = w.TestVerifierCulte;
+            Note("2.1.0 : vérifications : " + verifs);
+            Ok(verifs.StartsWith("Projecteur:") && verifs.Contains("|YouTube:") && verifs.Contains("|Son:") && verifs.Contains("|Caméras:") && w.TestCommencerTexte == "Commencer le culte",
+                "2.1.0 : Commencer le culte vérifie le projecteur, YouTube, le son et les caméras");
             Capture(w, "00b-display-menu.png");
             w.TestOnglet(true);
             await Attendre(400);

@@ -12,6 +12,7 @@ public partial class MainWindow
     void InitDisplay()
     {
         DisplayAjouter.Click += (_, _) => Ouvrir(MenuAjouterSource(), DisplayAjouter, PlacementMode.Bottom);
+        DisplayPeripherique.Click += (_, _) => Ouvrir(MenuAjouterPeripherique(), DisplayPeripherique, PlacementMode.Bottom);
         DisplayReconnecter.Click += (_, _) => ReconnecterSources();
         ListeAnnonces.MouseDoubleClick += Display_DoubleClick;
         ListeChants.MouseDoubleClick += (_, e) =>
@@ -57,11 +58,7 @@ public partial class MainWindow
         menu.Items.Add(Article("Nouveau texte", AjouterTexteDisplay));
         menu.Items.Add(Article("Images", AjouterImage));
         menu.Items.Add(Article("Vidéos avec audio intégré", AjouterVideo));
-        menu.Items.Add(Article("Périphérique de capture vidéo", AjouterCamera));
-        // 2.0.3 : MyVirtualCam, caméra officielle de Siloé Stream (l'image de MyStream), juste à côté des autres caméras
-        menu.Items.Add(Article("MyVirtualCam (l'image de MyStream)", () => AjouterMyVirtualCam(null)));
-        menu.Items.Add(Article("Téléphone MyCam (caméra Android)", AjouterMyCam));
-        menu.Items.Add(Article("Caméra Sony par Wi-Fi (sans câble)", AjouterCameraWifi));
+        // 2.1.0 : les caméras ont leur propre bouton, juste en dessous (« + Ajouter un périphérique vidéo »)
         menu.Items.Add(Article("Capture de fenêtre", AjouterFenetre));
         // les dossiers de l'onglet Duo : un clic les met dans la bibliothèque et dans la grille
         var duos = R.Duos.ToList();
@@ -77,6 +74,37 @@ public partial class MainWindow
             }));
         }
         return menu;
+    }
+
+    /// <summary>
+    /// 2.1.0 : « + Ajouter un périphérique vidéo », à part des médias : MyVirtualCam d'abord (la caméra officielle de Siloé Stream,
+    /// comme l'OBS Virtual Camera), puis chaque webcam ou carte de capture branchée (un clic l'ajoute), le téléphone MyCam et la caméra Sony.
+    /// </summary>
+    ContextMenu MenuAjouterPeripherique()
+    {
+        var menu = new ContextMenu();
+        menu.Items.Add(Article("MyVirtualCam (l'image de MyStream)", () => AjouterMyVirtualCam(null), true));
+        List<SourcesDisplay.Peripherique> devices;
+        try { devices = SourcesDisplay.Peripheriques(); }
+        catch (Exception ex) { Journal.Erreur("périphériques vidéo", ex); devices = new(); }
+        menu.Items.Add(new Separator());
+        if (devices.Count == 0) menu.Items.Add(new MenuItem { Header = "(aucune webcam ni carte de capture branchée)", IsEnabled = false });
+        foreach (var d in devices)
+        {
+            var dev = d;
+            menu.Items.Add(Article(dev.Nom, () => AjouterPeripherique(dev)));
+        }
+        menu.Items.Add(new Separator());
+        menu.Items.Add(Article("Téléphone MyCam (caméra Android)", AjouterMyCam));
+        menu.Items.Add(Article("Caméra Sony par Wi-Fi (sans câble)", AjouterCameraWifi));
+        return menu;
+    }
+
+    /// <summary>2.1.0 : une webcam ou une carte de capture choisie dans le menu des périphériques : un média, comme avant.</summary>
+    void AjouterPeripherique(SourcesDisplay.Peripherique d)
+    {
+        try { ChoisirDisplay(R.NouveauDisplay(d.Nom, new SourceDisplay { Type = "camera", Peripherique = d.Id })); }
+        catch (Exception ex) { Toast("Périphérique inaccessible : " + ex.Message); }
     }
 
     void AjouterTexteDisplay()
@@ -405,10 +433,13 @@ public partial class MainWindow
         var menu = MenuAjouterSource();
         var commandes = menu.Items.OfType<MenuItem>().ToList();
         Ouvrir(menu, DisplayAjouter, PlacementMode.Bottom);
-        bool ok = menu.IsOpen && commandes.Count == 8 + R.Duos.Count && commandes.Any(c => c.Header?.ToString() == "Caméra Sony par Wi-Fi (sans câble)") && commandes[0].Header?.ToString() == "Nouveau texte"
-            // 2.0.3 : MyVirtualCam juste après « Périphérique de capture vidéo »
-            && commandes.FindIndex(c => c.Header?.ToString() == "MyVirtualCam (l'image de MyStream)") == commandes.FindIndex(c => c.Header?.ToString() == "Périphérique de capture vidéo") + 1;
+        // 2.1.0 : les médias seulement (texte, images, vidéos, fenêtre, Duo) ; les caméras ont leur bouton
+        bool ok = menu.IsOpen && commandes.Count == 4 + R.Duos.Count && commandes[0].Header?.ToString() == "Nouveau texte"
+            && !commandes.Any(c => c.Header?.ToString() is "Caméra Sony par Wi-Fi (sans câble)" or "MyVirtualCam (l'image de MyStream)");
         menu.IsOpen = false;
+        var cameras = MenuAjouterPeripherique().Items.OfType<MenuItem>().ToList();
+        ok &= cameras.Count >= 3 && cameras[0].Header?.ToString() == "MyVirtualCam (l'image de MyStream)"
+            && cameras.Any(c => c.Header?.ToString() == "Téléphone MyCam (caméra Android)") && cameras.Any(c => c.Header?.ToString() == "Caméra Sony par Wi-Fi (sans câble)");
         return ok;
     }
 

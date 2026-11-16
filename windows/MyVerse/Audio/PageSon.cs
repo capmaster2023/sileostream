@@ -190,6 +190,25 @@ internal static class ActionsSon
 
     /// <summary>Le dossier où vont les fichiers d'un enregistrement.</summary>
     public static string Dossier(RecordingProfile? p) => p != null && p.Directory.Length > 0 ? p.Directory : AudioConfiguration.DossierEnregistrements;
+
+    /// <summary>
+    /// 2.1.0 : le dossier des enregistrements par défaut, choisi dans Réglages › Son (celui de « Commencer le culte »). Les
+    /// enregistrements qui étaient dans l'ancien dossier par défaut y passent ; ceux rangés ailleurs à la main ne bougent pas.
+    /// Faux si un enregistrement tourne (le dossier ne change pas en cours de route).
+    /// </summary>
+    public static bool ChoisirDossierEnregistrements(string nouveau)
+    {
+        if (A.Recorder.AnyBusy) { SonUi.Toast("Un enregistrement tourne : arrêtez-le d'abord, puis changez de dossier."); return false; }
+        var ancien = AudioConfiguration.DossierEnregistrements;
+        C.DossierChoisi = nouveau;
+        AudioConfiguration.DossierParDefautChoisi = nouveau;
+        foreach (var p in C.Profiles)
+            if (p.Directory.Length == 0 || p.Directory.StartsWith(ancien, StringComparison.OrdinalIgnoreCase))
+                p.Directory = Path.Combine(nouveau, RecordingFiles.SafeName(p.Name));
+        A.Apply();
+        SonUi.Toast("Les enregistrements iront dans " + nouveau + ".");
+        return true;
+    }
 }
 
 /// <summary>

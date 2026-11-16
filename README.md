@@ -1,4 +1,6 @@
-# Siloé Stream 2.0.2
+# Siloé Stream 2.1.0
+
+**Commencer le culte** (2.1.0) : un clic vérifie le projecteur, YouTube, le son et les caméras, puis lance l'enregistrement dans le dossier choisi (Réglages › Son). Médias : « + Ajouter un média » et, à part, « + Ajouter un périphérique vidéo » (MyVirtualCam, webcams, cartes de capture, MyCam, Sony).
 
 Design « Conducteur » (2.0.2) : **À L'ÉCRAN** (l'église, en or), **ENVOYER À L'ANTENNE** (touche S), **À L'ANTENNE** (YouTube, Zoom, MyStream, en rouge) ; chaque écran a sa source principale et son bouton **Revenir** (Échap pour l'écran, M pour l'antenne). Thème sombre chaud par défaut, clair au choix. Les couleurs sont dans `windows/MyVerse/Palette.cs`.
 

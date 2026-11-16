@@ -82,6 +82,8 @@ public sealed class Palette : INotifyPropertyChanged
         ["SurEcran"] = ("#FFFFFF", "#1A1205"),
         ["Antenne"] = ("#930000", "#930000"),
         ["SurAntenne"] = ("#FFFFFF", "#FFFFFF"),
+        // 2.1.0 : le texte sur le vert (« Commencer le culte »)
+        ["SurVert"] = ("#FFFFFF", "#0B1A10"),
     };
 
     public static Palette Actuelle { get; } = new();
@@ -178,4 +180,5 @@ public sealed class Palette : INotifyPropertyChanged
     public Color SurEcran => C(nameof(SurEcran));
     public Color Antenne => C(nameof(Antenne));
     public Color SurAntenne => C(nameof(SurAntenne));
+    public Color SurVert => C(nameof(SurVert));
 }

@@ -199,6 +199,8 @@ public partial class App : Application
             MyStream = new MyStreamMoteur(CameraVirtuelle, l, h);
         }
         catch (Exception ex) { Journal.Erreur("MyStream démarrage", ex); }
+        // 2.1.0 : le dossier des enregistrements choisi dans Réglages › Son
+        MyVerse.Audio.AudioConfiguration.DossierParDefautChoisi = Donnees.Reglages.Audio.DossierChoisi ?? "";
         Audio = new Audio.ChurchAudioService(Donnees.Reglages.Audio);
         Direct = new Audio.DirectService(Audio, Donnees);
         // le test automatique fait tourner les directs automatiques lui-même (heure simulée)

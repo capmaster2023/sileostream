@@ -244,6 +244,15 @@
 
                 <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
                     <Button x:Name="MajBtn" Style="{StaticResource BtnPetitOr}" Margin="0,0,10,0" Visibility="Collapsed" Content="Mettre à jour" />
+                    <!-- 2.1.0 : Commencer le culte : tout est vérifié (projecteur, YouTube, son, caméras), puis l'enregistrement démarre -->
+                    <Button x:Name="CommencerBtn" Style="{StaticResource Btn}" Height="40" Padding="14,0" Margin="0,0,10,0" FontWeight="Bold" FontSize="14"
+                            Background="{StaticResource Vert}" BorderBrush="{StaticResource Vert}"
+                            ToolTip="Vérifie le projecteur, YouTube, le son et les caméras, puis lance l'enregistrement du culte dans le dossier choisi (Réglages › Son)">
+                        <StackPanel Orientation="Horizontal">
+                            <Path x:Name="CommencerIcone" Data="M0,0 L9,6 L0,12 Z" Fill="{StaticResource SurVert}" VerticalAlignment="Center" Margin="0,0,9,0" />
+                            <TextBlock x:Name="CommencerTexte" Text="Commencer le culte" Foreground="{StaticResource SurVert}" VerticalAlignment="Center" />
+                        </StackPanel>
+                    </Button>
                     <Button x:Name="ProjectionBtn" Style="{StaticResource PuceEtat}" ToolTip="Choisir l'écran de projection">
                         <StackPanel Orientation="Horizontal">
                             <Ellipse x:Name="ProjectionPoint" Width="8" Height="8" Fill="{StaticResource Brume2}" VerticalAlignment="Center" Margin="0,1,8,0" />
@@ -367,7 +376,10 @@
                 <DockPanel>
                     <StackPanel DockPanel.Dock="Top">
                         <local:Capitales Libelle="Médias" />
-                        <Button x:Name="DisplayAjouter" Style="{StaticResource BtnOr}" Content="+ Ajouter un média" Height="44" Padding="14,0" Margin="0,10,0,0" ToolTip="Ajouter un texte, des images ou une source vidéo" />
+                        <Button x:Name="DisplayAjouter" Style="{StaticResource BtnOr}" Content="+ Ajouter un média" Height="44" Padding="14,0" Margin="0,10,0,0" ToolTip="Ajouter un texte, des images, une vidéo, une fenêtre ou un Duo" />
+                        <!-- 2.1.0 : les caméras à part des médias : MyVirtualCam, webcams, cartes de capture, téléphone MyCam, caméra Sony -->
+                        <Button x:Name="DisplayPeripherique" Style="{StaticResource Btn}" Content="+ Ajouter un périphérique vidéo" Height="44" Padding="14,0" Margin="0,8,0,0"
+                                ToolTip="Une caméra : MyVirtualCam (l'image de MyStream), une webcam, une carte de capture USB/HDMI, un téléphone MyCam ou une caméra Sony par Wi-Fi" />
                         <TextBlock Text="Le + met un média dans la grille (✓ : il y est déjà). Double-clic : le montrer. Clic droit : modifier, garder dans un coin, supprimer."
                                    TextWrapping="Wrap" Foreground="{StaticResource Brume}" FontSize="12.5" LineHeight="18" Margin="0,10,0,0" />
                     </StackPanel>

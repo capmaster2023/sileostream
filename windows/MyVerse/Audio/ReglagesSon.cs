@@ -131,9 +131,21 @@ public sealed class ReglagesSon : StackPanel
         var dossier = new TextBox { Style = S("Champ"), Text = AudioConfiguration.DossierEnregistrements, IsReadOnly = true, FontSize = 14 };
         var ouvrirDossier = new Button { Style = S("Btn"), Content = "Ouvrir", Height = 40, Padding = new Thickness(14, 0, 14, 0), FontSize = 14, Margin = new Thickness(8, 0, 0, 0) };
         ouvrirDossier.Click += (_, _) => ActionsSon.OuvrirDossier(AudioConfiguration.DossierEnregistrements);
+        // 2.1.0 : le dossier se choisit (celui de « Commencer le culte »)
+        var choisirDossier = new Button { Style = S("Btn"), Content = "Choisir…", Height = 40, Padding = new Thickness(14, 0, 14, 0), FontSize = 14, Margin = new Thickness(8, 0, 0, 0) };
+        choisirDossier.Click += (_, _) =>
+        {
+            var d = new Microsoft.Win32.OpenFolderDialog { Title = "Dossier des enregistrements (Commencer le culte enregistre ici)" };
+            if (Directory.Exists(AudioConfiguration.DossierEnregistrements)) d.InitialDirectory = AudioConfiguration.DossierEnregistrements;
+            bool? ok = Window.GetWindow(choisirDossier) is { } fenetre ? d.ShowDialog(fenetre) : d.ShowDialog();
+            if (ok != true || string.IsNullOrWhiteSpace(d.FolderName)) return;
+            if (ActionsSon.ChoisirDossierEnregistrements(d.FolderName)) dossier.Text = AudioConfiguration.DossierEnregistrements;
+        };
         var ligneDossier = new DockPanel();
         DockPanel.SetDock(ouvrirDossier, Dock.Right);
         ligneDossier.Children.Add(ouvrirDossier);
+        DockPanel.SetDock(choisirDossier, Dock.Right);
+        ligneDossier.Children.Add(choisirDossier);
         ligneDossier.Children.Add(dossier);
         corps.Children.Add(Champ("Dossier des enregistrements (un sous-dossier par enregistrement)", ligneDossier));
         bool ffmpeg = File.Exists(ChurchAudioService.FfmpegInclus);

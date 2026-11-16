@@ -250,6 +250,8 @@ public partial class MainWindow : Window
         InitTelecommande();
         InitProjecteur();
         InitMyStream();
+        // 2.1.0 : « Commencer le culte » (vérifications, enregistrement)
+        InitCommencer();
         AgendaAjoutBible.Click += (_, _) =>
         {
             if (sel is Ref s && s.V1 > 0) Toast($"{R.AjouterBibleAgenda(s).Titre} ajouté au programme « {R.Agenda.Nom} ».");

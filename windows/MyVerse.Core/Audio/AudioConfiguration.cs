@@ -425,11 +425,18 @@ public sealed class AudioConfiguration
         };
     }
 
-    /// <summary>Dossier des enregistrements par défaut : Vidéos\Siloé Stream.</summary>
+    /// <summary>2.1.0 : le dossier des enregistrements choisi dans Réglages › Son (vide : Vidéos\Siloé Stream).</summary>
+    [JsonPropertyName("dossierEnregistrements")] public string DossierChoisi { get; set; } = "";
+
+    /// <summary>2.1.0 : le dossier choisi, repris de <see cref="DossierChoisi"/> au démarrage et à chaque choix.</summary>
+    public static string DossierParDefautChoisi { get; set; } = "";
+
+    /// <summary>Dossier des enregistrements par défaut : celui choisi dans Réglages › Son (2.1.0), sinon Vidéos\Siloé Stream.</summary>
     public static string DossierEnregistrements
     {
         get
         {
+            if (DossierParDefautChoisi.Length > 0) return DossierParDefautChoisi;
             string v = Environment.GetFolderPath(Environment.SpecialFolder.MyVideos);
             if (string.IsNullOrEmpty(v)) v = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "Videos");
             return Path.Combine(v, "Siloé Stream");

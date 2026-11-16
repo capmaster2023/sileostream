@@ -60,6 +60,7 @@
     <SolidColorBrush x:Key="SurEcran" Color="{Binding SurEcran, Source={x:Static local:Palette.Actuelle}}" />
     <SolidColorBrush x:Key="Antenne" Color="{Binding Antenne, Source={x:Static local:Palette.Actuelle}}" />
     <SolidColorBrush x:Key="SurAntenne" Color="{Binding SurAntenne, Source={x:Static local:Palette.Actuelle}}" />
+    <SolidColorBrush x:Key="SurVert" Color="{Binding SurVert, Source={x:Static local:Palette.Actuelle}}" />
     <!-- damier : rien à l'écran (transparent), comme la sortie -->
     <DrawingBrush x:Key="Damier" TileMode="Tile" Viewport="0,0,24,24" ViewportUnits="Absolute">
         <DrawingBrush.Drawing>
