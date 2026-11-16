@@ -7,7 +7,9 @@ const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
 
-const CLIENT_ID = process.env.GOOGLE_CLIENT_ID || '651141034269-s9hq1jb8bafbiipoprof0v1qm2175l9d.apps.googleusercontent.com';
+// 1.9.3 : les jetons Google viennent de deux clients du projet mychurchapp : le client Desktop (application Android)
+// et le client Web « Siloé Stream – site » (page siloestream.tech/connexion du logiciel)
+const CLIENT_IDS = (process.env.GOOGLE_CLIENT_IDS || process.env.GOOGLE_CLIENT_ID || '651141034269-s9hq1jb8bafbiipoprof0v1qm2175l9d.apps.googleusercontent.com,651141034269-80ld00hjco7vsrs86thn99ghe6dnq47v.apps.googleusercontent.com').split(',').map(s => s.trim()).filter(Boolean);
 const DOSSIER = process.env.STATE_DIRECTORY || process.env.DONNEES || path.join(__dirname, 'donnees');
 const FICHIER = path.join(DOSSIER, 'comptes.json');
 const ROLES = ['admin', 'bible', 'chants', 'affichage', 'camera'];
@@ -48,7 +50,7 @@ async function verifierGoogle(idToken) {
   const r = await fetch('https://oauth2.googleapis.com/tokeninfo?id_token=' + encodeURIComponent(idToken));
   if (!r.ok) return null;
   const j = await r.json();
-  if (j.aud !== CLIENT_ID) return null;
+  if (!CLIENT_IDS.includes(j.aud)) return null;
   if (!['accounts.google.com', 'https://accounts.google.com'].includes(j.iss)) return null;
   if (j.email_verified !== 'true' && j.email_verified !== true) return null;
   if (+j.exp < maintenant()) return null;

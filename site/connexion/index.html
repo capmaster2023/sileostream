@@ -61,8 +61,8 @@ a { color: var(--rouge); }
      sur 127.0.0.1 (cet ordinateur seulement), avec le code etat qu'il a tiré. Le relais vérifie le jeton auprès de Google. -->
 <script>
 (() => {
-  // l'identifiant Google de Siloé Stream (le même que l'application Android et le serveur des comptes)
-  const CLIENT_ID = '651141034269-s9hq1jb8bafbiipoprof0v1qm2175l9d.apps.googleusercontent.com';
+  // l'identifiant Google « Siloé Stream – site » (client Web du projet mychurchapp, origine https://siloestream.tech)
+  const CLIENT_ID = '651141034269-80ld00hjco7vsrs86thn99ghe6dnq47v.apps.googleusercontent.com';
   const params = new URLSearchParams(location.search);
   const port = Number(params.get('port'));
   const etat = params.get('etat') || '';
