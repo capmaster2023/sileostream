@@ -1,0 +1,5 @@
+# Siloé Stream 2.2.1 — Publier sur YouTube : l'identifiant Google se saisit dans la fenêtre
+
+- **Publier sur YouTube** ne bloque plus quand la version installée n'a pas d'identifiant Google : la fenêtre explique en 4 étapes comment créer l'identifiant gratuit de l'église dans Google Cloud (projet, « YouTube Data API v3 », écran de consentement, ID client « Application de bureau »), avec un bouton **Ouvrir Google Cloud**, puis on colle l'**ID client** et le **code secret** et on clique **Enregistrer l'identifiant**. Ensuite : **Connecter le compte YouTube**, et **Publier**.
+- L'identifiant est gardé chiffré sur le PC (pour cet utilisateur de Windows) ; c'est le même que celui du direct, qui peut alors lui aussi « Connecter le compte ». Le lien **Identifiant Google…** permet de le changer.
+- Rappel : tant que l'application Google n'a pas passé la vérification de YouTube, les vidéos envoyées restent privées ; Siloé Stream le signale après l'envoi (il suffit de les rendre publiques dans YouTube Studio).

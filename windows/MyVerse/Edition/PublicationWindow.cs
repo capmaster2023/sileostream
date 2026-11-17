@@ -219,7 +219,12 @@ public sealed class PublicationWindow : FenetreDialogue
     readonly ReglagesPublication r = ReglagesPublication.Lire();
     readonly StackPanel corps = new();
     readonly TextBlock compteTexte = new() { FontSize = 14, TextWrapping = TextWrapping.Wrap, VerticalAlignment = VerticalAlignment.Center };
-    readonly Button connecter, changer;
+    readonly Button connecter, changer, lienGoogle;
+    readonly Border blocGoogle = new() { Padding = new Thickness(14, 12, 14, 14), CornerRadius = new CornerRadius(12), BorderThickness = new Thickness(1), Margin = new Thickness(0, 10, 0, 0) };
+    readonly TextBox googleId;
+    readonly TextBlock messageGoogle = new() { FontSize = 12.5, TextWrapping = TextWrapping.Wrap, Margin = new Thickness(0, 8, 0, 0) };
+    readonly PasswordBox googleSecret;
+    bool montrerGoogle;
     readonly TextBox titre, description, tags, heure;
     readonly ComboBox categorie = new() { MinHeight = 38 }, visibilite = new() { MinHeight = 38 }, playlist = new() { MinHeight = 38 }, resolution = new() { MinHeight = 38 }, encodeur = new() { MinHeight = 38 };
     readonly CheckBox enfants, programmer, copie;
@@ -295,6 +300,43 @@ public sealed class PublicationWindow : FenetreDialogue
         corps.Children.Add(ligneCompte);
         connecter.Click += async (_, _) => await Connecter(false);
         changer.Click += async (_, _) => await Connecter(true);
+
+        // 2.2.1 : l'identifiant Google de l'église (programme installé), s'il n'est pas dans cette version : saisi ici une fois
+        // (le même que dans la fenêtre du direct ; gardé chiffré pour cet utilisateur de Windows)
+        lienGoogle = new Button { Style = S("BtnLien"), Content = "Identifiant Google…", HorizontalAlignment = HorizontalAlignment.Left, Margin = new Thickness(0, 8, 0, 0),
+            ToolTip = "L'identifiant client Google de l'église (le même que pour le direct)" };
+        lienGoogle.Click += (_, _) => { montrerGoogle = !montrerGoogle; MajCompte(); };
+        corps.Children.Add(lienGoogle);
+        var pg = new StackPanel();
+        pg.Children.Add(new TextBlock { Text = "L'identifiant Google de l'église (une seule fois, gratuit)", FontSize = 14.5, FontWeight = FontWeights.Bold, Foreground = P("Blanc"), TextWrapping = TextWrapping.Wrap });
+        pg.Children.Add(new TextBlock
+        {
+            Text = "1. Ouvrez Google Cloud avec le compte Google de la chaîne et créez un projet (par exemple « Siloé Stream »).\n"
+                + "2. API et services › Bibliothèque : activez « YouTube Data API v3 ».\n"
+                + "3. API et services › Écran de consentement OAuth : type « Externe », nom « Siloé Stream », votre adresse e-mail ; ajoutez le compte de la chaîne comme utilisateur test, puis « Publier l'application » (sinon Google redemande la connexion chaque semaine).\n"
+                + "4. API et services › Identifiants › Créer des identifiants › ID client OAuth › type « Application de bureau ». Copiez ci-dessous l'ID client et le code secret.",
+            FontSize = 12.5, Foreground = P("Brume"), TextWrapping = TextWrapping.Wrap, LineHeight = 19, Margin = new Thickness(0, 6, 0, 0),
+        });
+        var ouvrirCloud = new Button { Style = S("BtnPetit"), Content = "Ouvrir Google Cloud", Height = 32, Padding = new Thickness(12, 0, 12, 0), HorizontalAlignment = HorizontalAlignment.Left, Margin = new Thickness(0, 10, 0, 0) };
+        ouvrirCloud.Click += (_, _) => SonUi.Ouvrir("https://console.cloud.google.com/apis/credentials");
+        pg.Children.Add(ouvrirCloud);
+        pg.Children.Add(Libelle("ID client (se termine par .apps.googleusercontent.com)"));
+        googleId = Champ(App.Direct.Coffre.Lire("google.id"));
+        googleId.FontSize = 13;
+        pg.Children.Add(googleId);
+        pg.Children.Add(Libelle("Code secret du client"));
+        googleSecret = new PasswordBox { FontSize = 13, Height = 38, Padding = new Thickness(10, 8, 10, 8), Password = App.Direct.Coffre.Lire("google.secret") };
+        pg.Children.Add(googleSecret);
+        var garder = new Button { Style = S("BtnOr"), Content = "Enregistrer l'identifiant", Height = 36, Padding = new Thickness(14, 0, 14, 0), HorizontalAlignment = HorizontalAlignment.Left, Margin = new Thickness(0, 12, 0, 0) };
+        garder.Click += (_, _) => GarderGoogle();
+        pg.Children.Add(garder);
+        messageGoogle.Foreground = P("Danger");
+        pg.Children.Add(messageGoogle);
+        pg.Children.Add(new TextBlock { Text = "Il sert aussi au direct (fenêtre YouTube, « Connecter le compte »). Il est gardé chiffré sur ce PC, pour cet utilisateur de Windows.", FontSize = 12, Foreground = P("Brume"), TextWrapping = TextWrapping.Wrap, Margin = new Thickness(0, 8, 0, 0) });
+        blocGoogle.Child = pg;
+        blocGoogle.Background = P("Encre");
+        blocGoogle.BorderBrush = P("OrBord");
+        corps.Children.Add(blocGoogle);
 
         // ------------------------------------------------------------ la vidéo
         corps.Children.Add(Section("La vidéo"));
@@ -467,12 +509,15 @@ public sealed class PublicationWindow : FenetreDialogue
 
     void MajCompte()
     {
-        if (!Compte.Disponible)
+        bool dispo = Compte.Disponible;
+        blocGoogle.Visibility = !dispo || montrerGoogle ? Visibility.Visible : Visibility.Collapsed;
+        lienGoogle.Visibility = dispo ? Visibility.Visible : Visibility.Collapsed;
+        publier.IsEnabled = dispo;
+        if (!dispo)
         {
-            compteTexte.Text = "Cette version de Siloé Stream n'a pas d'identifiant Google : la publication directe n'est pas possible. Utilisez « Exporter un fichier » dans la page Montage.";
-            compteTexte.Foreground = P("Danger");
+            compteTexte.Text = "Pour publier directement, Siloé Stream a besoin une seule fois de l'identifiant Google de l'église : suivez les 4 étapes ci-dessous (en attendant, « Exporter un fichier » marche).";
+            compteTexte.Foreground = P("Or");
             connecter.Visibility = changer.Visibility = Visibility.Collapsed;
-            publier.IsEnabled = false;
             return;
         }
         bool c = Compte.Connecte;
@@ -481,6 +526,26 @@ public sealed class PublicationWindow : FenetreDialogue
         compteTexte.Foreground = P(c ? "Blanc" : "Brume");
         connecter.Visibility = c ? Visibility.Collapsed : Visibility.Visible;
         changer.Visibility = c ? Visibility.Visible : Visibility.Collapsed;
+    }
+
+    /// <summary>Garde l'identifiant Google saisi (chiffré, dans le coffre du direct), puis propose de connecter le compte.</summary>
+    void GarderGoogle()
+    {
+        var id = googleId.Text.Trim();
+        var secret = googleSecret.Password.Trim();
+        if (id.Length == 0 || secret.Length == 0) { messageGoogle.Text = "Copiez l'ID client et le code secret de Google Cloud (étape 4)."; return; }
+        if (!id.EndsWith(".apps.googleusercontent.com", StringComparison.OrdinalIgnoreCase))
+        {
+            messageGoogle.Text = "Cet ID client ne ressemble pas à celui de Google (il se termine par .apps.googleusercontent.com) : vérifiez la copie.";
+            return;
+        }
+        messageGoogle.Text = "";
+        App.Direct.Coffre.Ecrire("google.id", id);
+        App.Direct.Coffre.Ecrire("google.secret", secret);
+        montrerGoogle = false;
+        message.Text = "Identifiant Google gardé (chiffré sur ce PC). Cliquez maintenant sur « Connecter le compte YouTube ».";
+        message.Foreground = P("Vert");
+        MajCompte();
     }
 
     async Task Connecter(bool autre)
