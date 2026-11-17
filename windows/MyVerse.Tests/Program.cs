@@ -1931,6 +1931,30 @@ if (Actif())
     Ok(!rg.Commande("bonjour la maison").Any(x => x.Titre == "45 - Ndashima"), "des mots sans rapport ne trouvent pas le chant");
 }
 
+Groupe("Recherche vocale (2.2.0) : ce qui est entendu devient un chant ou un verset");
+if (Actif())
+{
+    Egal(RechercheVocale.Nettoyer(" [Musique] Jean 3:16 (applaudissements) ♪ "), "Jean 3:16", "texte de Whisper nettoyé (annotations retirées)");
+    Egal(RechercheVocale.Nettoyer("Sous-titrage ST' 501"), "", "hallucination de Whisper sur du silence ignorée");
+    var refs = RechercheVocale.References("Ouvrons nos Bibles dans Jean chapitre 3, verset 16 à 18. Puis Romains 8:28.");
+    Ok(refs.Any(r => Livres.Lire(r) is { B: 42, C: 3, V1: 16, V2: 18 }) && refs.Any(r => Livres.Lire(r) is { B: 44, C: 8, V1: 28 }),
+        "références dites à voix haute : « Jean chapitre 3, verset 16 à 18 », « Romains 8:28 »", string.Join(" | ", refs));
+    Ok(RechercheVocale.References("lisons le psaume 23").Any(r => Livres.Lire(r) is { B: 18, C: 23 }), "« le psaume 23 »", string.Join(" | ", RechercheVocale.References("lisons le psaume 23")));
+    Ok(RechercheVocale.References("premier Jean 1 verset 9").Any(r => Livres.Lire(r) is { B: 61, C: 1, V1: 9 }), "« premier Jean 1 verset 9 »", string.Join(" | ", RechercheVocale.References("premier Jean 1 verset 9")));
+    var don = Donnees.Charger(Temp(), res);
+    var rg = new Regie(don, new Bibles(don));
+    rg.AjouterChants(new[] { new Chant { Title = "45 - Ndashima", Sections = { new Section { Label = "Couplet 1", Text = "Je leva les yeux vers Dieu\nIl m'a sauvé de la mort" } } } }, "Nyimbo za Wokovu");
+    var b = RechercheVocale.Chercher(rg, "Comme le dit Jean chapitre 3 verset 16 : car Dieu a tant aimé le monde", RechercheVocale.Bible, null);
+    Ok(b.Count > 0 && b[0].Ref is { B: 42, C: 3, V1: 16 } && b.All(x => x.Ref != null), "Bible : la référence citée d'abord, que des versets", string.Join(" | ", b.Select(x => x.Titre)));
+    var lu = RechercheVocale.Chercher(rg, "car Dieu a tellement aimé le monde qu'il a donné son fils unique", RechercheVocale.Bible, null);
+    Ok(lu.Any(x => x.Ref is { B: 42, C: 3, V1: 16 }), "Bible : un verset lu sans sa référence est retrouvé par ses mots", string.Join(" | ", lu.Select(x => x.Titre)));
+    var en = RechercheVocale.Chercher(rg, "For God so loved the world, that he gave his only begotten Son", RechercheVocale.Bible, null);
+    Ok(en.Any(x => x.Ref is { B: 42, C: 3, V1: 16 }), "Bible : un verset lu en anglais (King James)", string.Join(" | ", en.Select(x => x.Titre)));
+    var c = RechercheVocale.Chercher(rg, "je lève les yeux vers Dieu, il m'a sauvé", RechercheVocale.Chant, null);
+    Ok(c.Count > 0 && c[0].Titre == "45 - Ndashima" && c.All(x => x.ChantId != null), "Chant : les paroles chantées retrouvent le chant, que des chants", string.Join(" | ", c.Select(x => x.Titre)));
+    Ok(RechercheVocale.Chercher(rg, "[Musique]", RechercheVocale.Chant, null).Count == 0, "rien d'entendu : aucun résultat");
+}
+
 Groupe("YouTube (1.6.0)");
 if (Actif()) MyVerse.Tests.YouTubeTests.RunAsync(Ok).GetAwaiter().GetResult();
 
@@ -2109,7 +2133,7 @@ if (Actif())
     Ok(!Roles.Permis(Roles.Bible, "display.show") && !Roles.Permis(Roles.Bible, "agenda.show"), "Versets : ni les médias, ni le culte");
     Ok(Roles.Pages(Roles.Bible).SequenceEqual(new[] { "bible" }) && Roles.Pages(Roles.Chants).SequenceEqual(new[] { "chants" }), "pages du logiciel : Versets = Bible, Chants = chants");
     Ok(Roles.Pages(Roles.Affichage).SequenceEqual(new[] { "agenda", "annonces", "duo" }), "pages du logiciel : Affichage = Culte, Médias, Duo");
-    Ok(Roles.Pages(Roles.Admin).Count == 7 && Roles.Pages(Roles.Admin).Contains("reglages") && Roles.Pages(Roles.Camera).Count == 0, "pages du logiciel : Admin tout, Caméraman aucune");
+    Ok(Roles.Pages(Roles.Admin).Count == 8 && Roles.Pages(Roles.Admin).Contains("montage") && Roles.Pages(Roles.Admin).Contains("reglages") && Roles.Pages(Roles.Camera).Count == 0, "pages du logiciel : Admin tout, Caméraman aucune");
 
     // la page siloestream.tech/connexion renvoie le jeton Google au logiciel, sur 127.0.0.1
     var rq = ConnexionGoogle.Analyser("POST /connexion HTTP/1.1\r\nHost: 127.0.0.1", "idToken=abc.def%2Bg+h&etat=XyZ_-1");
@@ -2235,6 +2259,9 @@ if (Actif()) MyVerse.Tests.CameraWifiTests.RunAsync(Ok).GetAwaiter().GetResult()
 
 Groupe("Enregistrement");
 if (Actif()) MyVerse.Tests.RecordingIntegrationTests.RunAsync(Ok).GetAwaiter().GetResult();
+
+Groupe("Montage et publication YouTube (2.2.0)");
+if (Actif()) MyVerse.Tests.MontageTests.RunAsync(Ok).GetAwaiter().GetResult();
 
 Console.WriteLine($"\n{total - echecs}/{total} vérifications réussies" + (echecs > 0 ? $" — {echecs} ÉCHEC(S)" : " — tout est bon"));
 return echecs == 0 ? 0 : 1;

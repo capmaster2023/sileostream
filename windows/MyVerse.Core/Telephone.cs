@@ -195,7 +195,7 @@ public static class Roles
     /// </summary>
     public static IReadOnlyList<string> Pages(string? role) => Connu(role) switch
     {
-        Admin => new[] { "agenda", "bible", "chants", "annonces", "duo", "son", "reglages" },
+        Admin => new[] { "agenda", "bible", "chants", "annonces", "duo", "son", "montage", "reglages" },
         Bible => new[] { "bible" },
         Chants => new[] { "chants" },
         Affichage => new[] { "agenda", "annonces", "duo" },

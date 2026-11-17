@@ -115,8 +115,10 @@ public partial class MainWindow
         ecran?.Rendu.ImageDuo(b);
         EgliseRendu.ImageDuo(b);
         // 1.3.1 : un contenu épinglé « Dans l'église » ne part pas vers MyStream (Zoom, YouTube)
-        StreamRendu.ImageDuo(streamDuo ? b : null);
-        App.MyStream?.MediaDuo(streamDuo ? b : null);
+        // 2.2.0 : un dossier Duo principal de l'antenne a son propre 2e élément
+        var bs = lecteurStreamDuo != null ? lecteurStreamDuo.Image : b;
+        StreamRendu.ImageDuo(streamDuo ? bs : null);
+        App.MyStream?.MediaDuo(streamDuo ? bs : null);
     }
 
     // ------------------------------------------------------------ pour le test automatique

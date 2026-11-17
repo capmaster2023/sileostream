@@ -566,6 +566,33 @@ public sealed class YouTubeCompte
         catch (ErreurYouTube e) when (e.Raison is "redundantTransition") { }
     }
 
+    // ------------------------------------------------------------ 2.2.0 : les vidéos publiées depuis le montage
+    /// <summary>Oublie le jeton d'accès (Google l'a refusé) : le prochain appel en refait un avec le jeton de rafraîchissement.</summary>
+    public void OublierJeton() => jeton = "";
+
+    /// <summary>Les playlists de la chaîne (identifiant, titre).</summary>
+    public async Task<List<(string Id, string Titre)>> PlaylistsAsync(CancellationToken annuler = default)
+    {
+        var l = new List<(string Id, string Titre)>();
+        string page = "";
+        for (int i = 0; i < 20; i++)
+        {
+            var r = await AppelerAsync(HttpMethod.Get, "/playlists?part=snippet&mine=true&maxResults=50" + (page.Length > 0 ? "&pageToken=" + Uri.EscapeDataString(page) : ""), annuler: annuler);
+            foreach (var it in r["items"]?.AsArray() ?? new JsonArray())
+                if (it?["id"]?.GetValue<string>() is { Length: > 0 } id) l.Add((id, it["snippet"]?["title"]?.GetValue<string>() ?? id));
+            page = r["nextPageToken"]?.GetValue<string>() ?? "";
+            if (page.Length == 0) break;
+        }
+        return l;
+    }
+
+    /// <summary>Ajoute la vidéo à la fin d'une playlist de la chaîne.</summary>
+    public Task AjouterAPlaylistAsync(string playlist, string video, CancellationToken annuler = default) =>
+        AppelerAsync(HttpMethod.Post, "/playlistItems?part=snippet", new JsonObject
+        {
+            ["snippet"] = new JsonObject { ["playlistId"] = playlist, ["resourceId"] = new JsonObject { ["kind"] = "youtube#video", ["videoId"] = video } },
+        }, annuler);
+
     // ------------------------------------------------------------ outils
     public static string Aleatoire(int octets) => Base64Url(RandomNumberGenerator.GetBytes(octets));
     public static string Base64Url(byte[] b) => Convert.ToBase64String(b).TrimEnd('=').Replace('+', '-').Replace('/', '_');

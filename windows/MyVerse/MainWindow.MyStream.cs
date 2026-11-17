@@ -19,6 +19,12 @@ public partial class MainWindow
     /// <summary>MyStream montre le contenu épinglé (pas un contenu « Dans l'église »).</summary>
     bool streamDuo = true;
     EtatEcran etatStream = new();
+    /// <summary>
+    /// 2.2.0 : quand un dossier Duo est la source principale de l'antenne, le lecteur qui donne l'image vivante de son 2e élément
+    /// (null : l'antenne montre le même contenu épinglé que l'écran de l'église). Créé seulement si on en a besoin.
+    /// </summary>
+    SourcesDisplay? lecteurStreamDuo;
+    SourcesDisplay? lecteurStreamDuoPropre;
 
     void InitMyStream()
     {
@@ -34,6 +40,7 @@ public partial class MainWindow
         App.SourcesStream.Change += () =>
         {
             if (lecteurStream == App.SourcesStream) ImageStream();
+            if (lecteurStreamDuo == App.SourcesStream) ImagesDuo();
             MajInfoStream();
         };
         App.Direct.Change += () => { MajDirect(); MajVeille(); };
@@ -52,13 +59,44 @@ public partial class MainWindow
     void ChoisirLecteurStream(EtatEcran stream)
     {
         var principale = R.SourcePrincipaleStream?.Source;
-        App.SourcesStream.ChoisirSource(principale);
+        // 2.2.0 : un dossier Duo principal : on capte son 1er élément (le 2e a son propre lecteur, plus bas)
+        bool duoPrincipal = principale is { Type: "duo" };
+        bool streamSurDuo = duoPrincipal && stream.Duo?.Dossier == principale!.Chemin;
+        var capte = duoPrincipal ? (streamSurDuo && stream.Mode == "media" ? stream.Media : null) : principale;
+        App.SourcesStream.ChoisirSource(capte);
+        principale = capte;
+        ChoisirLecteurStreamDuo(streamSurDuo ? stream.Duo?.Etat is { Mode: "media", Media: { } md } ? md : null : null, capte);
         var m = stream.Media;
         lecteurStream = m == null ? null
             : m == principale ? App.SourcesStream
             : App.Sources.Source == m ? App.Sources
             : App.SourcesDefaut.Source == m ? App.SourcesDefaut
             : null;
+    }
+
+    /// <summary>
+    /// 2.2.0 : le 2e élément d'un dossier Duo principal de l'antenne. Une caméra n'est jamais ouverte deux fois : si l'église, son
+    /// contenu épinglé ou le 1er élément captent déjà cette source, leur lecteur sert aussi à l'antenne.
+    /// </summary>
+    void ChoisirLecteurStreamDuo(SourceDisplay? m, SourceDisplay? capte)
+    {
+        SourcesDisplay? partage = m == null ? null
+            : m == capte ? App.SourcesStream
+            : App.Sources.Source == m ? App.Sources
+            : App.SourcesDuo.Source == m ? App.SourcesDuo
+            : null;
+        if (m != null && partage == null)
+        {
+            if (lecteurStreamDuoPropre == null)
+            {
+                lecteurStreamDuoPropre = new SourcesDisplay("");
+                lecteurStreamDuoPropre.Change += () => { if (lecteurStreamDuo == lecteurStreamDuoPropre) ImagesDuo(); };
+            }
+            lecteurStreamDuoPropre.ChoisirSource(m);
+            partage = lecteurStreamDuoPropre;
+        }
+        else lecteurStreamDuoPropre?.ChoisirSource(null);
+        lecteurStreamDuo = partage;
     }
 
     /// <summary>L'image vivante de MyStream, vers son aperçu et vers Zoom et YouTube.</summary>
@@ -107,7 +145,7 @@ public partial class MainWindow
             item.IsChecked = actuel == id;
             menu.Items.Add(item);
         }
-        var medias = R.Annonces.Where(a => a.Source is { Type: "image" or "camera" or "mycam" or "fenetre" or "video" }).ToList();
+        var medias = R.Annonces.Where(a => a.Source is { Type: "image" or "camera" or "mycam" or "fenetre" or "video" or "duo" }).ToList();
         if (medias.Count > 0) menu.Items.Add(new Separator());
         foreach (var a in medias)
         {

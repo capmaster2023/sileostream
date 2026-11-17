@@ -175,6 +175,9 @@
                                  ToolTip="Les médias : caméras, MyCam, images, vidéos, fenêtres (Zoom…)" />
                     <RadioButton x:Name="OngletSon" Style="{StaticResource OngletRail}" GroupName="Pages" Content="Son" Tag="{StaticResource IconeSon}"
                                  ToolTip="Les micros, la musique, l'enregistrement du culte et Zoom" />
+                    <!-- 2.2.0 : le montage des enregistrements et la publication sur YouTube -->
+                    <RadioButton x:Name="OngletMontage" Style="{StaticResource OngletRail}" GroupName="Pages" Content="Montage" Tag="{StaticResource IconeMontage}"
+                                 ToolTip="Monter l'enregistrement du culte (couper, titres, logo, fondus) et le publier sur YouTube sans exporter" />
                     <!-- 1.5.0 : les pages de la Bibliothèque se choisissent avec ses onglets (en haut de la colonne) -->
                     <RadioButton x:Name="OngletBible" GroupName="Pages" Visibility="Collapsed" IsChecked="True" />
                     <RadioButton x:Name="OngletChants" GroupName="Pages" Visibility="Collapsed" />
@@ -224,6 +227,12 @@
                             <TextBox x:Name="Cmd" Grid.Column="1" Margin="8,0,0,0" FontSize="15" FontWeight="SemiBold" Background="Transparent" BorderThickness="0" Foreground="{StaticResource Blanc}"
                                      CaretBrush="{StaticResource Blanc}" SelectionBrush="{StaticResource OrVif}" VerticalContentAlignment="Center" Padding="0,10" FocusVisualStyle="{x:Null}" />
                             <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
+                                <!-- 2.2.0 : la recherche vocale : « Chant ou Bible ? », puis Siloé Stream écoute et trouve -->
+                                <Button x:Name="CmdMicro" Style="{StaticResource BtnPlat}" Padding="6,2" Margin="0,0,2,0" VerticalAlignment="Center"
+                                        ToolTip="Recherche vocale : écouter un chant ou la prédication, et trouver le chant ou le verset">
+                                    <Path Data="M12,3 A3,3 0 0 1 15,6 V11 A3,3 0 0 1 9,11 V6 A3,3 0 0 1 12,3 Z M5.5,10.5 A6.5,6.5 0 0 0 18.5,10.5 M12,17 V21 M8.5,21 H15.5"
+                                          Stroke="{StaticResource Or}" StrokeThickness="1.9" StrokeStartLineCap="Round" StrokeEndLineCap="Round" Width="20" Height="20" Stretch="Uniform" />
+                                </Button>
                                 <Button x:Name="CmdEffacer" Style="{StaticResource BtnPlat}" Padding="8,2" Content="×" FontSize="18" Foreground="{StaticResource Brume}" Visibility="Collapsed" ToolTip="Annuler la recherche" />
                                 <Border Style="{StaticResource Touche}" Margin="6,0,6,0">
                                     <TextBlock Text="Ctrl K" FontFamily="{StaticResource Mono}" FontSize="11" FontWeight="SemiBold" Foreground="{StaticResource Brume}" />
@@ -591,6 +600,9 @@
 
         <!-- ==================== Son (construit en C# : Audio/PageSon.cs) : à la place de la colonne de gauche et du centre ==================== -->
         <Border x:Name="PanneauSon" Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="2" Visibility="Collapsed" Background="{StaticResource Page}" />
+
+        <!-- ==================== 2.2.0 : Montage (construit en C# : Edition/PageMontage.cs), sur toute la largeur ==================== -->
+        <Border x:Name="PanneauMontage" Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="3" Visibility="Collapsed" Background="{StaticResource Page}" />
 
         <!-- ==================== à droite : ce qui vient (Ensuite), puis les outils de l'écran, repliés ==================== -->
         <Border x:Name="ColonneControle" Grid.Row="1" Grid.Column="3" BorderBrush="{StaticResource Nuit3}" BorderThickness="1,0,0,0">

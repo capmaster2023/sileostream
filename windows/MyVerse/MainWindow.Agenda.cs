@@ -85,6 +85,7 @@ public partial class MainWindow
 
         // ---------- recherche du culte (Ctrl K)
         CmdEffacer.Click += (_, _) => { Cmd.Clear(); CmdPopup.IsOpen = false; Cmd.Focus(); };
+        CmdMicro.Click += (_, _) => OuvrirVoix();
         Cmd.TextChanged += (_, _) =>
         {
             CmdIndice.Visibility = Cmd.Text.Length == 0 ? Visibility.Visible : Visibility.Collapsed;
@@ -451,11 +452,41 @@ public partial class MainWindow
         }
     }
 
+    // ------------------------------------------------------------ 2.2.0 : la recherche vocale (le micro de la barre de recherche)
+    Voix.RechercheVocaleWindow? voix;
+
+    void OuvrirVoix()
+    {
+        if (voix != null)
+        {
+            voix.Demander();
+            if (voix.WindowState == WindowState.Minimized) voix.WindowState = WindowState.Normal;
+            voix.Activate();
+            return;
+        }
+        voix = new Voix.RechercheVocaleWindow { Owner = this };
+        voix.WindowStartupLocation = WindowStartupLocation.Manual;
+        // juste sous la barre de recherche
+        var p = RechercheCulte.PointToScreen(new Point(0, RechercheCulte.ActualHeight + 8));
+        if (PresentationSource.FromVisual(this)?.CompositionTarget is { } cible) p = cible.TransformFromDevice.Transform(p);
+        voix.Left = Math.Max(SystemParameters.WorkArea.Left, Math.Min(p.X, SystemParameters.WorkArea.Right - 560));
+        voix.Top = Math.Max(SystemParameters.WorkArea.Top, p.Y);
+        voix.Closed += (_, _) => voix = null;
+        voix.Show();
+    }
+
+    /// <summary>Un résultat de la recherche vocale : « aller », « montrer » ou « ajouter », comme dans la recherche Ctrl K.</summary>
+    internal void ExecuterResultat(ResultatCommande r, string mode)
+    {
+        if (FiltrerRole(new List<ResultatCommande> { r }).Count == 0) { Toast("Cela ne fait pas partie de votre rôle."); return; }
+        ExecuterCommande(r, mode);
+    }
+
     // ------------------------------------------------------------ recherche du culte (Ctrl K)
     void OuvrirCommande()
     {
         // 1.5.0 : la recherche est en haut de toutes les pages ; seuls Son et Réglages ramènent au culte
-        if (onglet is "son" or "reglages") MontrerOnglet("agenda");
+        if (onglet is "son" or "reglages" or "montage") MontrerOnglet("agenda");
         Cmd.Focus();
         Cmd.SelectAll();
     }

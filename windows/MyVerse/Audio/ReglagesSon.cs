@@ -218,6 +218,7 @@ public sealed class ReglagesSon : StackPanel
         corps.Children.Add(licence);
         corps.Children.Add(Note("FFmpeg (www.ffmpeg.org), livré dans le dossier « ffmpeg » de Siloé Stream pour le MP3 et la vidéo, est un programme libre sous licence GNU GPL version 3 : son texte est dans ffmpeg\\LICENSE.txt. Build « essentials » de gyan.dev (www.gyan.dev/ffmpeg/builds).", 14));
         corps.Children.Add(Note(VbCable.Mention + " Il n'est pas inclus dans Siloé Stream : il s'installe à la demande depuis le site officiel.", 8));
+        corps.Children.Add(Note("Recherche vocale (2.2.0) : Whisper.net et whisper.cpp (licence MIT) ; le modèle de reconnaissance Whisper (OpenAI, licence MIT) est téléchargé à la demande depuis le dépôt officiel de whisper.cpp.", 6));
         corps.Children.Add(Note("Polices Manrope, IBM Plex Mono, Literata, Atkinson Hyperlegible Next et Unbounded : licence SIL Open Font License 1.1.", 6));
         return cadre;
     }

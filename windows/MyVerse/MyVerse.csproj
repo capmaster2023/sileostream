@@ -46,6 +46,9 @@
     <PackageReference Include="NAudio.Asio" Version="2.2.1" />
     <PackageReference Include="QRCoder" Version="1.6.0" />
     <PackageReference Include="PdfPig" Version="0.1.9" />
+    <!-- 2.2.0 : la recherche vocale (chant ou Bible) reconnue sur le PC, sans Internet : whisper.cpp (licence MIT) -->
+    <PackageReference Include="Whisper.net" Version="1.8.1" />
+    <PackageReference Include="Whisper.net.Runtime" Version="1.8.1" />
   </ItemGroup>
 
   <ItemGroup>

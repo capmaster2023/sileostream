@@ -828,6 +828,102 @@ public static class AutoTest
         serveur.Dispose();
     }
 
+    /// <summary>
+    /// 2.2.0 : le montage dans la vraie application : un clip fabriqué par FFmpeg, ajouté, coupé, un fondu, un titre, un générique,
+    /// annuler, puis un vrai export (vérifié par FFmpeg) et la fenêtre « Publier sur YouTube ».
+    /// </summary>
+    static async Task TestMontage(MainWindow w)
+    {
+        string ffmpeg = App.Audio.Ffmpeg;
+        if (!File.Exists(ffmpeg)) { Note("2.2.0 : montage non essayé (ffmpeg absent : " + ffmpeg + ")"); return; }
+        var dm = Path.Combine(dossier, "montage");
+        Directory.CreateDirectory(dm);
+        var clip = Path.Combine(dm, "culte-test.mkv");
+        var (code, err, _) = await MyVerse.Montages.Processus.ExecuterAsync(ffmpeg, new[] { "-hide_banner", "-nostdin", "-loglevel", "error", "-y",
+            "-f", "lavfi", "-i", "testsrc2=s=1280x720:r=30:d=8", "-f", "lavfi", "-i", "sine=f=440:d=8:sample_rate=48000",
+            "-c:v", "libx264", "-preset", "ultrafast", "-g", "30", "-pix_fmt", "yuv420p", "-c:a", "aac", "-shortest", clip }, TimeSpan.FromMinutes(2));
+        Ok(code == 0 && File.Exists(clip), "2.2.0 : clip de test fabriqué" + (code == 0 ? "" : " : " + err));
+        if (code != 0) return;
+        w.TestPage("montage");
+        await Attendre(900);
+        var page = w.TestPageMontage;
+        Ok(page != null, "2.2.0 : page Montage ouverte");
+        if (page == null) return;
+        page.TestNouveau();
+        await page.TestAjouterVideo(clip);
+        var p = page.TestProjet;
+        Ok(p.Sequences.Count == 1 && Math.Abs(p.Duree - 8) < 0.2, $"2.2.0 : enregistrement ajouté à la piste vidéo ({p.Duree:0.00} s)");
+        page.TestAller(3);
+        page.TestCouper();
+        Ok(p.Sequences.Count == 2 && Math.Abs(p.Sequences[0].Fin - 3) < 0.05 && Math.Abs(p.Duree - 8) < 0.2, "2.2.0 : couper à la tête de lecture (S)");
+        page.TestAnnuler();
+        p = page.TestProjet;
+        Ok(p.Sequences.Count == 1, "2.2.0 : annuler (Ctrl Z) revient à une séquence");
+        page.TestAller(3);
+        page.TestCouper();
+        p = page.TestProjet;
+        p.Sequences[1].Debut = 5;
+        p.Sequences[1].Transition = MyVerse.Montages.ProjetMontage.Fondu;
+        p.Sequences[1].DureeTransition = 0.5;
+        page.TestModifie();
+        page.TestAller(1);
+        page.TestTitre();
+        page.TestGenerique();
+        p = page.TestProjet;
+        double attendu = 3 + 3 - 0.5 + p.Intro.Duree;
+        Ok(p.Titres.Count == 1 && p.Intro.Actif && Math.Abs(p.Duree - attendu) < 0.05, $"2.2.0 : fondu, titre et générique ({p.Duree:0.00} s)");
+        page.TestChoisir(null);
+        page.TestAller(p.Intro.Duree + 1.5);
+        await Attendre(1500);
+        Capture(w, "70-v220-montage.png");
+        var sortieExport = Path.Combine(dm, "export.mp4");
+        var pub = MyVerse.Montages.Publications.Exporter(p, sortieExport, ffmpeg);
+        var chrono = System.Diagnostics.Stopwatch.StartNew();
+        while (pub.EnCours && chrono.Elapsed < TimeSpan.FromMinutes(4)) await Attendre(300);
+        Ok(pub.Statut == "termine" && File.Exists(sortieExport), $"2.2.0 : export du montage ({chrono.Elapsed.TotalSeconds:0.0} s, {pub.Description}) : {pub.Message}");
+        if (File.Exists(sortieExport))
+        {
+            var info = await MyVerse.Montages.AnalyseMedia.LireAsync(ffmpeg, sortieExport);
+            Ok(info.Video && info.Audio && info.Largeur == 1280 && Math.Abs(info.Duree - attendu) < 0.2, $"2.2.0 : l'export se relit ({info.Resume}, {info.Duree:0.00} s)");
+        }
+        await Attendre(600);
+        Capture(w, "71-v220-montage-export.png");
+        await Fenetre(w, () => new Edition.PublicationWindow(p, () => { }), "72-v220-publier-youtube.png");
+        // la recherche vocale : « Chant ou Bible ? »
+        await Fenetre(w, () => new Voix.RechercheVocaleWindow(), "73-v220-recherche-vocale.png");
+        // SILOE_TEST_MICRO=1 (un PC avec un micro) : le micro s'ouvre, une seconde est captée et mise en 16 kHz pour Whisper
+        if (Environment.GetEnvironmentVariable("SILOE_TEST_MICRO") == "1")
+        {
+            try
+            {
+                using var micro = new Voix.EcouteMicro("");
+                await Attendre(1200);
+                var son = micro.Son16k();
+                Ok(micro.Erreur == null && son.Length > 12000 && son.Length < 24000, $"2.2.0 : micro ouvert, {micro.Secondes:0.0} s captées → {son.Length} échantillons à 16 kHz");
+            }
+            catch (Exception x) { Echec("2.2.0 : micro : " + x.Message); }
+        }
+        // SILOE_TEST_VOIX_MODELE + SILOE_TEST_VOIX_WAV (WAV 16 kHz mono 16 bits) : Whisper dans l'application, puis la recherche
+        if (Environment.GetEnvironmentVariable("SILOE_TEST_VOIX_MODELE") is { Length: > 0 } mod && Environment.GetEnvironmentVariable("SILOE_TEST_VOIX_WAV") is { Length: > 0 } wav && File.Exists(mod) && File.Exists(wav))
+        {
+            try
+            {
+                Directory.CreateDirectory(Voix.ModeleVoix.Dossier);
+                if (!Voix.ModeleVoix.Present("base")) File.Copy(mod, Voix.ModeleVoix.Chemin("base"), true);
+                var o = File.ReadAllBytes(wav);
+                int d = 12;
+                while (System.Text.Encoding.ASCII.GetString(o, d, 4) != "data") d += 8 + BitConverter.ToInt32(o, d + 4);
+                var son = new float[BitConverter.ToInt32(o, d + 4) / 2];
+                for (int i = 0; i < son.Length; i++) son[i] = BitConverter.ToInt16(o, d + 8 + 2 * i) / 32768f;
+                var chronoVoix = System.Diagnostics.Stopwatch.StartNew();
+                var texte = await Voix.ModeleVoix.ReconnaitreAsync(son, "base", "auto", RechercheVocale.Bible, CancellationToken.None);
+                var res = await Task.Run(() => RechercheVocale.Chercher(App.Regie, texte, RechercheVocale.Bible, null));
+                Ok(res.Count > 0 && res[0].Ref is { B: 42, C: 3, V1: 16 }, $"2.2.0 : Whisper dans Siloé Stream ({chronoVoix.Elapsed.TotalSeconds:0.0} s) : « {texte} » → {string.Join(", ", res.Take(3).Select(x => x.Titre))}");
+            }
+            catch (Exception x) { Echec("2.2.0 : Whisper : " + x); }
+        }
+    }
+
     public static async void Lancer(MainWindow w, string sortie)
     {
         dossier = sortie;
@@ -835,6 +931,13 @@ public static class AutoTest
         var R = App.Regie;
         try
         {
+            // 2.2.0 : SILOE_AUTOTEST_SEUL=montage : seulement le montage (essai rapide sur un PC de développement)
+            if (Environment.GetEnvironmentVariable("SILOE_AUTOTEST_SEUL") == "montage")
+            {
+                await TestMontage(w);
+                goto Fin;
+            }
+
             Note($"Siloé Stream {App.Version} · données : {App.Donnees.Dossier} · {App.Donnees.Chants.Count} chants");
             // 4.2 : au premier lancement, Siloé Stream est vide ; seules les Bibles libres de droits LSG 1910 et King James sont livrées
             Ok(App.Donnees.Chants.Count == 0 && App.Audio.Config.Sons.Count == 1 && App.Audio.Config.Sons[0].Genre == GenreSon.Video && App.Donnees.Annonces.Count == 0,
@@ -1460,7 +1563,7 @@ public static class AutoTest
             Ok(((SolidColorBrush)MainWindow.Pinceau("Page")).Color == Palette.De("Page", true), "les pinceaux suivent le thème sombre");
             await Attendre(500);
             Capture(w, "41-sombre-reglages.png");
-            foreach (var (page, nom) in new[] { ("agenda", "42-sombre-culte.png"), ("bible", "43-sombre-bible.png"), ("chants", "44-sombre-chants.png"), ("annonces", "45-sombre-display.png"), ("duo", "46-sombre-duo.png"), ("son", "46b-sombre-son.png") })
+            foreach (var (page, nom) in new[] { ("agenda", "42-sombre-culte.png"), ("bible", "43-sombre-bible.png"), ("chants", "44-sombre-chants.png"), ("annonces", "45-sombre-display.png"), ("duo", "46-sombre-duo.png"), ("son", "46b-sombre-son.png"), ("montage", "46c-sombre-montage.png") })
             {
                 w.TestPage(page);
                 await Attendre(500);
@@ -1469,7 +1572,7 @@ public static class AutoTest
             await Fenetre(w, () => new OutilsWindow(false), "47-sombre-fenetre.png");
             App.AppliquerApparence("clair");
             Ok(!Palette.Actuelle.Sombre && ((SolidColorBrush)MainWindow.Pinceau("Page")).Color == Palette.De("Page", false), "retour au thème clair");
-            foreach (var (page, nom) in new[] { ("agenda", "48-clair-culte.png"), ("annonces", "49-clair-display.png"), ("bible", "49b-clair-bible.png"), ("chants", "49c-clair-chants.png"), ("duo", "49d-clair-duo.png"), ("son", "49e-clair-son.png") })
+            foreach (var (page, nom) in new[] { ("agenda", "48-clair-culte.png"), ("annonces", "49-clair-display.png"), ("bible", "49b-clair-bible.png"), ("chants", "49c-clair-chants.png"), ("duo", "49d-clair-duo.png"), ("son", "49e-clair-son.png"), ("montage", "49f-clair-montage.png") })
             {
                 w.TestPage(page);
                 await Attendre(500);
@@ -1581,6 +1684,9 @@ public static class AutoTest
             await Fenetre(w, () => new TelephoneWindow(), "17-telephone.png");
             await Fenetre(w, () => new OutilsWindow(false), "18-outils.png");
 
+            // 2.2.0 : le montage et l'export
+            await TestMontage(w);
+
             // recueil PDF (lecture du PDF par PdfPig)
             var pdf = Path.Combine(Environment.CurrentDirectory, "windows", "MyVerse.Tests", "donnees", "recueil-test.pdf");
             if (File.Exists(pdf))
@@ -1609,6 +1715,7 @@ public static class AutoTest
             Ok(File.Exists(App.SortieObs.Page), "page OBS (ecran.html)");
         }
         catch (Exception x) { Echec("exception : " + x); }
+        Fin:
         lock (log)
         {
             log.Add("");

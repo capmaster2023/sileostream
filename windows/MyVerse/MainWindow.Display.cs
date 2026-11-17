@@ -35,7 +35,7 @@ public partial class MainWindow
             if (mediaSalle == null) { ecran?.Rendu.ImageDisplay(b); EgliseRendu.ImageDisplay(b); }
             // 1.6.0 : MyStream (Zoom, YouTube) suit le lecteur de son image : celui-ci, l'écran de repos ou sa source principale
             if (lecteurStream == App.Sources) ImageStream();
-            if (duoMemeSource) ImagesDuo();
+            if (duoMemeSource || lecteurStreamDuo == App.Sources) ImagesDuo();
             DisplaySourceInfo.Text = App.Sources.Statut;
         };
         App.SourcesDefaut.Change += () =>

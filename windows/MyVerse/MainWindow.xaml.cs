@@ -56,6 +56,7 @@ public partial class MainWindow : Window
         OngletAnnonces.Checked += (_, _) => MontrerOnglet("annonces");
         OngletDuo.Checked += (_, _) => MontrerOnglet("duo");
         OngletSon.Checked += (_, _) => MontrerOnglet("son");
+        OngletMontage.Checked += (_, _) => MontrerOnglet("montage");
         OngletReglages.Checked += (_, _) => MontrerOnglet("reglages");
         Q.TextChanged += (_, _) =>
         {
@@ -226,6 +227,16 @@ public partial class MainWindow : Window
         bool closingAfterRecording = false;
         Closing += async (_, e) =>
         {
+            // 2.2.0 : une vidéo en cours d'envoi sur YouTube (ou d'export) : on demande avant de tout arrêter
+            if (!closingAfterRecording && MyVerse.Montages.Publications.EnCours)
+            {
+                if (!Dialogue.Confirmer(this, "Une vidéo est en cours de rendu ou d'envoi sur YouTube. Fermer Siloé Stream l'arrête (rien n'est publié ; si une copie complète est gardée sur le PC, l'envoi pourra reprendre).", "Fermer quand même", "Continuer l'envoi"))
+                {
+                    e.Cancel = true;
+                    return;
+                }
+                foreach (var p in MyVerse.Montages.Publications.Toutes) if (p.EnCours) p.Annuler();
+            }
             if (!closingAfterRecording && App.Audio.Recorder.AnyBusy)
             {
                 e.Cancel = true; IsEnabled = false;
@@ -391,16 +402,19 @@ public partial class MainWindow : Window
         // Réglages : toute la largeur, sans la colonne de droite ; Son : à la place de la colonne de gauche et du centre
         PanneauReglages.Visibility = V(o == "reglages");
         PanneauSon.Visibility = V(o == "son");
-        ColonneControle.Visibility = V(o != "reglages");
+        // 2.2.0 : le montage, sur toute la largeur (la page n'est construite qu'à la première visite)
+        if (o == "montage" && PanneauMontage.Child == null) PanneauMontage.Child = new Edition.PageMontage();
+        PanneauMontage.Visibility = V(o == "montage");
+        ColonneControle.Visibility = V(o is not ("reglages" or "montage"));
         // 1.5.0 : sur Culte, l'écran en direct est en grand, sans en-tête ; la recherche Ctrl K est en haut, sur toutes les pages
-        EnTete.Visibility = V(o is not ("reglages" or "son" or "agenda"));
+        EnTete.Visibility = V(o is not ("reglages" or "son" or "agenda" or "montage"));
         RechercheBible.Visibility = V(o == "bible");
         RechercheChants.Visibility = V(o == "chants");
         Recherches.Visibility = V(o is "bible" or "chants");
-        (o switch { "agenda" => OngletAgenda, "bible" => OngletBible, "annonces" => OngletAnnonces, "duo" => OngletDuo, "son" => OngletSon, "reglages" => OngletReglages, _ => OngletChants }).IsChecked = true;
+        (o switch { "agenda" => OngletAgenda, "bible" => OngletBible, "annonces" => OngletAnnonces, "duo" => OngletDuo, "son" => OngletSon, "montage" => OngletMontage, "reglages" => OngletReglages, _ => OngletChants }).IsChecked = true;
         MajPagesBiblio(o);
         // sur Culte, un clic sur une image la montre : pas de bouton « Montrer la sélection »
-        Afficher.Visibility = V(o is not ("agenda" or "reglages" or "son"));
+        Afficher.Visibility = V(o is not ("agenda" or "reglages" or "son" or "montage"));
         MajEntete();
         if (o == "agenda") Dispatcher.BeginInvoke(DispatcherPriority.Loaded, new Action(() => { LargeurVignettes(); DefilerVers(elementChoisi ?? R.ElementCourant); }));
     }
@@ -454,6 +468,12 @@ public partial class MainWindow : Window
         var f = Keyboard.FocusedElement;
         bool champ = f is TextBox or PasswordBox or ComboBox or ComboBoxItem;
         if (champ) return;
+        // 2.2.0 : sur la page Montage, Espace, S, flèches… pilotent le montage, pas l'écran de l'église
+        if (onglet == "montage")
+        {
+            if (PanneauMontage.Child is Edition.PageMontage pm && pm.Touche(e)) e.Handled = true;
+            return;
+        }
         switch (e.Key)
         {
             case Key.Divide:
@@ -1197,6 +1217,7 @@ public partial class MainWindow : Window
     public void TestOnglet(bool bible) => MontrerOnglet(bible);
     /// <summary>Test : affiche une page (« agenda », « bible », « chants », « annonces », « duo », « reglages »).</summary>
     public void TestPage(string o) => MontrerOnglet(o);
+    internal Edition.PageMontage? TestPageMontage => PanneauMontage.Child as Edition.PageMontage;
     public string TestTheme => ThemeBtn.Content as string ?? "";
     public void TestBasculerTheme() => ThemeBtn.RaiseEvent(new RoutedEventArgs(System.Windows.Controls.Primitives.ButtonBase.ClickEvent));
     public string TestDeroule => AgendaTitre.Text + " / " + AgendaInfo.Text;

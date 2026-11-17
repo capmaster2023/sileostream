@@ -140,6 +140,8 @@ public partial class App : Application
             Donnees = Donnees.Charger(dossier, Ressources);
             Bibles = new Bibles(Donnees);
             Regie = new Regie(Donnees, Bibles);
+            // 2.2.0 : les publications et exports du montage (celles qui tournaient à la fermeture : « interrompues »)
+            MyVerse.Montages.Publications.Charger(Donnees.Dossier);
         }
         catch (Exception x)
         {

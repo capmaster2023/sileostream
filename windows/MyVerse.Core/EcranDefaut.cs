@@ -66,11 +66,11 @@ public sealed partial class Regie
 
     /// <summary>
     /// 1.8.0 : un média devient la source principale de l'église (son écran par défaut) : l'écran principal du déroulé qui le
-    /// montre, ajouté au besoin. Faux pour un texte ou un dossier Duo.
+    /// montre, ajouté au besoin. Faux pour un texte. 2.2.0 : un dossier Duo peut aussi être la source principale.
     /// </summary>
     public bool ChoisirPrincipaleEglise(string annonceId)
     {
-        if (donnees.Annonces.FirstOrDefault(x => x.Id == annonceId) is not { Source: { Type: "image" or "camera" or "mycam" or "fenetre" or "video" } s }) return false;
+        if (donnees.Annonces.FirstOrDefault(x => x.Id == annonceId) is not { Source: { Type: "image" or "camera" or "mycam" or "fenetre" or "video" or "duo" } s }) return false;
         var e = Agenda.Elements.FirstOrDefault(x => x.Type == "principal" && x.Source is { } xs && MemeSource(xs, s)) ?? AjouterPrincipalAgenda(annonceId);
         if (e == null) return false;
         ChoisirEcranDefaut(e.Id);
@@ -93,7 +93,7 @@ public sealed partial class Regie
     {
         if (annonceId == null) return Ajouter(new ElementAgenda { Type = "principal", Titre = "Fond seul" }, position);
         if (donnees.Annonces.FirstOrDefault(x => x.Id == annonceId) is not { } a) return null;
-        if (a.Source is { Type: "duo" }) { Dire("Un dossier Duo ne peut pas servir d'écran principal."); return null; }
+        if (a.Source is { Type: "duo" } sd && !donnees.Duos.Any(d => d.Id == sd.Chemin)) { Dire($"Le duo « {a.Titre} » n'existe plus."); return null; }
         if (a.Source == null && BlocsTexte(a.Texte).Count == 0) { Dire($"« {a.Titre} » est vide."); return null; }
         return Ajouter(new ElementAgenda
         {
@@ -110,6 +110,7 @@ public sealed partial class Regie
         "mycam" => "MyCam",
         "fenetre" => "Capture de fenêtre",
         "video" => "Vidéo",
+        "duo" => "Duo",
         _ => BlocsTexte(e.Texte).Count > 0 ? "Texte" : "Fond seul",
     };
 
@@ -119,11 +120,20 @@ public sealed partial class Regie
     {
         if (e.Source is { Type: "image" or "camera" or "mycam" or "fenetre" or "video" } s)
             return b with { Mode = "media", Media = s, Lignes = Array.Empty<string>(), Ref = e.Titre, Second = null };
+        // 2.2.0 : un dossier Duo comme écran principal : ses deux éléments, chacun à sa place (habillage de l'écran gardé)
+        if (e.Source is { Type: "duo" } sd)
+            return EtatDuoSur(sd.Chemin, b) ?? EtatFond(b);
         var blocs = BlocsTexte(e.Texte);
         if (blocs.Count > 0)
             return b with { Mode = "chant", Media = null, Lignes = blocs[0].Split('\n').Where(l => l.Trim().Length > 0).ToArray(), Ref = "", Second = null };
         return EtatFond(b);
     }
+
+    /// <summary>2.2.0 : le dossier Duo <paramref name="dossierId"/> avec l'habillage de <paramref name="b"/> (null s'il est incomplet ou supprimé).</summary>
+    EtatEcran? EtatDuoSur(string dossierId, EtatEcran b) =>
+        donnees.Duos.FirstOrDefault(d => d.Id == dossierId) is { } dossier && EtatDuo(dossier) is { } ed
+            ? ed with { Theme = b.Theme, Taille = b.Taille, Presentation = b.Presentation }
+            : null;
 
     /// <summary>Le fond seul : l'habillage choisi, sans texte.</summary>
     static EtatEcran EtatFond(EtatEcran b) => b with { Mode = "fond", Media = null, Lignes = Array.Empty<string>(), Ref = "", Second = null };

@@ -93,7 +93,7 @@ public partial class MainWindow
             if (R.AjouterAnnonceAgenda(a.Id) is { } el) Toast($"« {el.Titre} » ajouté au programme « {R.Agenda.Nom} ».");
         }));
         // 3.3 : un écran qui reste ; quand il passe, il devient l'écran par défaut (Retirer de l'écran revient dessus)
-        if (a.Source?.Type != "duo")
+        // 2.2.0 : un dossier Duo aussi
             m.Items.Add(Article("Ajouter au programme comme écran principal", () =>
             {
                 if (R.AjouterPrincipalAgenda(a.Id) is { } el)
@@ -266,7 +266,8 @@ public partial class MainWindow
         DockPanel.SetDock(bas, Dock.Bottom);
         pile.Children.Add(bas);
         // 1.8.0 : deux boutons nets : en faire la source principale de l'église, ou celle de MyStream
-        if (type is "image" or "camera" or "mycam" or "fenetre" or "video")
+        // 2.2.0 : les dossiers Duo aussi (ses deux éléments deviennent la source principale de l'église ou de l'antenne)
+        if (type is "image" or "camera" or "mycam" or "fenetre" or "video" or "duo")
         {
             Button Bouton(string texte, string tip, Action clic)
             {

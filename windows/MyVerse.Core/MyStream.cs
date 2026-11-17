@@ -19,7 +19,8 @@ public sealed partial class Regie
 {
     /// <summary>Les sources qui peuvent être la source principale de MyStream (une image vivante ou fixe, pas un texte).</summary>
     /// <remarks>1.6.8 : pas une source « Dans l'église seulement » (MyVirtualCam choisie comme média, un Zoom projeté…).</remarks>
-    public static bool SourceStreamPossible(SourceDisplay? s) => s?.Type is "camera" or "mycam" or "fenetre" or "video" or "image" && !s.EgliseSeulement;
+    /// <remarks>2.2.0 : un dossier Duo aussi (ses deux éléments partent ensemble à l'antenne).</remarks>
+    public static bool SourceStreamPossible(SourceDisplay? s) => s?.Type is "camera" or "mycam" or "fenetre" or "video" or "image" or "duo" && !s.EgliseSeulement;
 
     /// <summary>La source principale de MyStream (une source Display), ou null : MyStream reste noir (sauf « Envoyer dans le stream »).</summary>
     public Annonce? SourcePrincipaleStream =>
@@ -31,7 +32,7 @@ public sealed partial class Regie
     /// <summary>Les sources Display qui peuvent être la source principale, caméras d'abord.</summary>
     public IReadOnlyList<Annonce> SourcesStreamPossibles =>
         donnees.Annonces.Where(a => SourceStreamPossible(a.Source))
-            .OrderBy(a => a.Source!.Type switch { "mycam" => 0, "camera" => 1, "fenetre" => 2, "video" => 3, _ => 4 })
+            .OrderBy(a => a.Source!.Type switch { "mycam" => 0, "camera" => 1, "fenetre" => 2, "video" => 3, "duo" => 5, _ => 4 })
             .ThenBy(a => a.Titre, StringComparer.CurrentCultureIgnoreCase).ToList();
 
     /// <summary>
@@ -112,12 +113,26 @@ public sealed partial class Regie
         // une source « MyStream seulement » est faite pour Internet : elle y part toujours (sans ce que l'église garde dans un coin)
         if (r is { Mode: "media", Media.StreamingSeulement: true }) return StreamSuitEglise ? r : r with { Duo = null };
         if (p == null) return StreamSuitEglise ? EtatCamera(e) : Noir(r);
-        var seule = r with { Mode = "media", Media = p, Lignes = Array.Empty<string>(), Ref = "", Second = null, Duo = null, Presentation = "plein" };
+        bool duo = p.Type == "duo";
+        var seule = duo ? EtatDuoStream(p, r)
+            : r with { Mode = "media", Media = p, Lignes = Array.Empty<string>(), Ref = "", Second = null, Duo = null, Presentation = "plein" };
         if (!StreamSuitEglise) return seule;
         // MyStream suit l'église ; quand elle n'a rien pour Internet, la source principale (avec ce qui est gardé dans un coin)
         if (Cible is CibleDefaut || r.Mode is "vide" or "fond" || r is { Mode: "media", Media.EgliseSeulement: true })
-            return r.Duo != null ? seule with { Duo = r.Duo } : seule;
+            return r.Duo != null && !duo ? seule with { Duo = r.Duo } : seule;
         return r;
+    }
+
+    /// <summary>
+    /// 2.2.0 : un dossier Duo source principale de MyStream : ses deux éléments, avec l'habillage de l'écran ; un élément
+    /// « Dans l'église seulement » n'y va pas. Noir si le dossier est incomplet ou supprimé.
+    /// </summary>
+    EtatEcran EtatDuoStream(SourceDisplay p, EtatEcran r)
+    {
+        if (EtatDuoSur(p.Chemin, r) is not { } d) return Noir(r);
+        if (d.Duo?.Etat.Media is { EgliseSeulement: true }) d = d with { Duo = null };
+        if (d is { Mode: "media", Media.EgliseSeulement: true }) d = d with { Mode = "vide", Media = null };
+        return d;
     }
 
     /// <summary>MyStream noir : rien n'a été choisi pour Internet.</summary>

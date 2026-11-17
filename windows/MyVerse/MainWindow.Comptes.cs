@@ -41,6 +41,7 @@ public partial class MainWindow
         OngletBiblio.Visibility = V(pages.Contains("bible") || pages.Contains("chants"));
         OngletMediasRail.Visibility = V(pages.Contains("annonces") || pages.Contains("duo"));
         OngletSon.Visibility = V(pages.Contains("son"));
+        OngletMontage.Visibility = V(pages.Contains("montage"));
         OngletReglages.Visibility = V(pages.Contains("reglages"));
         SegBible.Visibility = V(pages.Contains("bible"));
         SegChants.Visibility = V(pages.Contains("chants"));
