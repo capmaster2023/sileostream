@@ -398,7 +398,7 @@ if (Actif())
     var r12 = Donnees.Charger(dir, res).Reglages.Audio;
     r12.Normalize();
     var relue = r12.Sons.FirstOrDefault(s => s.Nom == "Chaire");
-    Ok(relue is { Genre: MyVerse.Audio.GenreSon.Voix, Appareil: "{umc}", Entree: 2, VolumeDb: -4.5, Coupe: true, EnleverBruit: true, VolumeRegulier: true, Eglise: false }, "1.3 : son relu avec ses réglages");
+    Ok(relue is { Genre: MyVerse.Audio.GenreSon.Voix, Appareil: "{umc}", Entree: 2, VolumeDb: -4.5, Coupe: true, EnleverBruit: false, VolumeRegulier: false, Eglise: false }, "1.3 : son relu avec ses réglages");
     Ok(r12.Sons.Count == 1, "2.4.0 : seulement le son ajouté (plus de son des vidéos ajouté tout seul)");
 }
 
@@ -1723,7 +1723,7 @@ if (Actif())
     var table = MyVerse.Audio.Son.Nouveau(MyVerse.Audio.GenreSon.Table, "Table");
     var ordi = MyVerse.Audio.Son.Nouveau(MyVerse.Audio.GenreSon.Ordinateur, "Ordinateur");
     var musique = MyVerse.Audio.Son.Nouveau(MyVerse.Audio.GenreSon.Fichier, "Attente");
-    Ok(voix is { EnleverBruit: true, VolumeRegulier: true, Eglise: false, Capture: MyVerse.Audio.AudioInputKind.Microphone }, "micro : bruit enlevé, volume régulier, pas dans les haut-parleurs (larsen)");
+    Ok(voix is { EnleverBruit: false, VolumeRegulier: false, Eglise: false, Capture: MyVerse.Audio.AudioInputKind.Microphone }, "2.4.2 : micro : aucun traitement automatique, pas dans les haut-parleurs (larsen)");
     Ok(piano is { EnleverBruit: false, VolumeRegulier: false, Eglise: false } && table is { EnleverBruit: false, Eglise: false }, "instrument et table de mixage : la musique n'est pas « nettoyée »");
     Ok(ordi.Capture == MyVerse.Audio.AudioInputKind.Sortie && !ordi.Eglise && musique is { Capture: MyVerse.Audio.AudioInputKind.Media, Eglise: true }, "ordinateur : capté sur sa sortie ; musique : entendue dans l'église");
     var cfg = new MyVerse.Audio.AudioConfiguration();

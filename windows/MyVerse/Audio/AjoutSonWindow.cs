@@ -248,23 +248,6 @@ public sealed class AjoutSonWindow : FenetreDialogue
             puces.Children.Add(b);
         }
         p.Children.Add(puces);
-        // ce que Siloé Stream va faire tout seul
-        string fait = genre switch
-        {
-            GenreSon.Voix => "Siloé Stream va enlever le bruit de fond et garder un volume régulier. Il ne le met pas dans les haut-parleurs de l'église (il y passe déjà par la table de mixage, et cela pourrait siffler).",
-            GenreSon.Instrument or GenreSon.Table => "Siloé Stream le garde tel quel, en stéréo : la musique n'est pas « nettoyée ». Il ne le remet pas dans les haut-parleurs de l'église.",
-            GenreSon.Ordinateur => "Il part dans les enregistrements et vers Zoom. Il s'entend déjà dans l'église par l'ordinateur.",
-            GenreSon.Video => "Le son des vidéos que vous projetez (Médias) s'entendra dans l'église et partira dans les enregistrements et vers Zoom. Il suit tout seul la vidéo à l'écran.",
-            _ => "Elle s'entendra dans l'église et partira dans les enregistrements. Elle attend que vous cliquiez Lire.",
-        };
-        var cadre = new Border { Background = Pinceau("OrLeger"), BorderBrush = Pinceau("OrBord"), BorderThickness = new Thickness(1), CornerRadius = new CornerRadius(12), Padding = new Thickness(16, 12, 16, 12), Margin = new Thickness(0, 12, 0, 0) };
-        var dedans = new StackPanel();
-        dedans.Children.Add(SonUi.Texte("Réglé tout seul", 13, "Or", FontWeights.Bold));
-        var t = SonUi.Texte(fait, 14, "Blanc");
-        t.Margin = new Thickness(0, 4, 0, 0);
-        dedans.Children.Add(t);
-        cadre.Child = dedans;
-        p.Children.Add(cadre);
         Dispatcher.BeginInvoke(new Action(() => { nom.Focus(); nom.SelectAll(); }), System.Windows.Threading.DispatcherPriority.Input);
         return p;
     }

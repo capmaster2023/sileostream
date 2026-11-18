@@ -30,6 +30,10 @@ internal sealed class ChoixAppareil : StackPanel
     readonly EcouteApercu apercu = new();
     readonly DispatcherTimer minuterie = new(DispatcherPriority.Render) { Interval = TimeSpan.FromMilliseconds(60) };
     readonly List<(Button Ligne, Vumetre? Vu, Branchement B)> lignes = new();
+    /// <summary>2.4.2 : les barres des listes déroulantes (l'appareil, l'entrée) et ce qu'elles écoutent.</summary>
+    readonly List<(Vumetre Vu, string Appareil, int Entree)> vus = new();
+    ComboBox? appareils;
+    bool remplissage;
     readonly StackPanel liste = new();
     readonly StackPanel listeAsio = new() { Visibility = Visibility.Collapsed, Margin = new Thickness(0, 8, 0, 0) };
     readonly Action peripheriques;
@@ -110,7 +114,7 @@ internal sealed class ChoixAppareil : StackPanel
             Style = SonUi.S("Btn"), Content = g, HorizontalContentAlignment = HorizontalAlignment.Stretch, Padding = new Thickness(12, 9, 14, 9),
             Margin = new Thickness(retrait, 0, 0, 6), Tag = rond,
         };
-        bouton.Click += (_, _) => { choix = b; MajChoix(); Change?.Invoke(); };
+        bouton.Click += (_, _) => { choix = b; MajChoix(); if (appareils != null) { remplissage = true; appareils.SelectedIndex = -1; remplissage = false; } Change?.Invoke(); };
         lignes.Add((bouton, barre, b));
         return bouton;
     }
@@ -130,51 +134,128 @@ internal sealed class ChoixAppareil : StackPanel
         }
     }
 
+    /// <summary>Une option de liste déroulante : le nom, une précision, et (pour un micro) sa barre qui bouge.</summary>
+    ComboBoxItem Option(string titre, string detail, object tag, string? appareil, int entree)
+    {
+        var g = new Grid();
+        g.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
+        g.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
+        var textes = new StackPanel { VerticalAlignment = VerticalAlignment.Center };
+        textes.Children.Add(new TextBlock { Text = titre, FontSize = 14.5, FontWeight = FontWeights.SemiBold, TextTrimming = TextTrimming.CharacterEllipsis });
+        if (detail.Length > 0) textes.Children.Add(new TextBlock { Text = detail, FontSize = 12, Foreground = P("Brume"), TextTrimming = TextTrimming.CharacterEllipsis });
+        g.Children.Add(textes);
+        if (appareil != null)
+        {
+            var vu = new Vumetre(8) { Width = 130, Margin = new Thickness(12, 0, 4, 0), VerticalAlignment = VerticalAlignment.Center };
+            Grid.SetColumn(vu, 1);
+            g.Children.Add(vu);
+            vus.Add((vu, appareil, entree));
+        }
+        return new ComboBoxItem { Content = g, Tag = tag, HorizontalContentAlignment = HorizontalAlignment.Stretch, Padding = new Thickness(8, 6, 8, 6) };
+    }
+
+    static ComboBox Liste() => new() { MinHeight = 46, FontSize = 14.5, HorizontalContentAlignment = HorizontalAlignment.Stretch, Margin = new Thickness(0, 0, 0, 6) };
+
+    sealed record Appareil(string Id, string Nom, int Entrees, string Titre, string Detail);
+
     void Remplir()
     {
         lignes.RemoveAll(l => liste.Children.Contains(l.Ligne));
         liste.Children.Clear();
-        if (genre == GenreSon.Ordinateur)
+        vus.Clear();
+        remplissage = true;
+        try
         {
-            liste.Children.Add(Ligne("Tout le son de l'ordinateur (conseillé)", "YouTube, musique, vidéos : tout ce qui sort par la sortie de Windows", new(AudioInputKind.Sortie, "default", "", 0, new() { 0 }), false));
-            foreach (var d in SonUi.A.Outputs())
-                liste.Children.Add(Ligne(AudioConfiguration.NomCourt(d.Name), "Seulement ce qui sort de « " + d.Name + " »", new(AudioInputKind.Sortie, d.Id, d.Name, 0, new() { 0 }), false));
-            MajChoix();
-            return;
-        }
-        var micros = SonUi.A.Microphones();
-        if (micros.Count == 0)
-        {
-            var vide = SonUi.Texte("Aucun micro ni carte son trouvé. Branchez-le à l'ordinateur : il apparaît ici tout seul.", 14, "Brume");
-            vide.Margin = new Thickness(2, 6, 2, 6);
-            liste.Children.Add(vide);
-        }
-        foreach (var d in micros)
-        {
-            apercu.Ecouter(d.Id);
-            int n = apercu.Entrees(d.Id);
-            if (n <= 0) n = ChurchAudioService.Entrees(d.Id);
-            string nom = AudioConfiguration.NomCourt(d.Name);
-            // une table de mixage arrive en stéréo ; un micro simple n'a qu'une ligne
-            bool detail = n > 2 || (n == 2 && genre != GenreSon.Table);
-            if (!detail)
+            if (genre == GenreSon.Ordinateur)
             {
-                liste.Children.Add(Ligne(nom, d.Name, new(AudioInputKind.Microphone, d.Id, d.Name, 0, new() { 0 }), true));
-                continue;
+                var sorties = Liste();
+                sorties.Items.Add(Option("Tout le son de l'ordinateur (conseillé)", "YouTube, musique, vidéos : tout ce qui sort par la sortie de Windows", new Branchement(AudioInputKind.Sortie, "default", "", 0, new() { 0 }), null, 0));
+                foreach (var d in SonUi.A.Outputs())
+                    sorties.Items.Add(Option(AudioConfiguration.NomCourt(d.Name), "Seulement ce qui sort de « " + d.Name + " »", new Branchement(AudioInputKind.Sortie, d.Id, d.Name, 0, new() { 0 }), null, 0));
+                sorties.SelectedIndex = Math.Max(0, sorties.Items.Cast<ComboBoxItem>().ToList().FindIndex(i => i.Tag is Branchement b && b.Meme(choix)));
+                sorties.SelectionChanged += (_, _) =>
+                {
+                    if (remplissage || sorties.SelectedItem is not ComboBoxItem { Tag: Branchement b }) return;
+                    choix = b; Change?.Invoke();
+                };
+                liste.Children.Add(sorties);
+                return;
             }
-            var titre = SonUi.Texte($"{nom} · {n} entrées", 13, "Brume", FontWeights.Bold);
-            titre.Margin = new Thickness(2, 8, 0, 6);
-            liste.Children.Add(titre);
-            for (int k = 1; k <= Math.Min(n, AudioConfiguration.MaxEntrees); k++)
-                liste.Children.Add(Ligne($"Entrée {k}", d.Name, new(AudioInputKind.Microphone, d.Id, d.Name, k, new() { 0 }), true, 14));
-            liste.Children.Add(Ligne("Toutes les entrées ensemble (stéréo)", genre == GenreSon.Voix ? "Si votre micro est sur l'entrée 1 et la 2" : "Gauche et droite, comme Windows les donne", new(AudioInputKind.Microphone, d.Id, d.Name, 0, new() { 0 }), true, 14));
+            var micros = SonUi.A.Microphones();
+            var options = new List<Appareil>();
+            if (choix.Capture == AudioInputKind.Microphone && choix.Appareil == "default")
+                options.Add(new("default", "", 1, "Micro de Windows (par défaut)", "Celui choisi dans les paramètres de Windows"));
+            foreach (var d in micros)
+            {
+                apercu.Ecouter(d.Id);
+                int n = apercu.Entrees(d.Id);
+                if (n <= 0) n = ChurchAudioService.Entrees(d.Id);
+                options.Add(new(d.Id, d.Name, n, AudioConfiguration.NomCourt(d.Name), d.Name + (n > 1 ? $" · {n} entrées" : "")));
+            }
+            // un choix enregistré mais débranché reste visible
+            if (choix.Capture == AudioInputKind.Microphone && choix.Appareil != "default" && micros.All(d => d.Id != choix.Appareil))
+                options.Add(new(choix.Appareil, choix.NomAppareil, 0, (choix.NomAppareil.Length > 0 ? AudioConfiguration.NomCourt(choix.NomAppareil) : "Appareil choisi") + " (débranché)", "Il reviendra tout seul quand il sera rebranché"));
+            if (options.Count == 0)
+            {
+                var vide = SonUi.Texte("Aucun micro ni carte son trouvé. Branchez-le à l'ordinateur : il apparaît ici tout seul.", 14, "Brume");
+                vide.Margin = new Thickness(2, 6, 2, 6);
+                liste.Children.Add(vide);
+                appareils = null;
+                return;
+            }
+            liste.Children.Add(SonUi.Texte("Appareil", 13, "Brume", FontWeights.Bold));
+            var cbAppareils = Liste();
+            appareils = cbAppareils;
+            foreach (var o in options)
+                cbAppareils.Items.Add(Option(o.Titre, o.Detail, o, o.Id == "default" || o.Entrees == 0 ? null : o.Id, 0));
+            liste.Children.Add(cbAppareils);
+            var titreEntree = SonUi.Texte("Entrée", 13, "Brume", FontWeights.Bold);
+            titreEntree.Margin = new Thickness(0, 6, 0, 0);
+            var cbEntrees = Liste();
+            liste.Children.Add(titreEntree);
+            liste.Children.Add(cbEntrees);
+
+            void Entrees(Appareil o)
+            {
+                vus.RemoveAll(v => cbEntrees.Items.Cast<ComboBoxItem>().Any(i => i.Content is Grid g && g.Children.Contains(v.Vu)));
+                cbEntrees.Items.Clear();
+                // une table de mixage arrive en stéréo ; un micro simple n'a qu'une entrée
+                bool detail = o.Entrees > 2 || (o.Entrees == 2 && genre != GenreSon.Table);
+                titreEntree.Visibility = cbEntrees.Visibility = detail ? Visibility.Visible : Visibility.Collapsed;
+                if (!detail) return;
+                for (int k = 1; k <= Math.Min(o.Entrees, AudioConfiguration.MaxEntrees); k++)
+                    cbEntrees.Items.Add(Option($"Entrée {k}", "", k, o.Id, k));
+                cbEntrees.Items.Add(Option("Toutes les entrées ensemble (stéréo)", genre == GenreSon.Voix ? "Si votre micro est sur l'entrée 1 et la 2" : "Gauche et droite, comme Windows les donne", 0, o.Id, 0));
+                int voulue = choix.Appareil == o.Id ? choix.Entree : 0;
+                cbEntrees.SelectedIndex = Math.Max(0, cbEntrees.Items.Cast<ComboBoxItem>().ToList().FindIndex(i => i.Tag is int k && k == voulue));
+            }
+            cbAppareils.SelectionChanged += (_, _) =>
+            {
+                if (remplissage || cbAppareils.SelectedItem is not ComboBoxItem { Tag: Appareil o }) return;
+                remplissage = true;
+                Entrees(o);
+                int entree = cbEntrees.Visibility == Visibility.Visible && cbEntrees.SelectedItem is ComboBoxItem { Tag: int k } ? k : 0;
+                remplissage = false;
+                choix = new(AudioInputKind.Microphone, o.Id, o.Nom, entree, new() { 0 });
+                MajChoix();
+                Change?.Invoke();
+            };
+            cbEntrees.SelectionChanged += (_, _) =>
+            {
+                if (remplissage || cbEntrees.SelectedItem is not ComboBoxItem { Tag: int k } || choix.Capture != AudioInputKind.Microphone) return;
+                choix = choix with { Entree = k };
+                Change?.Invoke();
+            };
+            int choisi = choix.Capture == AudioInputKind.Microphone ? options.FindIndex(o => string.Equals(o.Id, choix.Appareil, StringComparison.OrdinalIgnoreCase)) : -1;
+            cbAppareils.SelectedIndex = choisi;
+            if (choisi >= 0) Entrees(options[choisi]);
+            else titreEntree.Visibility = cbEntrees.Visibility = Visibility.Collapsed;
         }
-        // un choix enregistré mais débranché reste visible
-        if (choix.Capture == AudioInputKind.Microphone && micros.All(d => d.Id != choix.Appareil) && choix.Appareil != "default")
-            liste.Children.Add(Ligne((choix.NomAppareil.Length > 0 ? AudioConfiguration.NomCourt(choix.NomAppareil) : "Appareil choisi") + " (débranché)", "Il reviendra tout seul quand il sera rebranché", choix, false));
-        if (choix.Capture == AudioInputKind.Microphone && choix.Appareil == "default")
-            liste.Children.Insert(0, Ligne("Micro de Windows (par défaut)", "Celui choisi dans les paramètres de Windows", choix, false));
-        MajChoix();
+        finally
+        {
+            remplissage = false;
+            MajChoix();
+        }
     }
 
     void RemplirAsio()
@@ -219,5 +300,6 @@ internal sealed class ChoixAppareil : StackPanel
         apercu.Relever();
         foreach (var (_, vu, b) in lignes)
             if (vu != null && b.Capture == AudioInputKind.Microphone) vu.Niveau(apercu.Crete(b.Appareil, b.Entree));
+        foreach (var (vu, appareil, entree) in vus) vu.Niveau(apercu.Crete(appareil, entree));
     }
 }

@@ -355,7 +355,8 @@ public sealed class AudioConfiguration
         {
             case GenreSon.Voix:
                 if (s.Capture is not (AudioInputKind.Microphone or AudioInputKind.Asio)) s.Capture = AudioInputKind.Microphone;
-                s.EnleverBruit = true; s.VolumeRegulier = true; s.Eglise = false;
+                // 2.4.2 : plus rien d'automatique : bruit et volume se règlent à la main (Régler › Aides)
+                s.EnleverBruit = false; s.VolumeRegulier = false; s.Eglise = false;
                 break;
             case GenreSon.Instrument:
             case GenreSon.Table:

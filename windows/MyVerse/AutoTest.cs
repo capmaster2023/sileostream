@@ -231,7 +231,7 @@ public static class AutoTest
             musique.Fichier = sinus;
             musique.Boucle = true;
             foreach (var s in new[] { pasteur, chorale, piano, ordi, musique }) cfg.Ajouter(s);
-            Ok(pasteur.EnleverBruit && pasteur.VolumeRegulier && !pasteur.Eglise, "une voix : bruit enlevé, volume régulier, pas dans l'église (pas de larsen)");
+            Ok(!pasteur.EnleverBruit && !pasteur.VolumeRegulier && !pasteur.Eglise, "2.4.2 : une voix : aucun traitement automatique, pas dans l'église (pas de larsen)");
             Ok(!piano.EnleverBruit && !piano.VolumeRegulier && !piano.Eglise, "un instrument : gardé tel quel (la musique ne se « nettoie » pas)");
             Ok(musique.Eglise && musique.Capture == MyVerse.Audio.AudioInputKind.Media, "une musique : entendue dans l'église");
             Ok(cfg.Sons[^1] == videos && cfg.Sons.Count == 6, "les sons ajoutés passent avant le son des vidéos, qui reste le dernier");
