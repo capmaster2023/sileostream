@@ -190,6 +190,8 @@ Section "Uninstall"
     RMDir /r "$APPDATA\VerseLight"
     RMDir /r "$APPDATA\MyVerse.exe"
     RMDir /r "$APPDATA\VerseLight.exe"
+    RMDir /r "$APPDATA\SiloeStream-OBS"
+    RMDir /r "$APPDATA\VerseLight-OBS"
     RMDir /r "$LOCALAPPDATA\Programs\MyVerse\MyVerse.exe.WebView2"
     RMDir /r "$LOCALAPPDATA\Programs\MyVerse\VerseLight.exe.WebView2"
   garder_donnees:

@@ -206,7 +206,12 @@ public sealed class PageMiniature : Grid
         // ---------- à droite : réglages, conseils, aperçu YouTube
         var colD = new StackPanel();
         colD.Children.Add(inspecteur);
-        colD.Children.Add(new Capitales { Libelle = "Sur YouTube", Margin = new Thickness(0, 18, 0, 8) });
+        colD.Children.Add(new Capitales { Libelle = "Exemple : comment YouTube l'affichera", Margin = new Thickness(0, 18, 0, 4) });
+        colD.Children.Add(new TextBlock
+        {
+            Text = "Simple aperçu : rien n'est publié ni projeté. La miniature part sur YouTube seulement quand vous publiez une vidéo (« Utiliser pour la publication », puis « Publier sur YouTube »).",
+            FontSize = 12, Foreground = P("Brume"), TextWrapping = TextWrapping.Wrap, Margin = new Thickness(0, 0, 0, 8),
+        });
         colD.Children.Add(ApercuYouTube());
         colD.Children.Add(conseils);
         var defilD = new ScrollViewer { Content = colD, VerticalScrollBarVisibility = ScrollBarVisibility.Auto, HorizontalScrollBarVisibility = ScrollBarVisibility.Disabled, Padding = new Thickness(0, 0, 6, 0) };
@@ -1176,7 +1181,7 @@ public sealed class PageMiniature : Grid
         var textes = new StackPanel();
         ytTitre.Text = projet.Nom; ytTitre.Foreground = Brushes.White; ytTitre.FontSize = 14; ytTitre.FontWeight = FontWeights.SemiBold; ytTitre.TextWrapping = TextWrapping.Wrap; ytTitre.MaxHeight = 40;
         textes.Children.Add(ytTitre);
-        textes.Children.Add(new TextBlock { Text = (App.Donnees.Reglages.Direct.Chaine is { Length: > 0 } ch ? ch : "Votre chaîne") + "\n128 vues · il y a 2 heures", Foreground = new SolidColorBrush(Color.FromRgb(170, 170, 170)), FontSize = 12, Margin = new Thickness(0, 4, 0, 0) });
+        textes.Children.Add(new TextBlock { Text = (App.Donnees.Reglages.Direct.Chaine is { Length: > 0 } ch ? ch : "Votre chaîne") + "\nExemple · accueil YouTube", Foreground = new SolidColorBrush(Color.FromRgb(170, 170, 170)), FontSize = 12, Margin = new Thickness(0, 4, 0, 0) });
         infos.Children.Add(textes);
         pile.Children.Add(infos);
         var suggestion = new DockPanel { Margin = new Thickness(0, 16, 0, 0) };
@@ -1187,7 +1192,7 @@ public sealed class PageMiniature : Grid
         ytTitrePetit.Text = projet.Nom; ytTitrePetit.Foreground = Brushes.White; ytTitrePetit.FontSize = 12.5; ytTitrePetit.FontWeight = FontWeights.SemiBold; ytTitrePetit.TextWrapping = TextWrapping.Wrap;
         var t2 = new StackPanel();
         t2.Children.Add(ytTitrePetit);
-        t2.Children.Add(new TextBlock { Text = "Suggestion · téléphone", Foreground = new SolidColorBrush(Color.FromRgb(170, 170, 170)), FontSize = 11, Margin = new Thickness(0, 4, 0, 0) });
+        t2.Children.Add(new TextBlock { Text = "Exemple · suggestion sur téléphone", Foreground = new SolidColorBrush(Color.FromRgb(170, 170, 170)), FontSize = 11, Margin = new Thickness(0, 4, 0, 0) });
         suggestion.Children.Add(t2);
         pile.Children.Add(suggestion);
         return new Border { Background = fond, CornerRadius = new CornerRadius(12), Padding = new Thickness(12), Child = pile };
