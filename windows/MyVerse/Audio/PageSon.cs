@@ -386,25 +386,30 @@ public sealed class PageSon : Grid
     {
         var corps = new StackPanel();
 
-        // tête : l'icône, le nom, ce que c'est, « Régler »
-        var tete = new DockPanel();
-        var regler = new Button { Style = S("BtnPetit"), Content = "Régler", VerticalAlignment = VerticalAlignment.Top, Margin = new Thickness(8, 0, 0, 0) };
+        // tête : l'icône et « Régler » en haut ; dessous, le nom en entier (2.4.0 : sur deux lignes au besoin) et ce que c'est
+        var tete = new StackPanel();
+        var hautCarte = new DockPanel();
+        var regler = new Button { Style = S("BtnPetit"), Content = "Régler", VerticalAlignment = VerticalAlignment.Center, Margin = new Thickness(8, 0, 0, 0) };
         regler.ToolTip = s.Genre == GenreSon.Video ? "Dans l'église, volume régulier" : "Son nom, où il est branché, ses aides";
         regler.Click += (_, _) => ActionsSon.Regler(s, this);
         DockPanel.SetDock(regler, Dock.Right);
-        tete.Children.Add(regler);
+        hautCarte.Children.Add(regler);
         var pastille = SonUi.Pastille(s.Genre, 42);
-        pastille.Margin = new Thickness(0, 0, 12, 0);
-        DockPanel.SetDock(pastille, Dock.Left);
-        tete.Children.Add(pastille);
-        var noms = new StackPanel { VerticalAlignment = VerticalAlignment.Center };
-        var nom = SonUi.Texte(s.Nom, 16, "Blanc", FontWeights.Bold, false);
+        pastille.HorizontalAlignment = HorizontalAlignment.Left;
+        hautCarte.Children.Add(pastille);
+        tete.Children.Add(hautCarte);
+        var nom = SonUi.Texte(s.Nom, 16, "Blanc", FontWeights.Bold, true);
+        nom.Margin = new Thickness(0, 10, 0, 0);
+        nom.MaxHeight = 46;
+        nom.TextTrimming = TextTrimming.CharacterEllipsis;
         nom.ToolTip = s.Nom;
-        noms.Children.Add(nom);
-        var description = SonUi.Texte(AudioConfiguration.Description(s), 12.5, "Brume", null, false);
+        tete.Children.Add(nom);
+        var description = SonUi.Texte(AudioConfiguration.Description(s), 12.5, "Brume", null, true);
+        description.MaxHeight = 36;
+        description.TextTrimming = TextTrimming.CharacterEllipsis;
+        description.Margin = new Thickness(0, 2, 0, 0);
         description.ToolTip = description.Text;
-        noms.Children.Add(description);
-        tete.Children.Add(noms);
+        tete.Children.Add(description);
         corps.Children.Add(tete);
 
         // la barre qui bouge

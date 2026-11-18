@@ -304,8 +304,8 @@ if (Actif())
     var d0 = Donnees.Charger(Temp(), res);
     Ok(d0.Chants.Count == 0 && d0.Agendas.Count == 0 && d0.Annonces.Count == 0 && d0.Duos.Count == 0, $"4.2 : premier démarrage vide, aucun chant ({d0.Chants.Count})");
     var a0 = d0.Reglages.Audio; a0.Normalize();
-    Ok(a0.Sons.Count == 1 && a0.Sons[0].Genre == MyVerse.Audio.GenreSon.Video && a0.Sons[0].Eglise && a0.Profiles.Count == 0 && a0.VirtualSounds.Count == 0,
-        "1.3 : premier démarrage, un seul son : celui des vidéos de Display (entendu dans l'église), aucun enregistrement ni envoi");
+    Ok(a0.Sons.Count == 0 && a0.Profiles.Count == 0 && a0.VirtualSounds.Count == 0,
+        "2.4.0 : premier démarrage : aucun son ajouté tout seul (on choisit ses sons), aucun enregistrement ni envoi");
     var bibles0 = new Bibles(d0).Toutes();
     Ok(bibles0.Count == 2 && bibles0.Any(b => b.Id == "lsg" && b.Integree) && bibles0.Any(b => b.Id == "kjv" && b.Integree), "4.2 : seulement les Bibles libres de droits Louis Segond 1910 et King James", string.Join(", ", bibles0.Select(b => b.Id)));
     Egal(d0.Reglages.Bibles.Principale, "lsg", "Bible principale : Louis Segond 1910");
@@ -384,7 +384,7 @@ if (Actif())
     Egal(d12.Chants.Count, 1, "1.2 : chants conservés");
     var a12 = d12.Reglages.Audio;
     a12.Normalize();
-    Egal(string.Join(",", a12.Sons.Select(s => s.Genre)), "Video", "1.2 bêta : l'ancien mixeur n'est pas repris, seul le son des vidéos");
+    Egal(string.Join(",", a12.Sons.Select(s => s.Genre)), "", "1.2 bêta : l'ancien mixeur n'est pas repris (2.4.0 : aucun son ajouté tout seul)");
     Egal(a12.Profiles.Count, 0, "1.2 bêta : anciens profils d'enregistrement non repris (aucun préréglage)");
     Egal(a12.Eglise.Appareil, "default", "1.2 bêta : l'église sur la sortie de Windows");
     Egal(a12.Version, MyVerse.Audio.AudioConfiguration.Actuelle, "1.2 bêta : version des réglages audio mise à jour");
@@ -399,7 +399,7 @@ if (Actif())
     r12.Normalize();
     var relue = r12.Sons.FirstOrDefault(s => s.Nom == "Chaire");
     Ok(relue is { Genre: MyVerse.Audio.GenreSon.Voix, Appareil: "{umc}", Entree: 2, VolumeDb: -4.5, Coupe: true, EnleverBruit: true, VolumeRegulier: true, Eglise: false }, "1.3 : son relu avec ses réglages");
-    Ok(r12.Sons.Count == 2 && r12.Sons[^1].Genre == MyVerse.Audio.GenreSon.Video, "le son des vidéos reste le dernier");
+    Ok(r12.Sons.Count == 1, "2.4.0 : seulement le son ajouté (plus de son des vidéos ajouté tout seul)");
 }
 
 // ------------------------------------------------------------------ régie
@@ -1389,6 +1389,7 @@ if (Actif())
     // 1.3 : chaque destination reçoit « tout le son » ou les sons choisis ; Siloé Stream donne les pistes d'OBS tout seul
     var cfg = new MyVerse.Audio.AudioConfiguration();
     foreach (var n in new[] { "guitare", "piano", "chanteur", "pasteur" }) cfg.Ajouter(new MyVerse.Audio.Son { Id = n, Nom = n, Genre = MyVerse.Audio.GenreSon.Voix });
+    cfg.Ajouter(MyVerse.Audio.Son.Nouveau(MyVerse.Audio.GenreSon.Video, "Vidéos de Display"));
     var louange = new MyVerse.Audio.RecordingProfile { Name = "Louange", ChoixSons = new() { "guitare", "piano", "chanteur" } };
     var predication = new MyVerse.Audio.RecordingProfile { Name = "Prédication", ChoixSons = new() { "pasteur", "inconnu" }, DisplayIds = { "projection", "camera1" }, Layout = "cote" };
     var culte = new MyVerse.Audio.RecordingProfile { Name = "Culte" };
@@ -1409,15 +1410,16 @@ if (Actif())
     string Pistes(string id) => string.Concat(Enumerable.Range(1, 6).Select(t => plan.Moteur.First(x => x.Id == id).DansPiste(t) ? t.ToString() : "·"));
     Egal(Pistes("pasteur"), "1·3···", "Pasteur : tout le son et Prédication");
     Egal(Pistes("piano"), "12····", "Piano : tout le son et Louange (avec YouTube)");
-    Egal(Pistes(cfg.SonVideos.Id), "1·····", "Vidéos : tout le son seulement");
+    Egal(Pistes(cfg.SonVideos!.Id), "1·····", "Vidéos : tout le son seulement");
     Egal(cfg.Recoit(predication), "pasteur seulement", "ce que reçoit une destination, en mots");
     Egal(cfg.Recoit(louange), "guitare, piano et chanteur", "plusieurs sons, en mots");
     Egal(cfg.Recoit(zoom), "Tout le son", "tout le son, en mots");
     flux.Enabled = false;
     cfg.Planifier(actives: new HashSet<string> { predication.Id });
     Ok(predication.Track == 3 && flux.Track == 2, "un enregistrement qui démarre garde sa piste : rien ne bouge (pas d'ancien mélange au début du fichier)", $"prédication {predication.Track}, YouTube {flux.Track}");
-    // retirer un son : il disparaît des choix ; le son des vidéos ne se retire pas
-    Ok(cfg.Retirer(cfg.Sons.First(x => x.Id == "pasteur")) && predication.ChoixSons!.Count == 0 && !cfg.Retirer(cfg.SonVideos), "retirer un son l'enlève des destinations ; le son des vidéos reste");
+    // retirer un son : il disparaît des choix ; 2.4.0 : le son des vidéos se retire aussi
+    Ok(cfg.Retirer(cfg.Sons.First(x => x.Id == "pasteur")) && predication.ChoixSons!.Count == 0 && cfg.Retirer(cfg.SonVideos!) && cfg.SonVideos == null,
+        "retirer un son l'enlève des destinations ; le son des vidéos se retire aussi (2.4.0)");
     Egal(cfg.Recoit(predication), "Aucun son", "plus aucun son choisi");
     // trop de mélanges différents : les suivants reçoivent tout le son, avec une alerte
     var beaucoup = new MyVerse.Audio.AudioConfiguration();
@@ -1448,7 +1450,7 @@ if (Actif())
     var z30 = a30.VirtualSounds.FirstOrDefault();
     Ok(a30.VirtualSounds.Count == 1 && z30 is { Name: "Zoom", Enabled: true } && z30.ChoixSons is ["a"],
         "3.0.0 : la sortie MyVirtualSound devient « Zoom », avec les sources de son ancienne piste", string.Join(",", z30?.ChoixSons ?? new()));
-    Ok(a30.Sons.Select(x => x.Genre).SequenceEqual(new[] { MyVerse.Audio.GenreSon.Voix, MyVerse.Audio.GenreSon.Ordinateur, MyVerse.Audio.GenreSon.Video }), "3.0.0 : un micro, le son de l'ordinateur, puis le son des vidéos");
+    Ok(a30.Sons.Select(x => x.Genre).SequenceEqual(new[] { MyVerse.Audio.GenreSon.Voix, MyVerse.Audio.GenreSon.Ordinateur }), "3.0.0 : un micro et le son de l'ordinateur (2.4.0 : pas de son des vidéos ajouté tout seul)");
     Ok(a30.Profiles.Count == 0 && a30.AncienneSortie == null && a30.Version == MyVerse.Audio.AudioConfiguration.Actuelle, "3.0.0 : le profil automatique n'est pas repris");
     var relu30 = System.Text.Json.JsonSerializer.Serialize(a30, Donnees.Json);
     Ok(relu30.Contains("\"sortiesVirtuelles\"") && relu30.Contains("\"enregistrements\"") && relu30.Contains("\"sons\"") && !relu30.Contains("\"virtualSound\"") && !relu30.Contains("SourceIds")
@@ -1727,9 +1729,11 @@ if (Actif())
     var cfg = new MyVerse.Audio.AudioConfiguration();
     foreach (var s in new[] { voix, piano, table, ordi, musique }) cfg.Ajouter(s);
     cfg.Normalize();
-    Ok(cfg.Sons.Count == 6 && cfg.Sons[^1].Genre == MyVerse.Audio.GenreSon.Video && cfg.Sons[^1].Nom == "Vidéos de Display", "le son des vidéos est ajouté tout seul, à la fin");
+    Ok(cfg.Sons.Count == 5 && cfg.SonVideos == null, "2.4.0 : le son des vidéos n'est plus ajouté tout seul");
+    cfg.Ajouter(MyVerse.Audio.Son.Nouveau(MyVerse.Audio.GenreSon.Video, "Vidéos de Display"));
+    cfg.Normalize();
     var deuxieme = MyVerse.Audio.Son.Nouveau(MyVerse.Audio.GenreSon.Voix, "Chorale"); cfg.Ajouter(deuxieme);
-    Ok(cfg.Sons[^1].Genre == MyVerse.Audio.GenreSon.Video && cfg.Sons[^2] == deuxieme, "un son ajouté passe avant le son des vidéos");
+    Ok(cfg.Sons[^1].Genre == MyVerse.Audio.GenreSon.Video && cfg.Sons[^2] == deuxieme, "choisi, le son des vidéos reste le dernier : un son ajouté passe avant lui");
     cfg.Retirer(deuxieme);
     Egal(cfg.NomLibre("pasteur"), "pasteur 2", "nom suivant (sans tenir compte des majuscules)");
     Egal(MyVerse.Audio.AudioConfiguration.Description(new MyVerse.Audio.Son { Genre = MyVerse.Audio.GenreSon.Voix, Appareil = "{umc}", NomAppareil = "Line In (Behringer UMC404HD)", Entree = 2 }),
@@ -1741,7 +1745,7 @@ if (Actif())
         && mv.Monitoring == MyVerse.Audio.AudioMonitoring.Off && mv.Kind == MyVerse.Audio.AudioInputKind.Microphone, "moteur : une voix est mono, nettoyée et régulière, hors de l'église");
     var mm = plan.Moteur.First(x => x.Id == musique.Id);
     Ok(mm.DemarrerArrete && !mm.Mono && mm.Filters.Count == 0 && mm.Monitoring == MyVerse.Audio.AudioMonitoring.AndOutput, "moteur : la musique attend « Lire », stéréo, dans l'église");
-    var mvid = plan.Moteur.First(x => x.Id == cfg.SonVideos.Id);
+    var mvid = plan.Moteur.First(x => x.Id == cfg.SonVideos!.Id);
     Ok(mvid.FollowProjection && mvid.MediaPath == "C:\\videos\\annonce.mp4" && !mvid.DemarrerArrete && mvid.Monitoring == MyVerse.Audio.AudioMonitoring.AndOutput, "moteur : le son des vidéos joue la vidéo à l'écran, dans l'église");
     var filtres = plan.Moteur.SelectMany(x => x.Filters.Select(f => f.Id)).ToList();
     Ok(filtres.Distinct().Count() == filtres.Count, "chaque aide a son propre identifiant dans OBS");
@@ -1805,8 +1809,8 @@ if (Actif())
     var d41 = Donnees.Charger(dir41, res);
     var a41 = d41.Reglages.Audio;
     a41.Normalize();
-    Egal(string.Join(",", a41.Sons.Select(x => x.Nom)), "Audio du bureau,Micro/Aux,Pasteur,Chorale,Guitare,Vidéos de Display", "4.1 : toutes les sources deviennent des sons, dans le même ordre ; le son des vidéos s'ajoute à la fin");
-    Egal(string.Join(",", a41.Sons.Select(x => x.Genre)), "Ordinateur,Voix,Voix,Voix,Instrument,Video", "4.1 : chaque son reconnu (l'ordinateur, des micros, une guitare)");
+    Egal(string.Join(",", a41.Sons.Select(x => x.Nom)), "Audio du bureau,Micro/Aux,Pasteur,Chorale,Guitare", "4.1 : toutes les sources deviennent des sons, dans le même ordre (2.4.0 : pas de son des vidéos ajouté tout seul)");
+    Egal(string.Join(",", a41.Sons.Select(x => x.Genre)), "Ordinateur,Voix,Voix,Voix,Instrument", "4.1 : chaque son reconnu (l'ordinateur, des micros, une guitare)");
     var pasteur41 = a41.Sons.First(x => x.Id == "pasteur");
     Ok(pasteur41 is { Entree: 1, VolumeDb: -3, Appareil: "{umc}", NomAppareil: "Line (UMC404HD)", Eglise: false } && a41.Sons.First(x => x.Id == "chorale").Eglise,
         "4.1 : entrée, volume et appareil gardés ; le monitoring devient « dans l'église »");
@@ -1842,7 +1846,7 @@ if (Actif())
     """);
     var a6 = Donnees.Charger(dir12, res).Reglages.Audio; a6.Normalize();
     Egal(string.Join(",", a6.Sons.Select(x => x.Nom + ":" + x.Genre)), "Capture audio (entrée):Voix,Piano:Instrument,Chant:Voix,Vidéo Display:Video", "1.2 : chaque source devient un son ; la vidéo projetée passe à la fin");
-    Ok(a6.Sons.Count(x => x.Genre == MyVerse.Audio.GenreSon.Video) == 1 && a6.SonVideos.Id == "video" && a6.SonVideos.Eglise, "1.2 : le son de la vidéo projetée est gardé (un seul) et s'entend maintenant dans l'église");
+    Ok(a6.Sons.Count(x => x.Genre == MyVerse.Audio.GenreSon.Video) == 1 && a6.SonVideos!.Id == "video" && a6.SonVideos.Eglise, "1.2 : le son de la vidéo projetée est gardé (un seul) et s'entend maintenant dans l'église");
     Ok(a6.Sons.First(x => x.Id == "micro") is { EnleverBruit: true, VolumeRegulier: false, Entree: 1, VolumeDb: -2 }, "1.2 : réduction du bruit gardée ; entrée et volume gardés");
     var asio6 = a6.Sons.First(x => x.Id == "asio");
     Ok(asio6.Capture == MyVerse.Audio.AudioInputKind.Asio && asio6.EntreesAsio.SequenceEqual(new[] { 1 }) && asio6.Appareil == "Focusrite USB ASIO", "1.2 : capture ASIO gardée");

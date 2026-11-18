@@ -2,7 +2,7 @@
 ; Le dossier « app » (copié en entier, sous-dossiers compris) contient aussi « obs » : libobs (OBS Studio 33.0.1, GNU GPL v2 ou ultérieure)
 ; et COPYING.txt, ainsi que « ffmpeg » : ffmpeg.exe 8.0.1 (gyan.dev, GNU GPL v3) et sa licence, pour le FLAC et la vidéo des enregistrements. VB-CABLE n'est jamais inclus : Siloé Stream le télécharge à la demande depuis le site officiel.
 ; Installation par utilisateur (pas besoin d'être administrateur), au même endroit que la 3.x : la mise à jour la remplace.
-; Chants, réglages, Bibles importées et téléphones jumelés (%APPDATA%\SiloeStream) sont gardés.
+; Une mise à jour garde chants, réglages, Bibles importées et téléphones jumelés (%APPDATA%\SiloeStream) ; la désinstallation propose de les effacer.
 Unicode true
 !include "MUI2.nsh"
 
@@ -162,7 +162,10 @@ Section "MyVerse"
   WriteRegDWORD HKCU "${UNINST_KEY}" "NoRepair" 1
 SectionEnd
 
-; Désinstaller : retire le programme, garde chants, réglages et téléphones jumelés (%APPDATA%\SiloeStream)
+; Désinstaller : retire le programme ; 2.4.0 : propose d'effacer aussi les données (chants, Bibles importées, photos, programmes,
+; réglages, comptes, téléphones jumelés) et les anciens profils de MyVerse 3.x qui les faisaient revenir : une réinstallation
+; repart alors de zéro. Les enregistrements, montages et miniatures (dossier Vidéos) ne sont jamais effacés.
+; Sans fenêtre (/S : tests, scripts) : les données sont gardées.
 Section "Uninstall"
   Call un.FermerMyVerse
   ExecShellWait "runas" "$INSTDIR\SiloeStream.exe" "--virtualcam-uninstall" SW_HIDE
@@ -182,6 +185,14 @@ Section "Uninstall"
   DeleteRegValue HKCU "Software\Microsoft\Windows\CurrentVersion\Run" "MyChurch Agent"
   DeleteRegValue HKCU "Software\Microsoft\Windows\CurrentVersion\Run" "Siloé Stream"
   DeleteRegValue HKCU "Software\Microsoft\Windows\CurrentVersion\Run" "Siloé Stream Agent"
+  MessageBox MB_YESNO|MB_ICONQUESTION|MB_DEFBUTTON1 "Effacer aussi toutes les données de Siloé Stream ?$\r$\n$\r$\nChants, Bibles importées, photos et médias, programmes du culte, réglages, comptes et téléphones jumelés : une prochaine installation repartira de zéro.$\r$\n$\r$\nVos enregistrements, montages et miniatures (dossier Vidéos) ne sont jamais effacés.$\r$\n$\r$\nNon : les garder pour une réinstallation." /SD IDNO IDNO garder_donnees
+    RMDir /r "$APPDATA\SiloeStream"
+    RMDir /r "$APPDATA\VerseLight"
+    RMDir /r "$APPDATA\MyVerse.exe"
+    RMDir /r "$APPDATA\VerseLight.exe"
+    RMDir /r "$LOCALAPPDATA\Programs\MyVerse\MyVerse.exe.WebView2"
+    RMDir /r "$LOCALAPPDATA\Programs\MyVerse\VerseLight.exe.WebView2"
+  garder_donnees:
 SectionEnd
 
 Function un.FermerMyVerse

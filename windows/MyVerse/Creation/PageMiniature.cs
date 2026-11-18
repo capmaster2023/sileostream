@@ -4,6 +4,7 @@ using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
 using System.Windows.Input;
 using System.Windows.Media;
+using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 using System.Windows.Threading;
 using Microsoft.Win32;
@@ -19,6 +20,8 @@ public sealed class ReglagesMiniature
 {
     public string Logo { get; set; } = "";
     public string Derniere { get; set; } = "";
+    /// <summary>2.4.0 : l'identité visuelle de l'église (ses couleurs), proposée dans toutes les miniatures.</summary>
+    public List<string> Marque { get; set; } = new();
     static string Fichier => System.IO.Path.Combine(App.Donnees.Dossier, "miniature.json");
     public static ReglagesMiniature Lire()
     {
@@ -48,9 +51,6 @@ public sealed class PageMiniature : Grid
     /// <summary>Une miniature est prête pour la publication (la fenêtre « Publier sur YouTube » la prend).</summary>
     public static event Action<string>? MiniaturePrete;
 
-    static readonly string[] Nuancier =
-        { "#FFFFFF", "#000000", "#FFD400", "#FF9F1C", "#E1251B", "#FF3D7F", "#8E44FF", "#1E90FF", "#00D1FF", "#2ECC71", "#121212", "#F4EDE4" };
-
     ProjetMiniature projet = new();
     string? chemin;
     readonly ReglagesMiniature reglages = ReglagesMiniature.Lire();
@@ -63,6 +63,8 @@ public sealed class PageMiniature : Grid
     readonly Grid plan = new() { Width = W, Height = H, ClipToBounds = false };
     Canvas scene = new();
     readonly Canvas surcouche = new() { Width = W, Height = H, IsHitTestVisible = false };
+    /// <summary>2.4.0 : la loupe de la pipette.</summary>
+    readonly Canvas loupe = new() { Width = W, Height = H, IsHitTestVisible = false };
     readonly TextBox nom, titre, sousTitre;
     readonly TextBlock etat = new() { FontSize = 12, Margin = new Thickness(2, 2, 0, 0) };
     readonly WrapPanel modeles = new();
@@ -72,7 +74,6 @@ public sealed class PageMiniature : Grid
     readonly TextBlock nomLogo = new() { FontSize = 12, TextWrapping = TextWrapping.Wrap, Margin = new Thickness(0, 4, 0, 0) };
     readonly VisualBrush miroirGrand = new() { Stretch = Stretch.UniformToFill }, miroirPetit = new() { Stretch = Stretch.UniformToFill };
     readonly TextBlock ytTitre = new(), ytTitrePetit = new();
-    readonly CheckBox zoneSure;
     readonly DispatcherTimer minuterieModeles = new() { Interval = TimeSpan.FromMilliseconds(450) };
     readonly DispatcherTimer minuterieSauvegarde = new() { Interval = TimeSpan.FromSeconds(1.5) };
     readonly List<Action> valeurs = new();
@@ -174,11 +175,6 @@ public sealed class PageMiniature : Grid
         // ---------- au centre : la miniature
         var centre = new DockPanel { Margin = new Thickness(12, 0, 12, 0) };
         var basCentre = new DockPanel { Margin = new Thickness(0, 8, 0, 0) };
-        zoneSure = new CheckBox { Content = "Montrer le minutage de YouTube", IsChecked = true, VerticalAlignment = VerticalAlignment.Center, ToolTip = "YouTube affiche la durée en bas à droite : rien d'important dessous" };
-        zoneSure.Checked += (_, _) => MajSurcouche();
-        zoneSure.Unchecked += (_, _) => MajSurcouche();
-        DockPanel.SetDock(zoneSure, Dock.Right);
-        basCentre.Children.Add(zoneSure);
         basCentre.Children.Add(new TextBlock
         {
             Text = "Glisser : déplacer · coins : agrandir (Maj : garder les proportions) · flèches : 1 px (Maj : 10) · Suppr · Ctrl D : dupliquer · Alt : sans aimant",
@@ -188,6 +184,7 @@ public sealed class PageMiniature : Grid
         centre.Children.Add(basCentre);
         plan.Children.Add(scene);
         plan.Children.Add(surcouche);
+        plan.Children.Add(loupe);
         vue.Child = plan;
         var cadre = new Border { Background = new SolidColorBrush(Color.FromRgb(24, 24, 24)), CornerRadius = new CornerRadius(10), Padding = new Thickness(14), Child = vue };
         centre.Children.Add(cadre);
@@ -197,7 +194,13 @@ public sealed class PageMiniature : Grid
         plan.MouseMove += Bouge;
         plan.MouseLeftButtonUp += (_, _) => Haut();
         plan.LostMouseCapture += (_, _) => { if (glisse != null) Haut(); };
-        plan.MouseMove += (_, e) => { if (glisse == null) plan.Cursor = CurseurSous(e.GetPosition(plan)); };
+        plan.MouseMove += (_, e) =>
+        {
+            if (pipette != null) { plan.Cursor = Cursors.None; MajLoupe(e.GetPosition(plan)); return; }
+            if (glisse == null) plan.Cursor = CurseurSous(e.GetPosition(plan));
+        };
+        plan.MouseLeave += (_, _) => loupe.Children.Clear();
+        plan.MouseRightButtonDown += (_, e) => { if (pipette == null) return; DemarrerPipette(null); e.Handled = true; };
         plan.Background = Brushes.Transparent;
 
         // ---------- à droite : réglages, conseils, aperçu YouTube
@@ -212,7 +215,7 @@ public sealed class PageMiniature : Grid
 
         minuterieModeles.Tick += (_, _) => { minuterieModeles.Stop(); MajModeles(); };
         minuterieSauvegarde.Tick += (_, _) => { minuterieSauvegarde.Stop(); Sauver(); };
-        IsVisibleChanged += (_, _) => { if (!IsVisible && modifie) Sauver(); };
+        IsVisibleChanged += (_, _) => { if (!IsVisible) DemarrerPipette(null); if (!IsVisible && modifie) Sauver(); };
         MajLogo();
         ChargerDerniere();
     }
@@ -469,18 +472,7 @@ public sealed class PageMiniature : Grid
     {
         surcouche.Children.Clear();
         double k = Echelle();
-        if (zoneSure.IsChecked == true)
-        {
-            var zone = new Border
-            {
-                Width = 150, Height = 54, CornerRadius = new CornerRadius(6), Background = new SolidColorBrush(Color.FromArgb(200, 0, 0, 0)),
-                Child = new TextBlock { Text = "1:24:05", Foreground = Brushes.White, FontSize = 34, FontWeight = FontWeights.SemiBold, HorizontalAlignment = HorizontalAlignment.Center, VerticalAlignment = VerticalAlignment.Center },
-            };
-            Canvas.SetLeft(zone, W - 150 - 16);
-            Canvas.SetTop(zone, H - 54 - 16);
-            zone.Opacity = 0.75;
-            surcouche.Children.Add(zone);
-        }
+        // 2.3.1 : plus de faux minutage YouTube dessiné sur la miniature (il prêtait à confusion) ; un conseil prévient si du texte est dessous
         foreach (var (x1, y1, x2, y2) in guides)
             surcouche.Children.Add(new Line { X1 = x1, Y1 = y1, X2 = x2, Y2 = y2, Stroke = new SolidColorBrush(Color.FromRgb(255, 45, 160)), StrokeThickness = 1.5 / k });
         if (sel == null || !sel.Visible) return;
@@ -557,6 +549,14 @@ public sealed class PageMiniature : Grid
     void Bas(object sender, MouseButtonEventArgs e)
     {
         var p = e.GetPosition(plan);
+        if (pipette is { } rappel)
+        {
+            var prise = CouleurA(p);
+            DemarrerPipette(null);
+            rappel(prise);
+            e.Handled = true;
+            return;
+        }
         plan.Focus();
         Keyboard.Focus(plan);
         int poignee = PoigneeSous(p);
@@ -749,6 +749,7 @@ public sealed class PageMiniature : Grid
             sel.X += dx; sel.Y += dy;
             Changer(true, false);
         }
+        if (e.Key == Key.Escape && pipette != null) { DemarrerPipette(null); SonUi.Toast("Pipette annulée."); return true; }
         switch (e.Key)
         {
             case Key.Delete or Key.Back: Supprimer(); return true;
@@ -845,41 +846,193 @@ public sealed class PageMiniature : Grid
         return cb;
     }
 
-    static readonly ControlTemplate ModelePastille = (ControlTemplate)System.Windows.Markup.XamlReader.Parse(
-        "<ControlTemplate xmlns='http://schemas.microsoft.com/winfx/2006/xaml/presentation' TargetType='Button'><Border CornerRadius='11' Background='{TemplateBinding Background}' BorderBrush='{TemplateBinding BorderBrush}' BorderThickness='{TemplateBinding BorderThickness}'/></ControlTemplate>");
+    /// <summary>Le panneau de couleurs ouvert (un seul à la fois) ; rouvert après un nouveau dessin des réglages.</summary>
+    string? couleurOuverte;
+    Action? fermerCouleur;
 
-    /// <summary>Une couleur : la palette, et le code (#RRGGBB) pour une couleur précise.</summary>
+    /// <summary>2.4.0 : une couleur, comme dans Canva : la pastille et son code ; un clic ouvre le panneau (document, photo, identité visuelle, roue, pipette).</summary>
     void Couleur(string libelle, Func<string> lire, Action<string> ecrire, bool transparent = false)
     {
-        inspecteur.Children.Add(new TextBlock { Text = libelle, FontSize = 12, FontWeight = FontWeights.SemiBold, Foreground = P("Brume"), Margin = new Thickness(0, 8, 0, 3) });
-        var rang = new WrapPanel();
-        var code = new TextBox { Style = S("Champ"), MinHeight = 26, FontSize = 12, Width = 92, Text = lire(), Margin = new Thickness(0, 0, 6, 4) };
-        void Mettre(string c)
-        {
-            if (Couleurs.Valide(c, "") is not { Length: > 0 } v || v == lire()) return;
-            memorise = false; Memoriser(); ecrire(v); memorise = false; Changer(true, false);
-            code.Text = v;
-        }
-        code.LostKeyboardFocus += (_, _) => Mettre(code.Text);
-        code.KeyDown += (_, e) => { if (e.Key == Key.Enter) { Mettre(code.Text); e.Handled = true; } };
-        rang.Children.Add(code);
-        foreach (var c in transparent ? Nuancier.Prepend("#00000000") : Nuancier)
-        {
-            var pastille = new Button
-            {
-                Width = 22, Height = 22, Margin = new Thickness(0, 0, 4, 4), BorderThickness = new Thickness(1.5), Cursor = Cursors.Hand, ToolTip = c == "#00000000" ? "Aucune" : c,
-                Background = new SolidColorBrush(RenduMiniature.Couleur(c)), BorderBrush = P("Trait2"),
-                Template = ModelePastille,
-            };
-            string cc = c;
-            pastille.Click += (_, _) => Mettre(cc);
-            rang.Children.Add(pastille);
-        }
+        var rang = new DockPanel { Margin = new Thickness(0, 8, 0, 0) };
+        var rond = new Ellipse { Width = 20, Height = 20, Stroke = P("Trait2"), StrokeThickness = 1, Margin = new Thickness(0, 0, 8, 0), VerticalAlignment = VerticalAlignment.Center };
+        var code = new TextBlock { FontSize = 12, FontWeight = FontWeights.SemiBold, Foreground = P("Blanc"), VerticalAlignment = VerticalAlignment.Center, MinWidth = 60 };
+        var fleche = new TextBlock { Text = "▾", FontSize = 12, Foreground = P("Brume"), VerticalAlignment = VerticalAlignment.Center, Margin = new Thickness(6, 0, 0, 0) };
+        var contenu = new StackPanel { Orientation = Orientation.Horizontal };
+        contenu.Children.Add(rond);
+        contenu.Children.Add(code);
+        contenu.Children.Add(fleche);
+        var bouton = new Button { Style = S("BtnPetit"), Height = 32, Padding = new Thickness(7, 0, 9, 0), Content = contenu, ToolTip = "Couleurs du document, de la photo, de l'église, roue et pipette" };
+        DockPanel.SetDock(bouton, Dock.Right);
+        rang.Children.Add(bouton);
+        rang.Children.Add(new TextBlock { Text = libelle, FontSize = 12, FontWeight = FontWeights.SemiBold, Foreground = P("Brume"), VerticalAlignment = VerticalAlignment.Center, TextWrapping = TextWrapping.Wrap });
         inspecteur.Children.Add(rang);
+        var hote = new ContentControl { Focusable = false };
+        inspecteur.Children.Add(hote);
+        string cle = (sel?.Id ?? "miniature") + "|" + libelle;
+        void MajBouton()
+        {
+            var v = lire();
+            bool aucune = SelecteurCouleur.EstAucune(v);
+            rond.Fill = aucune ? Brushes.Transparent : new SolidColorBrush(RenduMiniature.Couleur(v));
+            code.Text = aucune ? "Aucune" : v;
+        }
+        MajBouton();
+        valeurs.Add(() => { MajBouton(); (hote.Content as SelecteurCouleur)?.Maj(); });
+        void Fermer()
+        {
+            hote.Content = null;
+            fleche.Text = "▾";
+            DemarrerPipette(null);
+        }
+        void Ouvrir()
+        {
+            fermerCouleur?.Invoke();
+            var panneau = new SelecteurCouleur(lire, (v, debut) =>
+            {
+                if (SelecteurCouleur.EstAucune(v) && !transparent) return;
+                if (v == lire()) return;
+                if (debut) { memorise = false; Memoriser(); }
+                ecrire(v);
+                Changer(true, false);
+            }, () => memorise = false, transparent, ContexteCouleurs()) { Margin = new Thickness(0, 8, 0, 4) };
+            hote.Content = panneau;
+            fleche.Text = "▴";
+            couleurOuverte = cle;
+            fermerCouleur = Fermer;
+            Dispatcher.BeginInvoke(new Action(() => panneau.BringIntoView()), DispatcherPriority.Loaded);
+        }
+        bouton.Click += (_, _) =>
+        {
+            if (hote.Content != null) { Fermer(); couleurOuverte = null; fermerCouleur = null; }
+            else Ouvrir();
+        };
+        if (couleurOuverte == cle) Ouvrir();
+    }
+
+    ContexteCouleurs ContexteCouleurs() => new()
+    {
+        Document = CouleursDocument,
+        Photos = CouleursPhotos,
+        Marque = reglages.Marque,
+        SauverMarque = reglages.Sauver,
+        Logo = Logo,
+        Pipette = DemarrerPipette,
+    };
+
+    /// <summary>Les couleurs utilisées dans la miniature (les plus visibles d'abord).</summary>
+    public IReadOnlyList<string> CouleursDocument()
+    {
+        var l = new List<string>();
+        void Mettre(string? c, bool utile = true)
+        {
+            if (!utile || SelecteurCouleur.Normaliser(c) is not { } v || SelecteurCouleur.EstAucune(v) || l.Contains(v)) return;
+            l.Add(v);
+        }
+        foreach (var c in Enumerable.Reverse(projet.Calques).Where(c => c.Visible))
+        {
+            if (c.Type == Calque.TypeTexte)
+            {
+                Mettre(c.Couleur);
+                Mettre(c.Accent, c.Texte.Contains('*'));
+                Mettre(c.FondTexte, c.FondTexte.Length > 0);
+                Mettre(c.Contour, c.Epaisseur >= 0.5);
+                Mettre(c.OmbreCouleur, c.Ombre);
+            }
+            else if (c.Type == Calque.TypeImage) Mettre(c.Bordure, c.EpaisseurBordure >= 0.5);
+            else
+            {
+                Mettre(c.Remplissage);
+                Mettre(c.Bordure, c.Type == Calque.TypeForme && c.EpaisseurBordure >= 0.5);
+            }
+        }
+        Mettre(projet.Fond);
+        return l;
+    }
+
+    /// <summary>Les couleurs principales des images de la miniature (la plus grande d'abord), avec leur vignette.</summary>
+    IReadOnlyList<(ImageSource Vignette, string[] Couleurs)> CouleursPhotos()
+    {
+        var l = new List<(ImageSource, string[])>();
+        foreach (var c in projet.Calques.Where(c => c.Visible && c.Type == Calque.TypeImage && File.Exists(c.Chemin)).OrderByDescending(c => c.L * c.H).Take(3))
+        {
+            if (RenduMiniature.Image(c.Chemin, c.Luminosite, c.Contraste, c.Saturation) is not { } image) continue;
+            var cle = $"{c.Chemin}|{File.GetLastWriteTimeUtc(c.Chemin).Ticks}|{c.Luminosite}|{c.Contraste}|{c.Saturation}";
+            var couleurs = CouleursPhoto.De(cle, () => image);
+            if (couleurs.Length > 0 && !l.Any(x => x.Item2.SequenceEqual(couleurs))) l.Add((image, couleurs));
+        }
+        return l;
+    }
+
+    // ================================================================================================ pipette
+    Action<string>? pipette;
+    BitmapSource? imagePipette;
+    byte[]? pixelsPipette;
+
+    /// <summary>Démarre la pipette (le prochain clic dans la miniature prend sa couleur) ; null : l'arrête.</summary>
+    void DemarrerPipette(Action<string>? rappel)
+    {
+        loupe.Children.Clear();
+        if (rappel == null)
+        {
+            if (pipette == null) return;
+            pipette = null; imagePipette = null; pixelsPipette = null;
+            plan.Cursor = null;
+            return;
+        }
+        var image = RenduMiniature.Rendre(projet);
+        var conv = new FormatConvertedBitmap(image, PixelFormats.Bgra32, null, 0);
+        var px = new byte[conv.PixelWidth * conv.PixelHeight * 4];
+        conv.CopyPixels(px, conv.PixelWidth * 4, 0);
+        imagePipette = image;
+        pixelsPipette = px;
+        pipette = rappel;
+        SonUi.Toast("Pipette : cliquez dans la miniature pour prendre une couleur (Échap : annuler).");
+    }
+
+    /// <summary>La couleur de la miniature en un point (pendant la pipette).</summary>
+    string CouleurA(Point p)
+    {
+        if (pixelsPipette is not { } px) return "#000000";
+        int w = (int)W, x = Math.Clamp((int)p.X, 0, w - 1), y = Math.Clamp((int)p.Y, 0, (int)H - 1), i = (y * w + x) * 4;
+        return $"#{px[i + 2]:X2}{px[i + 1]:X2}{px[i]:X2}";
+    }
+
+    /// <summary>La loupe : les pixels sous la souris, grossis, et un anneau de la couleur prise.</summary>
+    void MajLoupe(Point p)
+    {
+        loupe.Children.Clear();
+        if (imagePipette == null) return;
+        double k = Echelle(), d = 120 / k;
+        var hex = CouleurA(p);
+        var verre = new Ellipse
+        {
+            Width = d, Height = d, StrokeThickness = 9 / k, Stroke = new SolidColorBrush(RenduMiniature.Couleur(hex)),
+            Fill = new ImageBrush(imagePipette) { ViewboxUnits = BrushMappingMode.Absolute, Viewbox = new Rect(Math.Floor(p.X) - 7, Math.Floor(p.Y) - 7, 15, 15), Stretch = Stretch.Fill },
+        };
+        RenderOptions.SetBitmapScalingMode(verre, BitmapScalingMode.NearestNeighbor);
+        var bord = new Ellipse { Width = d + 4 / k, Height = d + 4 / k, Stroke = Brushes.White, StrokeThickness = 2 / k };
+        var centre = new Rectangle { Width = d / 15, Height = d / 15, Stroke = Brushes.White, StrokeThickness = 1.5 / k };
+        Canvas.SetLeft(bord, p.X - d / 2 - 2 / k); Canvas.SetTop(bord, p.Y - d / 2 - 2 / k);
+        Canvas.SetLeft(verre, p.X - d / 2); Canvas.SetTop(verre, p.Y - d / 2);
+        Canvas.SetLeft(centre, p.X - d / 30); Canvas.SetTop(centre, p.Y - d / 30);
+        loupe.Children.Add(bord);
+        loupe.Children.Add(verre);
+        loupe.Children.Add(centre);
+        var etiquette = new Border
+        {
+            Background = new SolidColorBrush(Color.FromArgb(230, 20, 20, 20)), CornerRadius = new CornerRadius(6 / k), Padding = new Thickness(8 / k, 3 / k, 8 / k, 3 / k),
+            Child = new TextBlock { Text = hex, Foreground = Brushes.White, FontSize = 13 / k, FontWeight = FontWeights.SemiBold },
+        };
+        Canvas.SetLeft(etiquette, p.X - 32 / k);
+        Canvas.SetTop(etiquette, p.Y + d / 2 + 8 / k);
+        loupe.Children.Add(etiquette);
     }
 
     void MajInspecteur()
     {
+        DemarrerPipette(null);
+        fermerCouleur = null;
+        if (couleurOuverte != null && !couleurOuverte.StartsWith((sel?.Id ?? "miniature") + "|", StringComparison.Ordinal)) couleurOuverte = null;
         inspecteur.Children.Clear();
         valeurs.Clear();
         champTexte = null;
@@ -1089,4 +1242,27 @@ public sealed class PageMiniature : Grid
     internal void TestModele(string id) => AppliquerModele(id);
     internal void TestTitre(string t) => titre.Text = t;
     internal string? TestUtiliser() => UtiliserPourPublication();
+    internal void TestAnnuler() => Annuler();
+    internal void TestChoisirCalque(string role) { sel = projet.Role(role); memorise = false; MajCalques(); MajInspecteur(); MajSurcouche(); }
+    /// <summary>Ouvre le panneau de couleurs d'une ligne des réglages (par son libellé).</summary>
+    internal SelecteurCouleur? TestOuvrirCouleur(string libelle)
+    {
+        for (int i = 0; i < inspecteur.Children.Count - 1; i++)
+        {
+            if (inspecteur.Children[i] is not DockPanel d || !d.Children.OfType<TextBlock>().Any(t => t.Text == libelle)) continue;
+            if (inspecteur.Children[i + 1] is not ContentControl hote) return null;
+            if (hote.Content == null) d.Children.OfType<Button>().First().RaiseEvent(new RoutedEventArgs(System.Windows.Controls.Primitives.ButtonBase.ClickEvent));
+            return hote.Content as SelecteurCouleur;
+        }
+        return null;
+    }
+    /// <summary>La pipette : la couleur de la miniature au point (x, y).</summary>
+    internal string TestPipette(double x, double y)
+    {
+        DemarrerPipette(_ => { });
+        var c = CouleurA(new Point(x, y));
+        DemarrerPipette(null);
+        return c;
+    }
+    internal IReadOnlyList<(ImageSource Vignette, string[] Couleurs)> TestCouleursPhotos() => CouleursPhotos();
 }

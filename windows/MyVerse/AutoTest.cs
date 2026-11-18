@@ -190,19 +190,22 @@ public static class AutoTest
             Ok(A.EntreesSeparees, "OBS accepte les entrées séparées d'une carte son");
             Ok(File.Exists(Audio.ChurchAudioService.FfmpegInclus), "ffmpeg livré avec Siloé Stream (" + Audio.ChurchAudioService.FfmpegInclus + ")");
 
-            // 1. au départ : seulement le son des vidéos de Display, et « Ajouter un son »
-            cfg.Sons.RemoveAll(s => s.Genre != GenreSon.Video);
+            // 1. au départ (2.4.0) : aucun son ; on choisit le son des vidéos de Display dans « Ajouter un son »
+            cfg.Sons.Clear();
             cfg.Profiles.Clear();
             cfg.VirtualSounds.Clear();
+            Ok(cfg.SonVideos == null, "2.4.0 : le son des vidéos n'est plus ajouté tout seul");
+            cfg.Ajouter(Son.Nouveau(GenreSon.Video, "Vidéos de Display"));
             A.Apply();
             w.MontrerSon();
             await Attendre(900);
-            var videos = cfg.SonVideos;
-            Ok(cfg.Sons.Count == 1 && videos.Eglise && !videos.Coupe, "1.3 : au départ, le son des vidéos de Display seulement, entendu dans l'église");
+            var videos = cfg.SonVideos!;
+            Ok(cfg.Sons.Count == 1 && videos.Eglise && !videos.Coupe, "1.3 : le son des vidéos de Display, choisi, s'entend dans l'église");
             string cartes = w.PageSon.TestCartes();
             Ok(cartes.EndsWith("2 tuiles"), "page Son : la carte des vidéos et « Ajouter un son » (" + cartes + ")");
             if (A.Running) Ok(A.Etat(videos).Texte == "Pas de vidéo à l'écran", "le son des vidéos attend une vidéo : « " + A.Etat(videos).Texte + " »");
-            Ok(!cfg.Retirer(videos) && cfg.Sons.Contains(videos), "le son des vidéos ne se retire pas (on peut le couper)");
+            Ok(cfg.Retirer(videos) && !cfg.Sons.Contains(videos), "2.4.0 : le son des vidéos se retire comme les autres");
+            cfg.Ajouter(videos);
             Capture(w, "32-son-vide.png");
             w.PageSon.TestDefiler(true);
             await Attendre(400);
@@ -912,6 +915,30 @@ public static class AutoTest
                 bon = d.Frames[0].PixelWidth == 1280 && d.Frames[0].PixelHeight == 720 && taille <= 2 * 1024 * 1024 && Edition.ReglagesPublication.Lire().Miniature == jpg;
             }
             Ok(bon, "2.3.0 : miniature exportée pour YouTube (" + info + ") et choisie pour la publication");
+            // 2.4.0 : les couleurs comme dans Canva (recherche, document, photo, identité visuelle, roue, pipette)
+            Ok(Creation.SelecteurCouleur.Chercher("#0cf").FirstOrDefault() == "#00CCFF" && Creation.SelecteurCouleur.Chercher("Bleu").Count >= 5
+                && Creation.SelecteurCouleur.Chercher("bordeaux").FirstOrDefault() == "#800020" && Creation.SelecteurCouleur.Chercher("zzz").Count == 0,
+                "2.4.0 : recherche de couleur par code et par nom (« bleu », « bordeaux »)");
+            var vHsv = Creation.SelecteurCouleur.VersHsv(System.Windows.Media.Color.FromRgb(0xE1, 0x25, 0x1B));
+            Ok(Creation.SelecteurCouleur.Hex(Creation.SelecteurCouleur.DeHsv(vHsv.H, vHsv.S, vHsv.V)) == "#E1251B", "2.4.0 : roue des couleurs (teinte, saturation, luminosité) sans perte");
+            var photos = pm.TestCouleursPhotos();
+            Ok(photos.Count >= 1 && photos[0].Couleurs.Length >= 3, "2.4.0 : couleurs de la photo (" + string.Join(" ", photos.FirstOrDefault().Couleurs ?? Array.Empty<string>()) + ")");
+            pm.TestChoisirCalque("titre");
+            var titreCalque = pm.TestProjet.Role("titre");
+            var panneau = pm.TestOuvrirCouleur("Couleur du texte");
+            Ok(panneau != null && titreCalque != null, "2.4.0 : panneau de couleurs ouvert pour le titre");
+            if (panneau != null && titreCalque != null)
+            {
+                var avant = titreCalque.Couleur;
+                var prise = pm.TestPipette(640, 360);
+                panneau.TestChoisir(prise == avant ? "#00CCFF" : prise);
+                titreCalque = pm.TestProjet.Role("titre")!;
+                bool change = titreCalque.Couleur != avant;
+                await Attendre(500);
+                Capture(w, "76-v240-couleurs.png");
+                pm.TestAnnuler();
+                Ok(change && pm.TestProjet.Role("titre")?.Couleur == avant, $"2.4.0 : pipette ({prise}) appliquée au titre, Ctrl Z revient à {avant}");
+            }
             foreach (var m in MyVerse.Miniatures.ModelesMiniature.Tous.Skip(1).Take(2)) pm.TestModele(m.Id);
             await Attendre(500);
             Capture(w, "75-v230-miniature-modele.png");
@@ -968,7 +995,7 @@ public static class AutoTest
 
             Note($"Siloé Stream {App.Version} · données : {App.Donnees.Dossier} · {App.Donnees.Chants.Count} chants");
             // 4.2 : au premier lancement, Siloé Stream est vide ; seules les Bibles libres de droits LSG 1910 et King James sont livrées
-            Ok(App.Donnees.Chants.Count == 0 && App.Audio.Config.Sons.Count == 1 && App.Audio.Config.Sons[0].Genre == GenreSon.Video && App.Donnees.Annonces.Count == 0,
+            Ok(App.Donnees.Chants.Count == 0 && App.Audio.Config.Sons.Count == 0 && App.Donnees.Annonces.Count == 0,
                 $"4.2 : premier lancement vide ({App.Donnees.Chants.Count} chants, {App.Audio.Config.Sons.Count} son : le son des vidéos)");
             Ok(App.Bibles.Toutes().Select(b => b.Id).SequenceEqual(new[] { "lsg", "kjv" }), "4.2 : Bibles livrées : " + string.Join(", ", App.Bibles.Toutes().Select(b => b.Nom)));
             // 1.6.6 : sans source principale, MyStream reste noir ; les essais d'avant (MyVirtualCam = ce que montre l'église) le font

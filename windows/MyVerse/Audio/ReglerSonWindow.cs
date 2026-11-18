@@ -73,7 +73,7 @@ public sealed class ReglerSonWindow : FenetreDialogue
         corps.Children.Add(aides);
 
         var bas = new DockPanel { Margin = new Thickness(28, 12, 28, 22), LastChildFill = false };
-        if (s.Genre != GenreSon.Video)
+        // 2.4.0 : le son des vidéos se retire aussi (on le remet avec « Ajouter un son »)
         {
             var retirer = new Button { Style = Style_("BtnDanger"), Content = "Retirer ce son", Height = 42, Padding = new Thickness(16, 0, 16, 0) };
             retirer.Click += (_, _) =>

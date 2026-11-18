@@ -371,8 +371,11 @@ public sealed class AudioConfiguration
         }
     }
 
-    /// <summary>Le son des vidéos de Display : toujours présent (on peut le couper), entendu dans l'église.</summary>
-    [JsonIgnore] public Son SonVideos => Sons.First(s => s.Genre == GenreSon.Video);
+    /// <summary>
+    /// Le son des vidéos de Display, s'il a été ajouté (2.4.0 : il n'est plus ajouté tout seul ; on le choisit dans « Ajouter un son »,
+    /// et il se retire comme les autres).
+    /// </summary>
+    [JsonIgnore] public Son? SonVideos => Sons.FirstOrDefault(s => s.Genre == GenreSon.Video);
 
     /// <summary>« Microphone (Focusrite USB) » → « Focusrite USB » : un nom court pour un appareil.</summary>
     public static string NomCourt(string nom)
@@ -400,11 +403,10 @@ public sealed class AudioConfiguration
         else Sons.Insert(i, s);
     }
 
-    /// <summary>Retire un son : il n'est plus reçu nulle part. Le son des vidéos ne se retire pas (on peut le couper).</summary>
+    /// <summary>Retire un son : il n'est plus reçu nulle part (2.4.0 : le son des vidéos aussi).</summary>
     public bool Retirer(Son s)
     {
-        if (s.Genre == GenreSon.Video) return false;
-        Sons.Remove(s);
+        if (!Sons.Remove(s)) return false;
         foreach (var d in Destinations()) d.ChoixSons?.Remove(s.Id);
         return true;
     }
@@ -549,10 +551,9 @@ public sealed class AudioConfiguration
         var premiereVideo = Sons.FirstOrDefault(s => s.Genre == GenreSon.Video);
         Sons.RemoveAll(s => s.Genre == GenreSon.Video && s != premiereVideo);
         if (Sons.Count > MaxSources) Sons.RemoveRange(MaxSources, Sons.Count - MaxSources);
-        // le son des vidéos de Display est toujours là, le dernier
+        // 2.4.0 : le son des vidéos de Display n'est plus ajouté tout seul ; s'il a été choisi, il reste le dernier
         int iv = Sons.FindIndex(s => s.Genre == GenreSon.Video);
-        if (iv < 0) Sons.Add(Son.Nouveau(GenreSon.Video, "Vidéos de Display"));
-        else if (iv != Sons.Count - 1) { var v = Sons[iv]; Sons.RemoveAt(iv); Sons.Add(v); }
+        if (iv >= 0 && iv != Sons.Count - 1) { var v = Sons[iv]; Sons.RemoveAt(iv); Sons.Add(v); }
         foreach (var s in Sons)
         {
             s.Nom = string.IsNullOrWhiteSpace(s.Nom) ? NomGenre(s.Genre) : s.Nom.Trim();

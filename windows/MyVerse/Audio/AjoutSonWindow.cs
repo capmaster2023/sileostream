@@ -13,7 +13,9 @@ namespace MyVerse.Ui.Audio;
 /// </summary>
 public sealed class AjoutSonWindow : FenetreDialogue
 {
-    static readonly GenreSon[] Genres = { GenreSon.Voix, GenreSon.Instrument, GenreSon.Table, GenreSon.Ordinateur, GenreSon.Fichier };
+    static readonly GenreSon[] TousGenres = { GenreSon.Voix, GenreSon.Instrument, GenreSon.Table, GenreSon.Ordinateur, GenreSon.Fichier, GenreSon.Video };
+    /// <summary>2.4.0 : le son des vidéos se choisit ici (une seule fois) ; il n'est plus ajouté tout seul.</summary>
+    static IEnumerable<GenreSon> Genres => TousGenres.Where(g => g != GenreSon.Video || SonUi.C.SonVideos == null);
     readonly ContentControl page = new() { Focusable = false };
     readonly TextBlock titre = new() { FontSize = 24, FontWeight = FontWeights.ExtraBold, TextWrapping = TextWrapping.Wrap };
     readonly TextBlock etape = new() { FontSize = 12.5, FontWeight = FontWeights.Bold };
@@ -89,8 +91,10 @@ public sealed class AjoutSonWindow : FenetreDialogue
         Erreur(null);
         if (n < 1) n = 1;
         if (numero == 2 && n != 2 && appareil != null) { branchement = appareil.Choix; appareil.Fermer(); appareil = null; }
+        if (n == 2 && genre == GenreSon.Video) n = numero > 2 ? 1 : 3;
         numero = n;
-        etape.Text = $"ÉTAPE {n} SUR 3";
+        bool video = genre == GenreSon.Video && n > 1;
+        etape.Text = video ? $"ÉTAPE {n - 1} SUR 2" : $"ÉTAPE {n} SUR 3";
         retour.Visibility = n > 1 ? Visibility.Visible : Visibility.Hidden;
         suivant.Visibility = n > 1 ? Visibility.Visible : Visibility.Collapsed;
         suivant.Content = n == 3 ? "Ajouter" : "Suivant";
@@ -132,9 +136,12 @@ public sealed class AjoutSonWindow : FenetreDialogue
         }
         var p = new StackPanel();
         p.Children.Add(tuiles);
-        var note = SonUi.Texte("Le son des vidéos (Médias) est déjà là : il s'entend dans l'église et part dans les enregistrements.", 13, "Brume");
-        note.Margin = new Thickness(2, 6, 0, 0);
-        p.Children.Add(note);
+        if (SonUi.C.SonVideos != null)
+        {
+            var note = SonUi.Texte("Le son des vidéos (Médias) est déjà dans la liste.", 13, "Brume");
+            note.Margin = new Thickness(2, 6, 0, 0);
+            p.Children.Add(note);
+        }
         return p;
     }
 
@@ -212,6 +219,7 @@ public sealed class AjoutSonWindow : FenetreDialogue
             GenreSon.Instrument => "Instrument",
             GenreSon.Table => "Table de mixage",
             GenreSon.Ordinateur => "Son de l'ordinateur",
+            GenreSon.Video => "Vidéos de Display",
             _ => "Musique",
         };
     }
@@ -228,6 +236,7 @@ public sealed class AjoutSonWindow : FenetreDialogue
             GenreSon.Instrument => new[] { "Piano", "Clavier", "Guitare", "Basse", "Batterie", "Orgue" },
             GenreSon.Table => new[] { "Table de mixage", "Sono" },
             GenreSon.Ordinateur => new[] { "Son de l'ordinateur", "YouTube" },
+            GenreSon.Video => new[] { "Vidéos de Display", "Vidéos" },
             _ => new[] { "Musique d'attente", "Fond musical" },
         };
         var puces = new WrapPanel();
@@ -245,6 +254,7 @@ public sealed class AjoutSonWindow : FenetreDialogue
             GenreSon.Voix => "Siloé Stream va enlever le bruit de fond et garder un volume régulier. Il ne le met pas dans les haut-parleurs de l'église (il y passe déjà par la table de mixage, et cela pourrait siffler).",
             GenreSon.Instrument or GenreSon.Table => "Siloé Stream le garde tel quel, en stéréo : la musique n'est pas « nettoyée ». Il ne le remet pas dans les haut-parleurs de l'église.",
             GenreSon.Ordinateur => "Il part dans les enregistrements et vers Zoom. Il s'entend déjà dans l'église par l'ordinateur.",
+            GenreSon.Video => "Le son des vidéos que vous projetez (Médias) s'entendra dans l'église et partira dans les enregistrements et vers Zoom. Il suit tout seul la vidéo à l'écran.",
             _ => "Elle s'entendra dans l'église et partira dans les enregistrements. Elle attend que vous cliquiez Lire.",
         };
         var cadre = new Border { Background = Pinceau("OrLeger"), BorderBrush = Pinceau("OrBord"), BorderThickness = new Thickness(1), CornerRadius = new CornerRadius(12), Padding = new Thickness(16, 12, 16, 12), Margin = new Thickness(0, 12, 0, 0) };
@@ -267,6 +277,7 @@ public sealed class AjoutSonWindow : FenetreDialogue
         if (SonUi.C.Sons.Any(s => string.Equals(s.Nom, n, StringComparison.OrdinalIgnoreCase))) { Erreur($"Un autre son s'appelle déjà « {n} »."); nom?.Focus(); return; }
         var son = Son.Nouveau(genre, n);
         if (genre == GenreSon.Fichier) { son.Fichier = fichier; son.Boucle = boucle; }
+        else if (genre == GenreSon.Video) { }
         else (branchement ?? (genre == GenreSon.Ordinateur ? new Branchement(AudioInputKind.Sortie, "default", "", 0, new() { 0 }) : PremierMicro())).Appliquer(son);
         Resultat = son;
         Close();
