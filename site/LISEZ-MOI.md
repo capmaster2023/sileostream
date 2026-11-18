@@ -33,10 +33,8 @@ Le jeton GitHub expire (date choisie à sa création) : avant cette date, créez
 
 Si vous renvoyez le site plus tard, ne remplacez pas `api/config.php` : il contient le jeton.
 
-## Identifiant Google du logiciel (2.4.2)
+## Installateur (2.4.2)
 
-Le logiciel lit l'identifiant Google (connexion YouTube, publication) sur `https://siloestream.tech/api/google.php` : il n'est plus à taper sur chaque PC, ni après une réinstallation.
+Après avoir extrait `siloestream-site.zip` dans `public_html`, ouvrez **https://siloestream.tech/installer/** : entrez le jeton GitHub, l'identifiant client et le secret Google, puis « Enregistrer sur Hostinger ». L'installateur vérifie le jeton auprès de GitHub, écrit `api/config.php` et `api/google-config.php` (jamais lisibles depuis le Web) et se ferme tout seul (`api/installation.lock`).
 
-1. Gestionnaire de fichiers › `public_html/api/google-config.php` › Modifier.
-2. Collez l'identifiant client et le secret (Google Cloud › mychurchapp › Identifiants › client « Application de bureau ») entre les guillemets, enregistrez.
-3. Ne remplacez jamais `config.php` ni `google-config.php` en envoyant une nouvelle version du site : ils contiennent vos clés.
+Le logiciel lit alors l'identifiant Google sur `https://siloestream.tech/api/google.php` : rien à taper sur les PC, même après une réinstallation. Le zip ne contient jamais `config.php` ni `google-config.php` : renvoyer le site n'efface pas vos clés. Pour changer une clé : supprimez `api/installation.lock` et rouvrez l'installateur.
