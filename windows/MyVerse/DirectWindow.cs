@@ -323,6 +323,8 @@ public sealed partial class DirectWindow : FenetreDialogue
         Closed += (_, _) => { horloge.Stop(); D.Change -= Maj; connexion?.Cancel(); Garder(); };
         Maj();
         MajCompte();
+        // 2.4.2 : l'identifiant Google vient du site (rien à retaper après une réinstallation)
+        Loaded += async (_, _) => { await D.ChargerIdentifiantsSiteAsync(); MajCompte(); };
     }
 
     // ------------------------------------------------------------ petits morceaux

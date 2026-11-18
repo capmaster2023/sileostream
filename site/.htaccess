@@ -15,9 +15,9 @@ RewriteRule ^telecharger/(windows|portable|android)/?$ api/maj.php?quoi=raccourc
 RewriteRule ^telecharger/([^/]+)/([^/]+)$ api/maj.php?quoi=fichier&tag=$1&nom=$2 [L,QSA]
 
 # Le jeton GitHub ne se lit jamais depuis le Web (ni les notes internes)
-<Files "config.php">
+<FilesMatch "^(config|google-config)\.php$">
   Require all denied
-</Files>
+</FilesMatch>
 <FilesMatch "\.md$">
   Require all denied
 </FilesMatch>

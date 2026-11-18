@@ -48,6 +48,7 @@ public sealed class DirectService : IDisposable
         this.audio = audio; this.donnees = donnees;
         Coffre = new Coffre(donnees.Dossier);
         Compte = new YouTubeCompte(Coffre, Identifiants);
+        _ = ChargerIdentifiantsSiteAsync();
     }
 
     ReglagesDirect R => donnees.Reglages.Direct;
@@ -55,13 +56,44 @@ public sealed class DirectService : IDisposable
     public bool EnDirect => Etat is EtatDirect.EnDirect or EtatDirect.Reconnexion;
     public TimeSpan Duree => Debut is { } d ? DateTime.Now - d : TimeSpan.Zero;
 
-    /// <summary>L'identifiant Google de Siloé Stream (donné à la compilation), ou celui des réglages avancés du direct.</summary>
+    /// <summary>
+    /// L'identifiant Google : celui des réglages avancés du direct s'il y en a un, sinon (2.4.2) celui gardé sur siloestream.tech
+    /// (api/config.php, sur Hostinger : rien à retaper après une réinstallation), sinon celui donné à la compilation.
+    /// </summary>
     public (string Id, string Secret) Identifiants()
     {
         var id = Coffre.Lire("google.id").Trim();
         if (id.Length > 0) return (id, Coffre.Lire("google.secret").Trim());
+        if (site is { } s) return s;
+        var sid = Coffre.Lire("google.site.id").Trim();
+        if (sid.Length > 0) return (sid, Coffre.Lire("google.site.secret").Trim());
         var meta = typeof(DirectService).Assembly.GetCustomAttributes<AssemblyMetadataAttribute>().ToList();
         return (meta.FirstOrDefault(x => x.Key == "YouTubeClientId")?.Value ?? "", meta.FirstOrDefault(x => x.Key == "YouTubeClientSecret")?.Value ?? "");
+    }
+
+    static (string Id, string Secret)? site;
+    static readonly System.Net.Http.HttpClient http = new() { Timeout = TimeSpan.FromSeconds(10) };
+    public const string AdresseIdentifiants = "https://siloestream.tech/api/google.php";
+
+    /// <summary>2.4.2 : lit l'identifiant Google gardé sur le site (et le garde chiffré sur ce PC, pour quand Internet manque).</summary>
+    public async Task ChargerIdentifiantsSiteAsync()
+    {
+        if (site != null) return;
+        try
+        {
+            using var req = new System.Net.Http.HttpRequestMessage(System.Net.Http.HttpMethod.Get, AdresseIdentifiants);
+            req.Headers.Add("X-Siloe-Stream", "1");
+            using var r = await http.SendAsync(req);
+            if (!r.IsSuccessStatusCode) return;
+            using var j = System.Text.Json.JsonDocument.Parse(await r.Content.ReadAsStringAsync());
+            string id = j.RootElement.TryGetProperty("id", out var a) ? a.GetString()?.Trim() ?? "" : "";
+            string secret = j.RootElement.TryGetProperty("secret", out var b) ? b.GetString()?.Trim() ?? "" : "";
+            if (id.Length == 0 || secret.Length == 0) return;
+            site = (id, secret);
+            Coffre.Ecrire("google.site.id", id);
+            Coffre.Ecrire("google.site.secret", secret);
+        }
+        catch (Exception e) { Journal.Info("identifiant Google du site : " + e.Message); }
     }
 
     void Statut(EtatDirect e, string message)

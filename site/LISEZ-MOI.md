@@ -32,3 +32,11 @@ La page `/connexion/` utilise l'identifiant Google de Siloé Stream : dans Googl
 Le jeton GitHub expire (date choisie à sa création) : avant cette date, créez-en un nouveau et remplacez-le dans `api/config.php`.
 
 Si vous renvoyez le site plus tard, ne remplacez pas `api/config.php` : il contient le jeton.
+
+## Identifiant Google du logiciel (2.4.2)
+
+Le logiciel lit l'identifiant Google (connexion YouTube, publication) sur `https://siloestream.tech/api/google.php` : il n'est plus à taper sur chaque PC, ni après une réinstallation.
+
+1. Gestionnaire de fichiers › `public_html/api/google-config.php` › Modifier.
+2. Collez l'identifiant client et le secret (Google Cloud › mychurchapp › Identifiants › client « Application de bureau ») entre les guillemets, enregistrez.
+3. Ne remplacez jamais `config.php` ni `google-config.php` en envoyant une nouvelle version du site : ils contiennent vos clés.

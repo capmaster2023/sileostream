@@ -487,7 +487,7 @@ public sealed class PublicationWindow : FenetreDialogue
         racine.Children.Add(centre);
         Content = racine;
 
-        Loaded += async (_, _) => { MajCompte(); await ChargerPlaylists(); };
+        Loaded += async (_, _) => { MajCompte(); await App.Direct.ChargerIdentifiantsSiteAsync(); MajCompte(); await ChargerPlaylists(); };
         Action<string> recue = f => Dispatcher.BeginInvoke(new Action(() => { miniature = f; MajMiniature(); }));
         Creation.PageMiniature.MiniaturePrete += recue;
         Closed += (_, _) => { connexion?.Cancel(); Creation.PageMiniature.MiniaturePrete -= recue; };
