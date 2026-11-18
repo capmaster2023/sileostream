@@ -1741,8 +1741,8 @@ if (Actif())
     Egal(MyVerse.Audio.AudioConfiguration.Description(ordi), "Tout ce que joue l'ordinateur", "description du son de l'ordinateur");
     var plan = cfg.Planifier("C:\\videos\\annonce.mp4");
     var mv = plan.Moteur.First(x => x.Id == voix.Id);
-    Ok(mv.Mono && mv.Filters.Select(f => f.Kind).SequenceEqual(new[] { MyVerse.Audio.AudioFilterKind.NoiseSuppression, MyVerse.Audio.AudioFilterKind.Compressor, MyVerse.Audio.AudioFilterKind.Limiter })
-        && mv.Monitoring == MyVerse.Audio.AudioMonitoring.Off && mv.Kind == MyVerse.Audio.AudioInputKind.Microphone, "moteur : une voix est mono, nettoyée et régulière, hors de l'église");
+    Ok(mv.Mono && mv.Filters.Count == 0
+        && mv.Monitoring == MyVerse.Audio.AudioMonitoring.Off && mv.Kind == MyVerse.Audio.AudioInputKind.Microphone, "2.4.2 : moteur : une voix est mono, sans traitement automatique, hors de l'église");
     var mm = plan.Moteur.First(x => x.Id == musique.Id);
     Ok(mm.DemarrerArrete && !mm.Mono && mm.Filters.Count == 0 && mm.Monitoring == MyVerse.Audio.AudioMonitoring.AndOutput, "moteur : la musique attend « Lire », stéréo, dans l'église");
     var mvid = plan.Moteur.First(x => x.Id == cfg.SonVideos!.Id);
