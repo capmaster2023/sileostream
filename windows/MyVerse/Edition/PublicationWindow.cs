@@ -408,6 +408,11 @@ public sealed class PublicationWindow : FenetreDialogue
         var retirerMini = new Button { Style = S("BtnPetit"), Content = "Sans miniature", Height = 34, Padding = new Thickness(12, 0, 12, 0), Margin = new Thickness(8, 0, 0, 0) };
         rangMini.Children.Add(choisirMini);
         rangMini.Children.Add(retirerMini);
+        // 2.3.0 : la créer dans la page Miniature (elle arrive ici toute seule avec « Utiliser pour la publication »)
+        var creerMini = new Button { Style = S("BtnPetit"), Content = "Créer dans Miniature", Height = 34, Padding = new Thickness(12, 0, 12, 0), Margin = new Thickness(8, 0, 0, 0),
+            ToolTip = "Ouvre la page Miniature ; « Utiliser pour la publication » la met ici" };
+        creerMini.Click += (_, _) => (Application.Current.MainWindow as MainWindow)?.OuvrirMiniature();
+        rangMini.Children.Add(creerMini);
         miniBoutons.Children.Add(rangMini);
         ligneMini.Children.Add(miniBoutons);
         corps.Children.Add(ligneMini);
@@ -483,7 +488,9 @@ public sealed class PublicationWindow : FenetreDialogue
         Content = racine;
 
         Loaded += async (_, _) => { MajCompte(); await ChargerPlaylists(); };
-        Closed += (_, _) => connexion?.Cancel();
+        Action<string> recue = f => Dispatcher.BeginInvoke(new Action(() => { miniature = f; MajMiniature(); }));
+        Creation.PageMiniature.MiniaturePrete += recue;
+        Closed += (_, _) => { connexion?.Cancel(); Creation.PageMiniature.MiniaturePrete -= recue; };
     }
 
     static TextBlock Section(string titre) => new Capitales { Libelle = titre, Margin = new Thickness(0, 18, 0, 8) };

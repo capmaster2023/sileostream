@@ -889,6 +889,34 @@ public static class AutoTest
         await Attendre(600);
         Capture(w, "71-v220-montage-export.png");
         await Fenetre(w, () => new Edition.PublicationWindow(p, () => { }), "72-v220-publier-youtube.png");
+        // 2.3.0 : l'image de la tête de lecture part dans Miniature ; un modèle ; la miniature exportée pour la publication
+        page.TestAller(p.Intro.Duree + 1.0);
+        var image = await page.TestEnvoyerMiniature();
+        await Attendre(900);
+        var pm = w.TestPageMiniature;
+        Ok(image != null && File.Exists(image) && pm != null && pm.TestProjet.Role("fond")?.Chemin == image, "2.3.0 : image de la vidéo envoyée dans Miniature (" + System.IO.Path.GetFileName(image ?? "") + ")");
+        if (pm != null)
+        {
+            pm.TestTitre("La puissance de la prière");
+            pm.TestModele("predication");
+            await Attendre(700);
+            Capture(w, "74-v230-miniature.png");
+            var jpg = pm.TestUtiliser();
+            bool bon = false;
+            string info = "";
+            if (jpg != null && File.Exists(jpg))
+            {
+                var d = System.Windows.Media.Imaging.BitmapDecoder.Create(new Uri(jpg), System.Windows.Media.Imaging.BitmapCreateOptions.None, System.Windows.Media.Imaging.BitmapCacheOption.OnLoad);
+                long taille = new FileInfo(jpg).Length;
+                info = $"{d.Frames[0].PixelWidth} × {d.Frames[0].PixelHeight}, {taille / 1024} Ko";
+                bon = d.Frames[0].PixelWidth == 1280 && d.Frames[0].PixelHeight == 720 && taille <= 2 * 1024 * 1024 && Edition.ReglagesPublication.Lire().Miniature == jpg;
+            }
+            Ok(bon, "2.3.0 : miniature exportée pour YouTube (" + info + ") et choisie pour la publication");
+            foreach (var m in MyVerse.Miniatures.ModelesMiniature.Tous.Skip(1).Take(2)) pm.TestModele(m.Id);
+            await Attendre(500);
+            Capture(w, "75-v230-miniature-modele.png");
+        }
+
         // la recherche vocale : « Chant ou Bible ? »
         await Fenetre(w, () => new Voix.RechercheVocaleWindow(), "73-v220-recherche-vocale.png");
         // SILOE_TEST_MICRO=1 (un PC avec un micro) : le micro s'ouvre, une seconde est captée et mise en 16 kHz pour Whisper
@@ -931,7 +959,7 @@ public static class AutoTest
         var R = App.Regie;
         try
         {
-            // 2.2.0 : SILOE_AUTOTEST_SEUL=montage : seulement le montage (essai rapide sur un PC de développement)
+            // 2.2.0 : SILOE_AUTOTEST_SEUL=montage (2.3.0 : avec la miniature) : seulement le montage (essai rapide sur un PC de développement)
             if (Environment.GetEnvironmentVariable("SILOE_AUTOTEST_SEUL") == "montage")
             {
                 await TestMontage(w);
@@ -1563,7 +1591,7 @@ public static class AutoTest
             Ok(((SolidColorBrush)MainWindow.Pinceau("Page")).Color == Palette.De("Page", true), "les pinceaux suivent le thème sombre");
             await Attendre(500);
             Capture(w, "41-sombre-reglages.png");
-            foreach (var (page, nom) in new[] { ("agenda", "42-sombre-culte.png"), ("bible", "43-sombre-bible.png"), ("chants", "44-sombre-chants.png"), ("annonces", "45-sombre-display.png"), ("duo", "46-sombre-duo.png"), ("son", "46b-sombre-son.png"), ("montage", "46c-sombre-montage.png") })
+            foreach (var (page, nom) in new[] { ("agenda", "42-sombre-culte.png"), ("bible", "43-sombre-bible.png"), ("chants", "44-sombre-chants.png"), ("annonces", "45-sombre-display.png"), ("duo", "46-sombre-duo.png"), ("son", "46b-sombre-son.png"), ("montage", "46c-sombre-montage.png"), ("miniature", "46d-sombre-miniature.png") })
             {
                 w.TestPage(page);
                 await Attendre(500);
@@ -1572,7 +1600,7 @@ public static class AutoTest
             await Fenetre(w, () => new OutilsWindow(false), "47-sombre-fenetre.png");
             App.AppliquerApparence("clair");
             Ok(!Palette.Actuelle.Sombre && ((SolidColorBrush)MainWindow.Pinceau("Page")).Color == Palette.De("Page", false), "retour au thème clair");
-            foreach (var (page, nom) in new[] { ("agenda", "48-clair-culte.png"), ("annonces", "49-clair-display.png"), ("bible", "49b-clair-bible.png"), ("chants", "49c-clair-chants.png"), ("duo", "49d-clair-duo.png"), ("son", "49e-clair-son.png"), ("montage", "49f-clair-montage.png") })
+            foreach (var (page, nom) in new[] { ("agenda", "48-clair-culte.png"), ("annonces", "49-clair-display.png"), ("bible", "49b-clair-bible.png"), ("chants", "49c-clair-chants.png"), ("duo", "49d-clair-duo.png"), ("son", "49e-clair-son.png"), ("montage", "49f-clair-montage.png"), ("miniature", "49g-clair-miniature.png") })
             {
                 w.TestPage(page);
                 await Attendre(500);

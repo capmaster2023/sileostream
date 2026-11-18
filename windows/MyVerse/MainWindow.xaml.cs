@@ -57,6 +57,7 @@ public partial class MainWindow : Window
         OngletDuo.Checked += (_, _) => MontrerOnglet("duo");
         OngletSon.Checked += (_, _) => MontrerOnglet("son");
         OngletMontage.Checked += (_, _) => MontrerOnglet("montage");
+        OngletMiniature.Checked += (_, _) => MontrerOnglet("miniature");
         OngletReglages.Checked += (_, _) => MontrerOnglet("reglages");
         Q.TextChanged += (_, _) =>
         {
@@ -405,16 +406,19 @@ public partial class MainWindow : Window
         // 2.2.0 : le montage, sur toute la largeur (la page n'est construite qu'à la première visite)
         if (o == "montage" && PanneauMontage.Child == null) PanneauMontage.Child = new Edition.PageMontage();
         PanneauMontage.Visibility = V(o == "montage");
-        ColonneControle.Visibility = V(o is not ("reglages" or "montage"));
+        // 2.3.0 : les miniatures YouTube, sur toute la largeur aussi
+        if (o == "miniature" && PanneauMiniature.Child == null) PanneauMiniature.Child = new Creation.PageMiniature();
+        PanneauMiniature.Visibility = V(o == "miniature");
+        ColonneControle.Visibility = V(o is not ("reglages" or "montage" or "miniature"));
         // 1.5.0 : sur Culte, l'écran en direct est en grand, sans en-tête ; la recherche Ctrl K est en haut, sur toutes les pages
-        EnTete.Visibility = V(o is not ("reglages" or "son" or "agenda" or "montage"));
+        EnTete.Visibility = V(o is not ("reglages" or "son" or "agenda" or "montage" or "miniature"));
         RechercheBible.Visibility = V(o == "bible");
         RechercheChants.Visibility = V(o == "chants");
         Recherches.Visibility = V(o is "bible" or "chants");
-        (o switch { "agenda" => OngletAgenda, "bible" => OngletBible, "annonces" => OngletAnnonces, "duo" => OngletDuo, "son" => OngletSon, "montage" => OngletMontage, "reglages" => OngletReglages, _ => OngletChants }).IsChecked = true;
+        (o switch { "agenda" => OngletAgenda, "bible" => OngletBible, "annonces" => OngletAnnonces, "duo" => OngletDuo, "son" => OngletSon, "montage" => OngletMontage, "miniature" => OngletMiniature, "reglages" => OngletReglages, _ => OngletChants }).IsChecked = true;
         MajPagesBiblio(o);
         // sur Culte, un clic sur une image la montre : pas de bouton « Montrer la sélection »
-        Afficher.Visibility = V(o is not ("agenda" or "reglages" or "son" or "montage"));
+        Afficher.Visibility = V(o is not ("agenda" or "reglages" or "son" or "montage" or "miniature"));
         MajEntete();
         if (o == "agenda") Dispatcher.BeginInvoke(DispatcherPriority.Loaded, new Action(() => { LargeurVignettes(); DefilerVers(elementChoisi ?? R.ElementCourant); }));
     }
@@ -472,6 +476,11 @@ public partial class MainWindow : Window
         if (onglet == "montage")
         {
             if (PanneauMontage.Child is Edition.PageMontage pm && pm.Touche(e)) e.Handled = true;
+            return;
+        }
+        if (onglet == "miniature")
+        {
+            if (PanneauMiniature.Child is Creation.PageMiniature pmi && pmi.Touche(e)) e.Handled = true;
             return;
         }
         switch (e.Key)
@@ -1218,6 +1227,16 @@ public partial class MainWindow : Window
     /// <summary>Test : affiche une page (« agenda », « bible », « chants », « annonces », « duo », « reglages »).</summary>
     public void TestPage(string o) => MontrerOnglet(o);
     internal Edition.PageMontage? TestPageMontage => PanneauMontage.Child as Edition.PageMontage;
+    internal Creation.PageMiniature? TestPageMiniature => PanneauMiniature.Child as Creation.PageMiniature;
+
+    /// <summary>2.3.0 : une image (envoyée depuis Montage) devient le fond de la miniature ; la page Miniature s'ouvre.</summary>
+    internal void EnvoyerVersMiniature(string image, string? titre)
+    {
+        MontrerOnglet("miniature");
+        (PanneauMiniature.Child as Creation.PageMiniature)?.RecevoirImage(image, titre);
+    }
+
+    internal void OuvrirMiniature() => MontrerOnglet("miniature");
     public string TestTheme => ThemeBtn.Content as string ?? "";
     public void TestBasculerTheme() => ThemeBtn.RaiseEvent(new RoutedEventArgs(System.Windows.Controls.Primitives.ButtonBase.ClickEvent));
     public string TestDeroule => AgendaTitre.Text + " / " + AgendaInfo.Text;

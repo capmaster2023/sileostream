@@ -178,6 +178,9 @@
                     <!-- 2.2.0 : le montage des enregistrements et la publication sur YouTube -->
                     <RadioButton x:Name="OngletMontage" Style="{StaticResource OngletRail}" GroupName="Pages" Content="Montage" Tag="{StaticResource IconeMontage}"
                                  ToolTip="Monter l'enregistrement du culte (couper, titres, logo, fondus) et le publier sur YouTube sans exporter" />
+                    <!-- 2.3.0 : les miniatures YouTube -->
+                    <RadioButton x:Name="OngletMiniature" Style="{StaticResource OngletRail}" GroupName="Pages" Content="Miniature" Tag="{StaticResource IconeMiniature}"
+                                 ToolTip="Créer la miniature YouTube : une image de la vidéo (envoyée depuis Montage), des modèles, du texte à gros contour" />
                     <!-- 1.5.0 : les pages de la Bibliothèque se choisissent avec ses onglets (en haut de la colonne) -->
                     <RadioButton x:Name="OngletBible" GroupName="Pages" Visibility="Collapsed" IsChecked="True" />
                     <RadioButton x:Name="OngletChants" GroupName="Pages" Visibility="Collapsed" />
@@ -603,6 +606,9 @@
 
         <!-- ==================== 2.2.0 : Montage (construit en C# : Edition/PageMontage.cs), sur toute la largeur ==================== -->
         <Border x:Name="PanneauMontage" Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="3" Visibility="Collapsed" Background="{StaticResource Page}" />
+
+        <!-- ==================== 2.3.0 : Miniature (construit en C# : Creation/PageMiniature.cs), sur toute la largeur ==================== -->
+        <Border x:Name="PanneauMiniature" Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="3" Visibility="Collapsed" Background="{StaticResource Page}" />
 
         <!-- ==================== à droite : ce qui vient (Ensuite), puis les outils de l'écran, repliés ==================== -->
         <Border x:Name="ColonneControle" Grid.Row="1" Grid.Column="3" BorderBrush="{StaticResource Nuit3}" BorderThickness="1,0,0,0">

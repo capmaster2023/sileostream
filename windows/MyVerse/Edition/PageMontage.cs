@@ -162,6 +162,7 @@ public sealed class PageMontage : Grid
         T("I", "Marquer le début de la séquence ici (I) : ce qui est avant est retiré", MarquerDebut);
         T("O", "Marquer la fin de la séquence ici (O) : ce qui est après est retiré", MarquerFin);
         T("✂", "Couper la séquence ici (S)", Couper);
+        T("🖼", "Envoyer cette image dans Miniature (pleine qualité, pour la miniature YouTube)", EnvoyerMiniature);
         temps.Foreground = P("Blanc");
         infoElement.Foreground = P("Brume");
         var basApercu = new StackPanel();
@@ -978,6 +979,34 @@ public sealed class PageMontage : Grid
               + (materiels.Count == 0 ? " Pas de carte graphique utilisable : le processeur encode (plus lent)." : "");
     }
 
+    // ================================================================================================ 2.3.0 : vers Miniature
+    async void EnvoyerMiniature() => await EnvoyerMiniatureAsync();
+
+    /// <summary>
+    /// L'image de la tête de lecture, prise dans l'enregistrement d'origine en pleine qualité (4K comprise), devient le fond de la
+    /// miniature YouTube ; la page Miniature s'ouvre.
+    /// </summary>
+    internal async Task<string?> EnvoyerMiniatureAsync()
+    {
+        if (projet.ElementA(tete) is not { Type: TypeElement.Sequence } e) { SonUi.Toast("Placez la tête de lecture sur une séquence (pas sur un générique)."); return null; }
+        var s = projet.Sequences[e.Index];
+        double t = s.Debut + (tete - e.Debut);
+        var dossier = Path.Combine(Creation.PageMiniature.Dossier, "Images");
+        Directory.CreateDirectory(dossier);
+        var fichier = Path.Combine(dossier, $"{RecordingFiles.SafeName(projet.Nom)} - {ProjetMontage.Temps(t, false).Replace(':', '-')} - {DateTime.Now:HHmmss}.png");
+        apercu.Arreter();
+        SonUi.Toast("Image envoyée vers Miniature…");
+        try
+        {
+            var (code, err, _) = await Processus.ExecuterAsync(Ffmpeg, new[] { "-hide_banner", "-nostdin", "-loglevel", "error", "-y",
+                "-ss", t.ToString("0.###", System.Globalization.CultureInfo.InvariantCulture), "-i", s.Source, "-frames:v", "1", fichier }, TimeSpan.FromMinutes(1));
+            if (code != 0 || !File.Exists(fichier)) { SonUi.Toast("L'image n'a pas pu être prise : " + Processus.Fin(err)); return null; }
+        }
+        catch (Exception x) { Journal.Erreur("montage : image pour la miniature", x); SonUi.Toast("L'image n'a pas pu être prise : " + x.Message); return null; }
+        (Window.GetWindow(this) as MainWindow)?.EnvoyerVersMiniature(fichier, projet.Nom);
+        return fichier;
+    }
+
     // ================================================================================================ pour le test automatique
     internal ProjetMontage TestProjet => projet;
     internal double TestTete => tete;
@@ -990,6 +1019,7 @@ public sealed class PageMontage : Grid
     internal void TestGenerique() => BasculerGenerique(projet.Intro);
     internal void TestAnnuler() => Annuler();
     internal void TestModifie() => Changer();
+    internal Task<string?> TestEnvoyerMiniature() => EnvoyerMiniatureAsync();
 
     // ================================================================================================ publier, exporter
     void OuvrirPublication()

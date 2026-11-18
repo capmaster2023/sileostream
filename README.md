@@ -1,4 +1,4 @@
-# Siloé Stream 2.2.1
+# Siloé Stream 2.3.0
 
 **Commencer le culte** (2.1.0) : un clic vérifie le projecteur, YouTube, le son et les caméras, puis lance l'enregistrement dans le dossier choisi (Réglages › Son). Médias : « + Ajouter un média » et, à part, « + Ajouter un périphérique vidéo » (MyVirtualCam, webcams, cartes de capture, MyCam, Sony).
 
@@ -79,6 +79,7 @@ Tout le son est dans la page **Son** (barre de gauche). On n'y voit jamais de pi
 - **Montage** (barre de gauche) : les enregistrements de Siloé Stream et d'OBS, une ligne de temps multipiste (vidéo, titres, 4 pistes son), couper (S), marquer début / fin (I / O), fondus, titres, logo, génériques, volume, annuler ; le projet s'enregistre tout seul.
 - **Sans perte quand c'est possible** : copie des images d'origine (4K comprise) sans réencodage ; sinon réencodage par la carte graphique (NVIDIA NVENC, Intel Quick Sync, AMD AMF) ou x264 / x265, en H.264 ou HEVC, de 1080p à 4K.
 - **Publier sur YouTube** : la vidéo part pendant qu'elle se fabrique (YouTube Data API v3, envoi reprenable), sans fichier exporté à attendre ; titre, description, miniature, playlist, tags, visibilité ou date de publication. **Exporter un fichier** reste possible.
+- **Miniature** (2.3.0, sous Montage) : le bouton 🖼 de Montage envoie l'image de la tête de lecture (pleine qualité) ; modèles, texte à gros contour, mots en couleur, calques, aperçu YouTube, export JPG de moins de 2 Mo qui arrive dans « Publier sur YouTube ».
 - **Recherche vocale** : le micro de la barre de recherche demande « Chant ou Bible ? », écoute et trouve le chant ou le verset (reconnaissance Whisper sur le PC).
 
 ## Projection et caméra virtuelle

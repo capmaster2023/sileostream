@@ -1955,6 +1955,38 @@ if (Actif())
     Ok(RechercheVocale.Chercher(rg, "[Musique]", RechercheVocale.Chant, null).Count == 0, "rien d'entendu : aucun résultat");
 }
 
+Groupe("Miniatures YouTube (2.3.0)");
+if (Actif())
+{
+    var (t, acc) = MyVerse.Miniatures.Calque.Accents("la *grâce* de Dieu");
+    Ok(t == "la grâce de Dieu" && acc.Count == 1 && acc[0] == (3, 5), "mots en couleur : « la *grâce* de Dieu »", t);
+    Egal(MyVerse.Miniatures.Calque.Accents("5 * 3 = 15").Texte, "5 * 3 = 15", "un astérisque seul reste tel quel");
+    Egal(MyVerse.Miniatures.Calque.AccentAuto("La puissance de la prière"), "La *puissance* de la prière", "mot fort mis en avant tout seul");
+    Egal(MyVerse.Miniatures.Calque.AccentAuto("Le *salut* gratuit"), "Le *salut* gratuit", "un accent choisi par l'utilisateur est gardé");
+    bool tousBons = true;
+    string detail = "";
+    foreach (var m in MyVerse.Miniatures.ModelesMiniature.Tous)
+    {
+        var p = MyVerse.Miniatures.ModelesMiniature.Creer(m.Id, "fond.jpg", "La puissance de la prière", "Pasteur Jean", "logo.png");
+        bool ok = p.Role("fond")?.Chemin == "fond.jpg" && p.Role("titre") != null && p.Role("logo") != null
+            && p.Calques.All(c => c.X > -200 && c.Y > -200 && c.X + c.L < 1500 && c.Y + c.H < 950);
+        if (!ok) { tousBons = false; detail += m.Id + " "; }
+        var relu = MyVerse.Miniatures.ProjetMiniature.DepuisJson(p.VersJson());
+        if (relu.VersJson() != p.VersJson()) { tousBons = false; detail += m.Id + "(json) "; }
+    }
+    Ok(tousBons, "les 6 modèles : fond, titre et logo à leur place, relus à l'identique", detail);
+    var sans = MyVerse.Miniatures.ModelesMiniature.Creer("predication", null, "Titre", "", null);
+    Ok(sans.Role("fond") == null && sans.Role("logo") == null && sans.Role("sous") == null && sans.Role("titre") != null, "modèle sans image ni logo ni sous-titre : seulement ce qu'on a");
+    var mal = new MyVerse.Miniatures.ProjetMiniature();
+    mal.Calques.Add(new MyVerse.Miniatures.Calque { Type = MyVerse.Miniatures.Calque.TypeTexte, Texte = "Écoutez", X = 1100, Y = 650, L = 170, H = 60, Taille = 30 });
+    var conseils = mal.Conseils();
+    Ok(conseils.Any(c => c.Contains("illisible")) && conseils.Any(c => c.Contains("minutage")), "conseils : texte trop petit pour un téléphone, sous le minutage de YouTube", string.Join(" | ", conseils));
+    Ok(new MyVerse.Miniatures.ProjetMiniature().Conseils().Any(c => c.Contains("Pas de texte")), "conseil : pas de texte");
+    var bizarre = MyVerse.Miniatures.ProjetMiniature.DepuisJson("{\"calques\":[{\"type\":\"inconnu\",\"couleur\":\"rouge\",\"taille\":-5,\"opacite\":7},null]}");
+    Ok(bizarre.Calques.Count == 1 && bizarre.Calques[0].Type == "texte" && bizarre.Calques[0].Couleur == "#FFFFFF" && bizarre.Calques[0].Taille == 6 && bizarre.Calques[0].Opacite == 1,
+        "fichier modifié à la main : valeurs impossibles corrigées");
+}
+
 Groupe("YouTube (1.6.0)");
 if (Actif()) MyVerse.Tests.YouTubeTests.RunAsync(Ok).GetAwaiter().GetResult();
 
@@ -2133,7 +2165,7 @@ if (Actif())
     Ok(!Roles.Permis(Roles.Bible, "display.show") && !Roles.Permis(Roles.Bible, "agenda.show"), "Versets : ni les médias, ni le culte");
     Ok(Roles.Pages(Roles.Bible).SequenceEqual(new[] { "bible" }) && Roles.Pages(Roles.Chants).SequenceEqual(new[] { "chants" }), "pages du logiciel : Versets = Bible, Chants = chants");
     Ok(Roles.Pages(Roles.Affichage).SequenceEqual(new[] { "agenda", "annonces", "duo" }), "pages du logiciel : Affichage = Culte, Médias, Duo");
-    Ok(Roles.Pages(Roles.Admin).Count == 8 && Roles.Pages(Roles.Admin).Contains("montage") && Roles.Pages(Roles.Admin).Contains("reglages") && Roles.Pages(Roles.Camera).Count == 0, "pages du logiciel : Admin tout, Caméraman aucune");
+    Ok(Roles.Pages(Roles.Admin).Count == 9 && Roles.Pages(Roles.Admin).Contains("montage") && Roles.Pages(Roles.Admin).Contains("miniature") && Roles.Pages(Roles.Admin).Contains("reglages") && Roles.Pages(Roles.Camera).Count == 0, "pages du logiciel : Admin tout, Caméraman aucune");
 
     // la page siloestream.tech/connexion renvoie le jeton Google au logiciel, sur 127.0.0.1
     var rq = ConnexionGoogle.Analyser("POST /connexion HTTP/1.1\r\nHost: 127.0.0.1", "idToken=abc.def%2Bg+h&etat=XyZ_-1");

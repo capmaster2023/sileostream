@@ -486,7 +486,7 @@ public partial class MainWindow
     void OuvrirCommande()
     {
         // 1.5.0 : la recherche est en haut de toutes les pages ; seuls Son et Réglages ramènent au culte
-        if (onglet is "son" or "reglages" or "montage") MontrerOnglet("agenda");
+        if (onglet is "son" or "reglages" or "montage" or "miniature") MontrerOnglet("agenda");
         Cmd.Focus();
         Cmd.SelectAll();
     }
