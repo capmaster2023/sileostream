@@ -411,6 +411,7 @@ public sealed class ObsMixer : IDisposable
         AudioInputKind.Microphone when s.Channel > 0 && entreesPossibles => TypeEntree,
         AudioInputKind.Microphone => chemins.MicrophoneId,
         AudioInputKind.Sortie => chemins.OutputId,
+        AudioInputKind.Application => "wasapi_process_output_capture",
         _ => "ffmpeg_source",
     };
     /// <param name="charger">Un fichier de musique qui attend « Lire » n'est pas ouvert (fichier vide pour OBS).</param>
@@ -424,6 +425,13 @@ public sealed class ObsMixer : IDisposable
             LibObs.obs_data_set_bool(d, "restart_on_activate", false);
             LibObs.obs_data_set_bool(d, "close_when_inactive", false);
             LibObs.obs_data_set_bool(d, "hw_decode", false);
+        }
+        else if (s.Kind == AudioInputKind.Application)
+        {
+            // « Capture audio d'application » d'OBS : la fenêtre « titre:classe:exe », reconnue par son exe (priorité 2)
+            var exe = string.IsNullOrEmpty(s.DeviceId) ? "Zoom.exe" : s.DeviceId;
+            LibObs.obs_data_set_string(d, "window", System.IO.Path.GetFileNameWithoutExtension(exe) + "::" + exe);
+            LibObs.obs_data_set_int(d, "priority", 2);
         }
         else
         {

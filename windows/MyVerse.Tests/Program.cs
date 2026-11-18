@@ -1743,6 +1743,12 @@ if (Actif())
     var mv = plan.Moteur.First(x => x.Id == voix.Id);
     Ok(mv.Mono && mv.Filters.Count == 0
         && mv.Monitoring == MyVerse.Audio.AudioMonitoring.Off && mv.Kind == MyVerse.Audio.AudioInputKind.Microphone, "2.4.2 : moteur : une voix est mono, sans traitement automatique, hors de l'église");
+    Ok(plan.Moteur.All(x => x.Kind != MyVerse.Audio.AudioInputKind.Application), "2.4.3 : sans la case, pas de son de Zoom dans l'église");
+    cfg.Eglise.Zoom = true; cfg.Eglise.ZoomVolumeDb = -6;
+    var planZoom = cfg.Planifier("");
+    var zoomEglise = planZoom.Moteur.FirstOrDefault(x => x.Kind == MyVerse.Audio.AudioInputKind.Application);
+    Ok(zoomEglise is { DeviceId: "Zoom.exe", Tracks: 0, Monitoring: MyVerse.Audio.AudioMonitoring.Only, VolumeDb: -6 }, "2.4.3 : le son de Zoom joué dans l'église seulement (ni enregistré, ni renvoyé vers Zoom), avec son volume");
+    cfg.Eglise.Zoom = false;
     var mm = plan.Moteur.First(x => x.Id == musique.Id);
     Ok(mm.DemarrerArrete && !mm.Mono && mm.Filters.Count == 0 && mm.Monitoring == MyVerse.Audio.AudioMonitoring.AndOutput, "moteur : la musique attend « Lire », stéréo, dans l'église");
     var mvid = plan.Moteur.First(x => x.Id == cfg.SonVideos!.Id);

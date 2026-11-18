@@ -11,7 +11,8 @@ namespace MyVerse.Audio;
 // ======================================================================================================================
 
 /// <summary>Comment le moteur capte un son (caché à l'utilisateur). Les numéros sont ceux des réglages enregistrés depuis la 3.0.</summary>
-public enum AudioInputKind { Microphone, Sortie, Media, Asio }
+/// <summary>Application (2.4.3) : le son d'un seul logiciel (Zoom), capté par OBS sans rien régler dans ce logiciel.</summary>
+public enum AudioInputKind { Microphone, Sortie, Media, Asio, Application }
 public enum AudioFilterKind { NoiseSuppression, NoiseGate, Compressor, Limiter }
 /// <summary>Le monitoring d'OBS : Siloé Stream s'en sert pour faire entendre un son dans l'église (haut-parleurs de l'ordinateur).</summary>
 public enum AudioMonitoring { Off, Only, AndOutput }
@@ -66,6 +67,9 @@ public sealed class SortieEglise
 {
     [JsonPropertyName("appareil")] public string Appareil { get; set; } = "default";
     [JsonPropertyName("nomAppareil")] public string NomAppareil { get; set; } = "";
+    /// <summary>2.4.3 : le son de Zoom (les personnes à distance) joué dans l'église, sur ces haut-parleurs.</summary>
+    [JsonPropertyName("zoom")] public bool Zoom { get; set; }
+    [JsonPropertyName("zoomVolumeDb")] public double ZoomVolumeDb { get; set; }
 }
 
 /// <summary>Le casque de la régie : on y entend tout le son, comme il part en ligne et dans l'enregistrement.</summary>
@@ -504,9 +508,18 @@ public sealed class AudioConfiguration
             foreach (var (piste, ids) in plan.SonsDesPistes) if (piste > 1 && ids.Contains(s.Id)) masque |= 1 << (piste - 1);
             plan.Moteur.Add(SourceMoteur(s, masque, videoProjetee));
         }
+        // 2.4.3 : le son de Zoom dans l'église seulement (ni enregistré, ni renvoyé vers Zoom : pas de piste)
+        if (Eglise.Zoom)
+            plan.Moteur.Add(new AudioSource
+            {
+                Id = IdZoomEglise, Name = "Zoom", Kind = AudioInputKind.Application, DeviceId = ExeZoom,
+                VolumeDb = Math.Clamp(Eglise.ZoomVolumeDb, -60, 20), Tracks = 0, Monitoring = AudioMonitoring.Only,
+            });
         foreach (var d in Destinations()) d.Track = plan.PisteDe(d.Id);
         return plan;
     }
+
+    public const string IdZoomEglise = "zoom-eglise", ExeZoom = "Zoom.exe";
 
     /// <summary>La source d'OBS d'un son : comment le capter, ses pistes, l'église (monitoring) et ses aides (filtres d'OBS).</summary>
     static AudioSource SourceMoteur(Son s, int pistes, string videoProjetee)

@@ -646,6 +646,46 @@ public sealed class PageSon : Grid
         }
         if (C.Sons.Any(s => s.EstMicro))
             corps.Children.Add(SonUi.Note("Les micros et les instruments passent d'habitude par la table de mixage : laissez-les décochés, sinon ça siffle.", 4));
+
+        // 2.4.3 : le son de Zoom (les personnes à distance), sur ces haut-parleurs, avec son volume
+        var zoom = new CheckBox { Content = "Le son de Zoom (les personnes à distance)", IsChecked = C.Eglise.Zoom, Margin = new Thickness(0, 8, 0, 6), HorizontalAlignment = HorizontalAlignment.Left };
+        var ligneZoom = new DockPanel { Margin = new Thickness(0, 0, 0, 4) };
+        var pourcentZoom = new TextBlock { FontFamily = SonUi.Mono, FontSize = 13, FontWeight = FontWeights.SemiBold, Width = 54, TextAlignment = TextAlignment.Right, VerticalAlignment = VerticalAlignment.Center, Text = VolumeCurseur.Texte(C.Eglise.ZoomVolumeDb) };
+        DockPanel.SetDock(pourcentZoom, Dock.Right);
+        ligneZoom.Children.Add(pourcentZoom);
+        var libelleZoom = SonUi.Texte("Volume de Zoom", 12.5, "Brume", null, false);
+        libelleZoom.VerticalAlignment = VerticalAlignment.Center;
+        libelleZoom.Margin = new Thickness(0, 0, 10, 0);
+        DockPanel.SetDock(libelleZoom, Dock.Left);
+        ligneZoom.Children.Add(libelleZoom);
+        var curseurZoom = new Slider
+        {
+            Minimum = 0, Maximum = 1, SmallChange = 0.01, LargeChange = 0.05, Value = VolumeCurseur.Position(C.Eglise.ZoomVolumeDb), VerticalAlignment = VerticalAlignment.Center,
+            ToolTip = "100 % : le volume de Zoom tel quel. Double-clic : revenir à 100 %.",
+        };
+        curseurZoom.ValueChanged += (_, e) =>
+        {
+            double v = e.NewValue;
+            if (Math.Abs(v - VolumeCurseur.Normal) < 0.015) v = VolumeCurseur.Normal;
+            C.Eglise.ZoomVolumeDb = Math.Round(VolumeCurseur.Db(v), 1);
+            pourcentZoom.Text = VolumeCurseur.Texte(C.Eglise.ZoomVolumeDb);
+            A.Apply();
+        };
+        curseurZoom.MouseDoubleClick += (_, _) => curseurZoom.Value = VolumeCurseur.Normal;
+        ligneZoom.Children.Add(curseurZoom);
+        var noteZoom = SonUi.Note("Dans Zoom › Paramètres › Audio, choisissez comme haut-parleur une autre sortie que celle de l'église (par exemple « CABLE Input »), sinon on l'entend deux fois. Si les personnes à distance s'entendent en écho, baissez ce volume.", 2);
+        void MajZoom()
+        {
+            bool oui = C.Eglise.Zoom;
+            ligneZoom.Visibility = noteZoom.Visibility = oui ? Visibility.Visible : Visibility.Collapsed;
+            if (zoom.IsChecked != oui) zoom.IsChecked = oui;
+        }
+        zoom.Click += (_, _) => { C.Eglise.Zoom = zoom.IsChecked == true; MajZoom(); A.Apply(); };
+        lents.Add(MajZoom);
+        corps.Children.Add(zoom);
+        corps.Children.Add(ligneZoom);
+        corps.Children.Add(noteZoom);
+        MajZoom();
         return cadre;
     }
 
