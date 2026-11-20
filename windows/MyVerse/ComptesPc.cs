@@ -10,7 +10,7 @@ namespace MyVerse.Ui;
 
 /// <summary>
 /// Siloé Stream 1.9.3 : le compte Google connecté sur ce PC. Admin : tout ; Versets : la Bible ; Chants : les chants ;
-/// Affichage : le culte, les médias et le duo (ce qui est montré dans l'église et sur Zoom). Sans compte connecté, et tant que
+/// Affichage : le culte et les médias (ce qui est montré dans l'église et sur Zoom). Sans compte connecté, et tant que
 /// l'admin n'a pas rendu la connexion obligatoire (Réglages › Église et comptes), le logiciel reste entier, comme avant.
 /// </summary>
 public static class ComptesPc

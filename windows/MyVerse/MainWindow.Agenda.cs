@@ -182,7 +182,7 @@ public partial class MainWindow
 
     static string TypeLib(ElementAgenda e) => e.Type switch { "chant" => "Chant", "bible" => "Lecture", "compte" => "Accueil", "principal" => "Écran principal", _ => "Média" };
 
-    /// <summary>L'icône de la carte : note, livre, horloge, punaise (écran principal), deux écrans (Duo), texte ou écran (Display).</summary>
+    /// <summary>L'icône de la carte : note, livre, horloge, punaise (écran principal), texte ou écran (Display).</summary>
     static string IconeType(ElementAgenda e) => e.Type switch
     {
         "chant" => "IconeChants",
@@ -190,7 +190,7 @@ public partial class MainWindow
         "compte" => "IconeHorloge",
         "principal" => "IconePrincipal",
         "texte" => "IconeTexte",
-        _ => e.Source?.Type == "duo" ? "IconeDuo" : "IconeEcran",
+        _ => "IconeEcran",
     };
 
     /// <summary>La couleur d'un type, très pâle (fond de l'icône des cartes).</summary>
@@ -366,7 +366,7 @@ public partial class MainWindow
             {
                 if (await SourceMyVirtualCam() is { } mvc) AjouterPrincipal(mvc.Id);
             }));
-        var sources = R.Annonces.Where(a => a.Source?.Type != "duo").ToList();
+        var sources = R.Annonces.ToList();
         if (sources.Count > 0) principal.Items.Add(new Separator());
         foreach (var a in sources)
         {

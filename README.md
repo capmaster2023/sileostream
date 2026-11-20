@@ -1,4 +1,4 @@
-# Siloé Stream 2.4.3
+# Siloé Stream 2.5.0
 
 **Commencer le culte** (2.1.0) : un clic vérifie le projecteur, YouTube, le son et les caméras, puis lance l'enregistrement dans le dossier choisi (Réglages › Son). Médias : « + Ajouter un média » et, à part, « + Ajouter un périphérique vidéo » (MyVirtualCam, webcams, cartes de capture, MyCam, Sony).
 
@@ -14,26 +14,21 @@ Siloé Stream est un logiciel libre sous licence **GNU GPL version 2 ou ultérie
 
 ## Interface (3.2, design « Pupitre »)
 
-- **Barre de gauche** : **Culte**, **Bible**, **Chants**, **Display**, **Duo**, **Son**, puis en bas **Sombre / Clair** et **Réglages**.
+- **Barre de gauche** : **Culte**, **Bible**, **Chants**, **Médias**, **Son**, puis en bas **Sombre / Clair** et **Réglages**.
 - **Page Culte** : le déroulé en cartes à gauche (un trait de couleur par type, « ● DIRECT » sur l'élément à l'écran) et, au centre, **toutes les diapositives du culte en vignettes**, dessinées comme à l'écran et groupées par élément. La vignette à l'écran est encadrée de rouge (« À L'ÉCRAN »), la suivante d'ambre (« SUIVANT »). Un clic affiche une vignette.
-- **Colonne de contrôle à droite, sur toutes les pages** : un petit écran **EN DIRECT**, la diapositive **SUIVANT** en plus petit, **◀ / Suivant ▶**, **Noir / Retirer de l'écran**. Duo et habillage sont dessous.
+- **Colonne de contrôle à droite, sur toutes les pages** : un petit écran **EN DIRECT**, la diapositive **SUIVANT** en plus petit, **◀ / Suivant ▶**, **Noir / Retirer de l'écran**. L'habillage est dessous.
 - **Barre du bas** : l'écran de projection, les téléphones, l'écran de scène et l'heure.
 - Thème **clair** par défaut (crème), **sombre** au choix d'un clic. Police Manrope.
 
-## Duo : deux contenus à l'écran
+## Médias en calques (2.5.0) : des sources superposées, comme dans OBS
 
-L'onglet **Duo** prépare des dossiers de 2 éléments, chacun à sa place et à sa taille : **Choisir › Chant…** (recueil, puis numéro ou titre), **Verset…** ou une source Display. Dans la grille de Display, la vignette d'un dossier montre ses deux éléments comme sur l'écran principal.
+La page **Médias** montre l'écran en grand, au-dessus de la grille. Le bouton **⧉ Superposer** d'un média (à gauche, sur sa tuile ou dans son clic droit) le pose par-dessus ce qui est à l'écran : sur un écran vide il prend tout l'écran, sinon un coin.
 
-Pour épingler à la volée :
+- Dans l'écran : glisser pour déplacer, les coins pour agrandir (Maj : garder les proportions). Les sources se collent aux bords et au milieu (Alt : sans aimant) ; double-clic : tout l'écran.
+- **Sources à l'écran**, comme la liste d'OBS : ☑ montrer ou cacher, **▲ ▼** monter ou descendre (la plus haute passe devant), ⤢ tout l'écran, ✕ retirer, **Tout retirer**.
+- **L'écran principal** (versets, chants, média montré en grand) est une ligne de la liste : les paroles au-dessus d'une caméra, ou une caméra par-dessus le verset.
 
-1. Affichez le premier contenu.
-2. Dans la carte **DUO**, cliquez **Épingler le contenu en direct**, ou appuyez sur **P**.
-3. Affichez le second contenu : le premier reste dans un coin.
-4. Choisissez un coin ou **Côte à côte**. La taille d'un coin se règle entre 20 et 50 %.
-
-**Retirer de l'écran** ne vide que le contenu principal. **Retirer le duo** enlève le contenu épinglé. La touche **B** masque les deux sans les perdre.
-
-Textes, versets, chants, images, caméras et fenêtres peuvent être épinglés. Une source vidéo épinglée continue de fonctionner pendant l'affichage de l'autre contenu. Le Duo se retrouve dans la projection, l'aperçu et **MyVirtualCam**.
+**Retirer de l'écran** (Échap) ne vide que l'écran principal : les sources superposées restent. La touche **B** masque tout sans rien perdre. Les calques suivent partout : projection, aperçus, MyStream (YouTube, Zoom), MyVirtualCam, page OBS et enregistrements. Un logo PNG garde sa transparence. Le Duo (jusqu'à la 2.4) est remplacé par les calques.
 
 ## Display
 
@@ -92,7 +87,7 @@ Le bouton **Projection** (en bas à droite) propose les moniteurs détectés, le
 - **Au démarrage**, la projection laissée ouverte se rouvre sur le dernier écran, jamais en plein écran sur l'écran de la régie. **Arrêter la projection** : elle ne se rouvre plus toute seule.
 - **Échap** retire ce qui est à l'écran, sauf dans un champ de saisie : dans une recherche (Bible, chants, numéro, Ctrl K), Échap annule la recherche sans toucher au direct, et un 2e Échap quitte le champ.
 
-**MyVirtualCam** reçoit automatiquement la sortie en 720p30 : tout ce que montre l'écran de l'église, Duo et écran par défaut compris (1.3.2), sauf une capture de fenêtre « Dans l'église », remplacée par l'écran par défaut. Elle s'enregistre une fois avec l'autorisation Windows et reste disponible, avec une image noire, quand Siloé Stream est fermé. Elle vise les applications compatibles DirectShow et ne transporte pas d'audio.
+**MyVirtualCam** reçoit automatiquement la sortie en 720p30 : tout ce que montre l'écran de l'église, calques et écran par défaut compris (1.3.2), sauf une capture de fenêtre « Dans l'église », remplacée par l'écran par défaut. Elle s'enregistre une fois avec l'autorisation Windows et reste disponible, avec une image noire, quand Siloé Stream est fermé. Elle vise les applications compatibles DirectShow et ne transporte pas d'audio.
 
 La capture de fenêtre nécessite une fenêtre ouverte et non réduite (elle attend qu'on la rouvre ou la restaure). Certains contenus protégés ne permettent pas la capture. Les périphériques vidéo physiques nécessitent les pilotes et permissions Windows appropriés.
 
@@ -125,7 +120,7 @@ Qualité de l'image de contrôle (environ 1024 × 576). Pour garder Internet : c
 
 ## Comptes Google (1.9.3)
 
-Le logiciel se connecte avec un compte Google par la page **siloestream.tech/connexion** (bouton **Compte** de la barre de gauche) : la page renvoie le jeton de Google au logiciel, sur `127.0.0.1`, et le relais le vérifie. Les rôles sont ceux de l'église (relais du VPS) : **Admin** (tout), **Versets** (la Bible), **Chants**, **Affichage** (Culte, Médias, Duo : l'église et Zoom) et **Caméraman** (MyCam, sur le téléphone). L'admin gère les membres dans **Réglages › Église et comptes** et peut y rendre la connexion obligatoire.
+Le logiciel se connecte avec un compte Google par la page **siloestream.tech/connexion** (bouton **Compte** de la barre de gauche) : la page renvoie le jeton de Google au logiciel, sur `127.0.0.1`, et le relais le vérifie. Les rôles sont ceux de l'église (relais du VPS) : **Admin** (tout), **Versets** (la Bible), **Chants**, **Affichage** (Culte et Médias : l'église et Zoom) et **Caméraman** (MyCam, sur le téléphone). L'admin gère les membres dans **Réglages › Église et comptes** et peut y rendre la connexion obligatoire.
 
 ## Licence et code source
 
@@ -141,7 +136,7 @@ Le dossier `obs` livré avec Siloé Stream contient les bibliothèques du paquet
 
 - `windows/MyVerse.Core` : cœur .NET 8, sans WPF.
 - `windows/MyVerse` : interface Windows WPF.
-- `windows/MyVerse.Tests` : tests du cœur et du protocole téléphone, dont Duo, et du mélangeur sur la vraie libobs (groupe « Audio OBS »).
+- `windows/MyVerse.Tests` : tests du cœur et du protocole téléphone, dont les calques de Médias, et du mélangeur sur la vraie libobs (groupe « Audio OBS »).
 - `windows/MyVirtualCam` : composant vidéo DirectShow 32 et 64 bits.
 - `android` : télécommande Kotlin / Compose.
 - `windows/NOTES-<version>.md` : notes de version (la dernière : `NOTES-1.0.0.md`). Les notes des anciennes versions sont dans `windows/historique`.

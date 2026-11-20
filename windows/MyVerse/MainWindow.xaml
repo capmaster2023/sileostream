@@ -122,12 +122,19 @@
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*" />
                     <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
                 </Grid.ColumnDefinitions>
                 <StackPanel VerticalAlignment="Center" Margin="0,0,10,0">
                     <TextBlock Text="{Binding Titre}" FontSize="14.5" FontWeight="Bold" TextTrimming="CharacterEllipsis" Foreground="{StaticResource Blanc}" />
                     <TextBlock Text="{Binding Description}" FontSize="12" MaxHeight="18" Foreground="{StaticResource Brume2}" TextTrimming="CharacterEllipsis" Margin="0,2,0,0" />
                 </StackPanel>
-                <Button x:Name="Grille" Grid.Column="1" Style="{StaticResource BtnGrille}" Click="GrilleAnnonceListe_Click" VerticalAlignment="Center" ToolTip="Ajouter à la grille (un clic dans la grille = en direct)">
+                <!-- 2.5.0 : superposer à l'écran (par-dessus ce qui y est) -->
+                <Button Grid.Column="1" Style="{StaticResource BtnGrille}" Click="SuperposerAnnonceListe_Click" VerticalAlignment="Center" Margin="0,0,6,0"
+                        ToolTip="Superposer à l'écran : par-dessus ce qui y est (Médias : le déplacer, l'agrandir, le mettre devant ou derrière)">
+                    <Path Data="{StaticResource IconeDuo}" Stroke="{StaticResource Or}" StrokeThickness="2" StrokeStartLineCap="Round" StrokeEndLineCap="Round"
+                          StrokeLineJoin="Round" Width="14" Height="14" Stretch="Uniform" />
+                </Button>
+                <Button x:Name="Grille" Grid.Column="2" Style="{StaticResource BtnGrille}" Click="GrilleAnnonceListe_Click" VerticalAlignment="Center" ToolTip="Ajouter à la grille (un clic dans la grille = en direct)">
                     <Path x:Name="Signe" Data="{StaticResource IconePlus}" Stroke="{StaticResource Or}" StrokeThickness="2.4" StrokeStartLineCap="Round" StrokeEndLineCap="Round"
                           StrokeLineJoin="Round" Width="13" Height="13" Stretch="Uniform" />
                 </Button>
@@ -169,7 +176,7 @@
                     <RadioButton x:Name="OngletAgenda" Style="{StaticResource OngletRail}" GroupName="Pages" Content="Culte" Tag="{StaticResource IconeCulte}"
                                  ToolTip="Le programme du culte et ce qui est à l'écran (Ctrl K pour chercher)" />
                     <RadioButton x:Name="OngletBiblio" Style="{StaticResource OngletRail}" GroupName="Biblio" Content="Bibliothèque" Tag="{StaticResource IconeBible}"
-                                 ToolTip="La Bible, les chants, les médias (images, vidéos, Zoom, caméras) et les duos" />
+                                 ToolTip="La Bible, les chants et les médias (images, vidéos, Zoom, caméras)" />
                     <!-- 1.8.0 : les médias (caméras, images, vidéos, fenêtres) ont leur bouton -->
                     <RadioButton x:Name="OngletMediasRail" Style="{StaticResource OngletRail}" GroupName="Medias" Content="Médias" Tag="{StaticResource IconeDisplay}"
                                  ToolTip="Les médias : caméras, MyCam, images, vidéos, fenêtres (Zoom…)" />
@@ -185,7 +192,6 @@
                     <RadioButton x:Name="OngletBible" GroupName="Pages" Visibility="Collapsed" IsChecked="True" />
                     <RadioButton x:Name="OngletChants" GroupName="Pages" Visibility="Collapsed" />
                     <RadioButton x:Name="OngletAnnonces" GroupName="Pages" Visibility="Collapsed" />
-                    <RadioButton x:Name="OngletDuo" GroupName="Pages" Visibility="Collapsed" />
                 </StackPanel>
                 <StackPanel DockPanel.Dock="Bottom" VerticalAlignment="Bottom">
                     <Button x:Name="ThemeBtn" Style="{StaticResource BtnRail}" Content="Sombre" Tag="{StaticResource IconeLune}" ToolTip="Passer en mode sombre (aussi dans Réglages › Apparence)" />
@@ -296,11 +302,10 @@
         <Border Grid.Row="1" Grid.Column="1" BorderBrush="{StaticResource Nuit3}" BorderThickness="0,0,1,0">
             <DockPanel>
                 <Border x:Name="BiblioOnglets" DockPanel.Dock="Top" Margin="14,16,14,2" Background="{StaticResource Nuit2}" CornerRadius="10" Padding="3" Visibility="Collapsed">
-                    <UniformGrid Columns="4">
+                    <UniformGrid Columns="3">
                         <RadioButton x:Name="SegBible" Style="{StaticResource Segment}" GroupName="Segments" Content="Bible" ToolTip="Les Bibles, les livres, les versets" />
                         <RadioButton x:Name="SegChants" Style="{StaticResource Segment}" GroupName="Segments" Content="Chants" ToolTip="Les recueils et les chants" />
                         <RadioButton x:Name="SegMedias" Style="{StaticResource Segment}" GroupName="Segments" Content="Médias" ToolTip="Textes, images, vidéos, Zoom, caméras, MyCam" />
-                        <RadioButton x:Name="SegDuo" Style="{StaticResource Segment}" GroupName="Segments" Content="Duo" ToolTip="Deux contenus ensemble (un dossier = 2 éléments)" />
                     </UniformGrid>
                 </Border>
                 <Grid>
@@ -388,11 +393,11 @@
                 <DockPanel>
                     <StackPanel DockPanel.Dock="Top">
                         <local:Capitales Libelle="Médias" />
-                        <Button x:Name="DisplayAjouter" Style="{StaticResource BtnOr}" Content="+ Ajouter un média" Height="44" Padding="14,0" Margin="0,10,0,0" ToolTip="Ajouter un texte, des images, une vidéo, une fenêtre ou un Duo" />
+                        <Button x:Name="DisplayAjouter" Style="{StaticResource BtnOr}" Content="+ Ajouter un média" Height="44" Padding="14,0" Margin="0,10,0,0" ToolTip="Ajouter un texte, des images, une vidéo ou une fenêtre" />
                         <!-- 2.1.0 : les caméras à part des médias : MyVirtualCam, webcams, cartes de capture, téléphone MyCam, caméra Sony -->
                         <Button x:Name="DisplayPeripherique" Style="{StaticResource Btn}" Content="+ Ajouter un périphérique vidéo" Height="44" Padding="14,0" Margin="0,8,0,0"
                                 ToolTip="Une caméra : MyVirtualCam (l'image de MyStream), une webcam, une carte de capture USB/HDMI, un téléphone MyCam ou une caméra Sony par Wi-Fi" />
-                        <TextBlock Text="Le + met un média dans la grille (✓ : il y est déjà). Double-clic : le montrer. Clic droit : modifier, garder dans un coin, supprimer."
+                        <TextBlock Text="⧉ : le superposer à l'écran (par-dessus ce qui y est). + : le mettre dans la grille (✓ : il y est déjà). Double-clic : le montrer seul. Clic droit : modifier, supprimer."
                                    TextWrapping="Wrap" Foreground="{StaticResource Brume}" FontSize="12.5" LineHeight="18" Margin="0,10,0,0" />
                     </StackPanel>
                     <Grid Margin="0,12,0,0">
@@ -403,30 +408,6 @@
                 </DockPanel>
             </Border>
 
-            <!-- Duo : les dossiers -->
-            <Border x:Name="PanneauDuo" Visibility="Collapsed" Padding="14,14,14,14">
-                <DockPanel>
-                    <StackPanel DockPanel.Dock="Top">
-                        <local:Capitales Libelle="Dossiers" />
-                        <Button x:Name="DuoNouveau" Style="{StaticResource BtnOr}" Content="+ Nouveau duo" Height="44" Padding="0" Margin="0,10,0,0" />
-                        <TextBlock Margin="2,10,2,0" TextWrapping="Wrap" FontSize="12.5" Foreground="{StaticResource Brume}" Text="Un dossier = 2 éléments affichés ensemble. Double-clic : en direct." />
-                    </StackPanel>
-                    <Grid Margin="0,12,0,0">
-                        <ListBox x:Name="ListeDuos" Style="{StaticResource ListeChants}" ItemContainerStyle="{StaticResource ElementCarte}">
-                            <ListBox.ItemTemplate>
-                                <DataTemplate>
-                                    <StackPanel Margin="0,1,0,1">
-                                        <TextBlock Text="{Binding Nom}" FontWeight="Bold" FontSize="14.5" TextTrimming="CharacterEllipsis" />
-                                        <TextBlock Text="{Binding Description}" FontSize="12" Foreground="{StaticResource Brume2}" TextTrimming="CharacterEllipsis" Margin="0,2,0,0" />
-                                    </StackPanel>
-                                </DataTemplate>
-                            </ListBox.ItemTemplate>
-                        </ListBox>
-                        <TextBlock x:Name="DuosVide" Margin="6,8,6,0" VerticalAlignment="Top" TextWrapping="Wrap" FontSize="14" Foreground="{StaticResource Brume}" IsHitTestVisible="False" LineHeight="22"
-                                   Text="Aucun dossier. Cliquez « + Nouveau duo »." />
-                    </Grid>
-                </DockPanel>
-            </Border>
                 </Grid>
             </DockPanel>
         </Border>
@@ -469,8 +450,6 @@
                         <TextBlock Text="Médias" Style="{StaticResource GrandTitre}" VerticalAlignment="Center" />
                         <TextBlock x:Name="GrilleInfo" FontSize="13" Foreground="{StaticResource Brume}" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" Margin="14,5,0,0" />
                     </DockPanel>
-                    <!-- Duo : le dossier choisi -->
-                    <TextBlock x:Name="TeteDuo" Style="{StaticResource GrandTitre}" Margin="0,3,0,0" Text="Duo" TextTrimming="CharacterEllipsis" />
                 </StackPanel>
 
                 <!-- recherche de la page : Bible ou chants -->
@@ -565,9 +544,11 @@
                     <WrapPanel x:Name="Sections" />
                 </ScrollViewer>
 
-                <!-- Display : la grille -->
+                <!-- Display : l'écran en calques (2.5.0, construit dans MainWindow.Calques.cs), puis la grille -->
                 <ScrollViewer x:Name="DefilGrille" Visibility="Collapsed" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
                     <StackPanel Margin="24,0,22,24">
+                        <StackPanel x:Name="ZoneCalques" Margin="0,0,0,22" />
+                        <local:Capitales Libelle="Grille · un clic : montrer seul" Margin="0,0,0,10" />
                         <WrapPanel x:Name="GrilleSources" />
                         <Border x:Name="GrilleVide" BorderBrush="{StaticResource Trait2}" BorderThickness="1" CornerRadius="10" Padding="24">
                             <TextBlock TextWrapping="Wrap" FontSize="14.5" LineHeight="23" Foreground="{StaticResource Brume}" TextAlignment="Center"
@@ -587,14 +568,6 @@
                     </StackPanel>
                 </ScrollViewer>
 
-                <!-- Duo : le dossier choisi -->
-                <Grid x:Name="CentreDuo" Visibility="Collapsed" Margin="24,0,18,18">
-                    <TextBlock x:Name="DuoChoisirAide" TextWrapping="Wrap" FontSize="15" LineHeight="24" Foreground="{StaticResource Brume}" Margin="2,2,4,0"
-                               Text="Créez ou choisissez un dossier à gauche. Mettez-y 2 éléments (une source Display, un chant ou un verset), réglez la place et la taille de chacun, puis « + Display » pour l'avoir dans la grille de Display." />
-                    <ScrollViewer x:Name="DuoEditeur" Visibility="Collapsed" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
-                        <StackPanel x:Name="DuoPile" Margin="0,0,8,0" />
-                    </ScrollViewer>
-                </Grid>
             </Grid>
         </DockPanel>
 
@@ -765,36 +738,6 @@
                         </ToggleButton>
                         <StackPanel x:Name="CorpsTaille" Visibility="Collapsed" Margin="2,2,2,14">
                             <Slider x:Name="Taille" Minimum="0.6" Maximum="1.2" SmallChange="0.05" LargeChange="0.05" TickFrequency="0.05" IsSnapToTickEnabled="True" Value="1" />
-                        </StackPanel>
-
-                        <ToggleButton x:Name="TiroirCoin" Style="{StaticResource TiroirTete}" Tag="{StaticResource IconeCoin}" ToolTip="Touche P : garder ce qui est à l'écran dans un coin, et montrer autre chose à côté (Duo)">
-                            <DockPanel>
-                                <TextBlock x:Name="DuoEtat" DockPanel.Dock="Right" FontSize="13" FontWeight="SemiBold" Foreground="{StaticResource Brume}" VerticalAlignment="Center" Text="touche P" />
-                                <TextBlock Text="Garder dans un coin" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
-                            </DockPanel>
-                        </ToggleButton>
-                        <StackPanel x:Name="CorpsCoin" Visibility="Collapsed" Margin="2,2,2,14">
-                            <TextBlock x:Name="DuoAide" Text="Montre un premier contenu, garde-le dans un coin (touche P), puis montre le second." FontSize="13" Foreground="{StaticResource Brume}" TextWrapping="Wrap" Margin="0,0,0,10" />
-                            <Border x:Name="DuoBoite" Background="{StaticResource Nuit2}" CornerRadius="10" Padding="12,9" Margin="0,0,0,10" Visibility="Collapsed">
-                                <DockPanel>
-                                    <TextBlock DockPanel.Dock="Left" Text="Dans le coin" FontSize="12" FontWeight="Bold" Foreground="{StaticResource Brume}" VerticalAlignment="Center" Margin="0,0,10,0" />
-                                    <TextBlock x:Name="DuoLibelle" FontSize="13" FontWeight="Bold" Foreground="{StaticResource Blanc}" TextTrimming="CharacterEllipsis" VerticalAlignment="Center" />
-                                </DockPanel>
-                            </Border>
-                            <Button x:Name="DuoEpingler" Style="{StaticResource BtnContour}" Content="Garder dans un coin" Height="44" Padding="0" ToolTip="Touche P : ce qui est à l'écran part dans le coin, l'écran se libère pour autre chose" />
-                            <Button x:Name="DuoRetirer" Style="{StaticResource Btn}" Content="Enlever le coin" Height="44" Padding="0" Margin="0,8,0,0" IsEnabled="False" Visibility="Collapsed" ToolTip="Touche P : enlève seulement ce qui est dans le coin" />
-                            <DockPanel Margin="0,12,0,0">
-                                <ComboBox x:Name="DuoPlace" DockPanel.Dock="Right" Width="150" MinHeight="40" ToolTip="Place du contenu gardé">
-                                    <ComboBoxItem Tag="hd" Content="Haut droite" />
-                                    <ComboBoxItem Tag="hg" Content="Haut gauche" />
-                                    <ComboBoxItem Tag="bd" Content="Bas droite" />
-                                    <ComboBoxItem Tag="bg" Content="Bas gauche" />
-                                    <ComboBoxItem Tag="cote" Content="Côte à côte" />
-                                </ComboBox>
-                                <TextBlock Text="Place" FontSize="14" Foreground="{StaticResource Brume}" VerticalAlignment="Center" />
-                            </DockPanel>
-                            <TextBlock x:Name="DuoTailleLab" Text="Taille du coin : 35 %" FontSize="13" FontWeight="SemiBold" Foreground="{StaticResource Encre2}" Margin="0,12,0,4" />
-                            <Slider x:Name="DuoTaille" Minimum="20" Maximum="50" SmallChange="5" LargeChange="5" TickFrequency="5" IsSnapToTickEnabled="True" Value="35" />
                         </StackPanel>
 
                         <ToggleButton x:Name="TiroirRepos" Style="{StaticResource TiroirTete}" Tag="{StaticResource IconeLune}" ToolTip="Ce qui revient quand on efface (Échap) : noir, le fond seul, ou un écran du programme (logo…)">

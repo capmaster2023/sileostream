@@ -54,7 +54,6 @@ public partial class MainWindow : Window
         OngletBible.Checked += (_, _) => MontrerOnglet("bible");
         OngletChants.Checked += (_, _) => MontrerOnglet("chants");
         OngletAnnonces.Checked += (_, _) => MontrerOnglet("annonces");
-        OngletDuo.Checked += (_, _) => MontrerOnglet("duo");
         OngletSon.Checked += (_, _) => MontrerOnglet("son");
         OngletMontage.Checked += (_, _) => MontrerOnglet("montage");
         OngletMiniature.Checked += (_, _) => MontrerOnglet("miniature");
@@ -221,7 +220,7 @@ public partial class MainWindow : Window
         PreviewTextInput += (_, e) =>
         {
             if (e.Text != "/" || Keyboard.FocusedElement is TextBox or PasswordBox || ConnexionAffichee) return;
-            (onglet is "agenda" or "annonces" or "duo" ? Cmd : ongletBible ? Q : Qc).Focus();
+            (onglet is "agenda" or "annonces" ? Cmd : ongletBible ? Q : Qc).Focus();
             e.Handled = true;
         };
         SizeChanged += (_, _) => Placement();
@@ -256,8 +255,7 @@ public partial class MainWindow : Window
         InitAgenda();
         InitDisplay();
         InitGrille();
-        InitDossiersDuo();
-        InitDuo();
+        InitCalques();
         InitEcranDefaut();
         InitTelecommande();
         InitProjecteur();
@@ -299,7 +297,7 @@ public partial class MainWindow : Window
     {
         // 1.9.3 : le compte Google du PC (et l'écran de connexion si l'admin l'a rendue obligatoire)
         BrancherComptes();
-        (onglet is "agenda" or "annonces" or "duo" ? Cmd : Q).Focus();
+        (onglet is "agenda" or "annonces" ? Cmd : Q).Focus();
         // l'index de recherche se prépare en arrière-plan : la première recherche est instantanée
         _ = Task.Run(async () =>
         {
@@ -381,6 +379,8 @@ public partial class MainWindow : Window
 
     void MontrerOnglet(string o)
     {
+        // 2.5.0 : plus d'onglet Duo (les calques de Médias le remplacent)
+        if (o == "duo") o = "annonces";
         // 1.9.3 : seulement les pages du rôle du compte connecté (sinon la première qui l'est)
         if (!PagePermise(o))
         {
@@ -399,7 +399,6 @@ public partial class MainWindow : Window
         PanneauBible.Visibility = CentreBible.Visibility = TeteBible.Visibility = V(o == "bible");
         PanneauChants.Visibility = DefilSections.Visibility = TeteChants.Visibility = V(o == "chants");
         PanneauAnnonces.Visibility = DefilGrille.Visibility = TeteDisplay.Visibility = V(o == "annonces");
-        PanneauDuo.Visibility = CentreDuo.Visibility = TeteDuo.Visibility = V(o == "duo");
         // Réglages : toute la largeur, sans la colonne de droite ; Son : à la place de la colonne de gauche et du centre
         PanneauReglages.Visibility = V(o == "reglages");
         PanneauSon.Visibility = V(o == "son");
@@ -415,7 +414,7 @@ public partial class MainWindow : Window
         RechercheBible.Visibility = V(o == "bible");
         RechercheChants.Visibility = V(o == "chants");
         Recherches.Visibility = V(o is "bible" or "chants");
-        (o switch { "agenda" => OngletAgenda, "bible" => OngletBible, "annonces" => OngletAnnonces, "duo" => OngletDuo, "son" => OngletSon, "montage" => OngletMontage, "miniature" => OngletMiniature, "reglages" => OngletReglages, _ => OngletChants }).IsChecked = true;
+        (o switch { "agenda" => OngletAgenda, "bible" => OngletBible, "annonces" => OngletAnnonces, "son" => OngletSon, "montage" => OngletMontage, "miniature" => OngletMiniature, "reglages" => OngletReglages, _ => OngletChants }).IsChecked = true;
         MajPagesBiblio(o);
         // sur Culte, un clic sur une image la montre : pas de bouton « Montrer la sélection »
         Afficher.Visibility = V(o is not ("agenda" or "reglages" or "son" or "montage" or "miniature"));
@@ -423,7 +422,7 @@ public partial class MainWindow : Window
         if (o == "agenda") Dispatcher.BeginInvoke(DispatcherPriority.Loaded, new Action(() => { LargeurVignettes(); DefilerVers(elementChoisi ?? R.ElementCourant); }));
     }
 
-    /// <summary>Le surtitre du centre (« TOUTES LES DIAPOSITIVES DU CULTE », « BIBLE · LSG »…), le titre du dossier Duo et l'en-tête du déroulé.</summary>
+    /// <summary>Le surtitre du centre (« TOUTES LES DIAPOSITIVES DU CULTE », « BIBLE · LSG »…) et l'en-tête du déroulé.</summary>
     void MajEntete()
     {
         Surtitre.Libelle = onglet switch
@@ -432,10 +431,8 @@ public partial class MainWindow : Window
             "bible" => "Bible · " + VB.Etiquette(),
             "chants" => "Chants · " + ((Recueil.SelectedItem as ComboBoxItem)?.Content as string ?? "aucun recueil"),
             "annonces" => $"Médias · {R.Annonces.Count} source{(R.Annonces.Count > 1 ? "s" : "")} · {R.Annonces.Count(a => a.Grille)} dans la grille",
-            "duo" => $"Duo · {R.Duos.Count()} dossier{(R.Duos.Count() > 1 ? "s" : "")}",
             _ => "",
         };
-        TeteDuo.Text = duoChoisi is { } d ? (d.Nom.Trim().Length > 0 ? d.Nom : "Dossier sans nom") : "Dossiers Duo";
         var (sur, _) = DecouperNomCulte(R.Agenda.Nom);
         AgendaSurtitre.Libelle = sur;
         // 1.5.0 : en haut, le nom du culte en entier (« Culte du dimanche 15 novembre »)
@@ -486,15 +483,11 @@ public partial class MainWindow : Window
         switch (e.Key)
         {
             case Key.Divide:
-                (onglet is "agenda" or "annonces" or "duo" ? Cmd : ongletBible ? Q : Qc).Focus();
+                (onglet is "agenda" or "annonces" ? Cmd : ongletBible ? Q : Qc).Focus();
                 e.Handled = true;
                 break;
             case Key.B:
                 BasculerNoir();
-                e.Handled = true;
-                break;
-            case Key.P:
-                BasculerDuo();
                 e.Handled = true;
                 break;
             case Key.M:
@@ -578,7 +571,6 @@ public partial class MainWindow : Window
         Ajout("précédent", "←");
         Ajout("retirer", "Échap");
         Ajout("écran noir", "B");
-        Ajout("garder dans un coin", "P");
         Ajout("envoyer dans le stream", "S");
         Ajout("MyStream : source principale", "M");
         Ajout("diapositive", "1–9");
@@ -1001,7 +993,6 @@ public partial class MainWindow : Window
     void AfficherCourant()
     {
         if (onglet == "agenda") { AfficherAgendaCourant(); return; }
-        if (onglet == "duo") { AfficherDuoChoisi(); return; }
         if (onglet == "annonces")
         {
             if (annonceChoisie == null && AnnonceTexte.Text.Trim().Length == 0) Toast("Choisissez d'abord un display.");
@@ -1055,7 +1046,8 @@ public partial class MainWindow : Window
         App.Sources.Choisir(e);
         App.SourcesDefaut.ChoisirSource(mediaSalle ?? mediaCamera);
         ChoisirLecteurStream(stream);
-        ChoisirSourceDuo(e);
+        // 2.5.0 : les captures des calques (gardées pendant l'écran noir : rien à rouvrir quand il se rallume)
+        App.Calques.Choisir(R.Etat.Calques ?? (IReadOnlyList<CalqueEcran>)Array.Empty<CalqueEcran>());
         ApercuRendu.Afficher(e);
         ecran?.Rendu.Afficher(salle);
         EgliseRendu.Afficher(salle);
@@ -1065,15 +1057,14 @@ public partial class MainWindow : Window
         EgliseRendu.ImageDisplay(imageSalle);
         CulteRendu.ImageDisplay(App.Sources.Image);
         MajStream(stream);
-        ImagesDuo();
-        App.SortieObs.Ecrire(diffusion);
-        bool rien = e.Vide && e.Duo == null;
+        App.SortieObs.Ecrire(AvecImagesObs(diffusion));
+        bool rien = e.Rien;
         Apercu.BorderBrush = Pinceau(rien ? "Nuit3" : "Ecran");
         Apercu.Background = rien || e.Theme == "transparent" ? Pinceau("Damier") : Brushes.Black;
         // écran noir : le bouton « Noir » s'inverse
         if (noir) { NoirBtn.Background = Pinceau("Blanc"); NoirBtn.Foreground = Pinceau("Page"); NoirBtn.BorderBrush = Pinceau("Blanc"); }
         else { NoirBtn.ClearValue(BackgroundProperty); NoirBtn.ClearValue(ForegroundProperty); NoirBtn.ClearValue(BorderBrushProperty); }
-        MajDuo();
+        MajCalquesUi(e);
         MajPastille();
         MajSuivant();
         var s = R.Prochaine();
@@ -1103,7 +1094,7 @@ public partial class MainWindow : Window
         // 1.3.1 : une source qui ne va qu'à un endroit le dit (« Streaming seulement », « Église seulement »)
         var dif = !noir && e.Mode == "media" ? e.Media?.Diffusion : null;
         PastilleTexte.Text = noir ? "Écran noir" : dif == SourceDisplay.Streaming ? "MyStream seulement"
-            : ouvert ? (R.Cible is CibleDefaut ? "Écran de repos" : e.Vide && e.Duo == null ? "Écran ouvert · vide" : dif == SourceDisplay.Eglise ? "Église seulement" : "À l'écran")
+            : ouvert ? (R.Cible is CibleDefaut ? "Écran de repos" : e.Rien ? "Écran ouvert · vide" : dif == SourceDisplay.Eglise ? "Église seulement" : "À l'écran")
             : attente ? "Projecteur débranché" : "Aperçu seulement";
         // l'état s'affiche à droite d'« EN DIRECT » (« Aperçu seulement » tant qu'aucun écran n'est ouvert)
         var m = App.Donnees.Reglages.Ecran;
@@ -1112,7 +1103,7 @@ public partial class MainWindow : Window
         // 1.6.0 : l'état de l'écran de l'église, au-dessus de son aperçu
         EgliseEtat.Text = PastilleTexte.Text == "À l'écran" ? "Église · projecteur" : PastilleTexte.Text;
         EgliseEtat.Foreground = EcranInfo.Foreground;
-        EgliseApercu.Background = R.EtatSalle(EtatProjete()) is { Vide: true, Duo: null } || R.Etat.Theme == "transparent" ? Pinceau("Damier") : Brushes.Black;
+        EgliseApercu.Background = R.EtatSalle(EtatProjete()).Rien || R.Etat.Theme == "transparent" ? Pinceau("Damier") : Brushes.Black;
         EcranInfo.ToolTip = dif == SourceDisplay.Streaming ? "MyStream seulement : Zoom, YouTube et OBS reçoivent cette source, l'écran de projection garde l'écran de repos"
             : dif == SourceDisplay.Eglise ? "Dans l'église seulement : MyStream (Zoom, YouTube) montre sa source principale ou l'écran de repos à la place, OBS ne reçoit rien (pas d'effet miroir dans Zoom)"
             : ecran != null && m != null ? $"{m.Nom} · {m.W} × {m.H}"

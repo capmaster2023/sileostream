@@ -17,7 +17,7 @@ namespace MyVerse.Ui;
 /// MyStream (Siloé Stream 1.6.0) : l'image envoyée sur Internet, la même pour Zoom (MyVirtualCam) et pour YouTube (le direct).
 /// <para>
 /// Tout se fait hors du fil de l'interface, sur le fil « MyStream » (le clic reste immédiat) :
-/// le dessin WPF (texte, fond, bandeau, Duo) n'est refait que quand le contenu change, deux fois : les images vivantes remplacées
+/// le dessin WPF (texte, fond, bandeau, calques) n'est refait que quand le contenu change, deux fois : les images vivantes remplacées
 /// par une clé noire puis blanche ; la différence des deux dit, pour chaque pixel, combien l'image vivante s'y voit.
 /// À chaque image d'une caméra, MyCam ou vidéo, OpenCV la pose à sa place : image = clé noire + différence × image vivante
 /// (les paroles en bandeau restent par-dessus la caméra). Une caméra seule, sans rien par-dessus, est posée telle quelle.
@@ -39,14 +39,18 @@ public sealed class MyStreamMoteur : IRecordingFrameProvider, IDisposable
 
     // ce qu'on doit montrer (fil MyStream)
     EtatEcran etat = new();
-    BitmapSource? image, imageDuo;
-    BitmapSource? imageVue, imageDuoVue;
-    (int L, int H)? tailleImage, tailleDuo;
+    BitmapSource? image, imageVue;
+    (int L, int H)? tailleImage;
+    // 2.5.0 : les images des calques (par identifiant de calque)
+    readonly Dictionary<string, BitmapSource?> imagesCalques = new(), vuesCalques = new();
+    readonly Dictionary<string, (int L, int H)?> taillesCalques = new();
+    readonly Dictionary<string, Mat> matsCalques = new();
     bool sale = true, aComposer;
     long dernierDessin, dernierBattement, derniereComposition;
 
     // le calque : clé noire (C1), différence (D) et la place de chaque image vivante
-    sealed record Trou(bool Duo, bool Flou, Point O, Point X, Point Y, OpenCvSharp.Rect Rognage);
+    /// <summary>La place d'une image vivante : <paramref name="Calque"/> null pour le contenu principal.</summary>
+    sealed record Trou(string? Calque, bool Flou, Point O, Point X, Point Y, OpenCvSharp.Rect Rognage);
     sealed class Calque : IDisposable
     {
         public required Mat C1, D;
@@ -57,7 +61,7 @@ public sealed class MyStreamMoteur : IRecordingFrameProvider, IDisposable
     }
     Calque? calque;
     Mat media = new(), produit = new(), sortie = new(), flouPetit = new(), flouGrand = new();
-    readonly Mat vivante = new(), vivanteDuo = new();
+    readonly Mat vivante = new();
 
     // la dernière image composée, lue par le direct (autre fil)
     readonly object verrouImage = new();
@@ -131,19 +135,43 @@ public sealed class MyStreamMoteur : IRecordingFrameProvider, IDisposable
     }
 
     // ------------------------------------------------------------ ce que l'interface envoie
-    public void Afficher(EtatEcran e) => Fil(() => { etat = e; rendu.Afficher(e); sale = true; });
+    public void Afficher(EtatEcran e) => Fil(() =>
+    {
+        etat = e;
+        // les calques partis ne gardent ni image ni pixels
+        var ids = (e.Calques ?? Array.Empty<CalqueEcran>()).Select(c => c.Id).ToHashSet();
+        foreach (var id in imagesCalques.Keys.Where(k => !ids.Contains(k)).ToList())
+        {
+            imagesCalques.Remove(id); vuesCalques.Remove(id); taillesCalques.Remove(id);
+            if (matsCalques.Remove(id, out var mat)) mat.Dispose();
+        }
+        rendu.Afficher(e);
+        sale = true;
+    });
     /// <summary>L'image vivante du contenu principal (caméra, MyCam, fenêtre, vidéo, image ; la source principale sous le bandeau).</summary>
     public void Media(BitmapSource? b)
     {
         b = Gelee(b);
         Fil(() => { image = b; if (Taille(b) != tailleImage) sale = true; aComposer = true; });
     }
-    /// <summary>L'image vivante du contenu gardé dans un coin (Duo).</summary>
-    public void MediaDuo(BitmapSource? b)
+    /// <summary>2.5.0 : l'image vivante d'un calque.</summary>
+    public void ImageCalque(string id, BitmapSource? b)
     {
         b = Gelee(b);
-        Fil(() => { imageDuo = b; if (Taille(b) != tailleDuo) sale = true; aComposer = true; });
+        Fil(() =>
+        {
+            imagesCalques[id] = b;
+            // une image fixe d'un calque (un logo PNG) est dans le dessin WPF lui-même : il est refait
+            if (Fixe(id) || Taille(b) != (taillesCalques.TryGetValue(id, out var t) ? t : null)) sale = true;
+            aComposer = true;
+        });
     }
+
+    /// <summary>
+    /// Un calque d'image fixe (un logo, une photo) : dessiné par WPF avec sa transparence, sans clé ; les autres (caméra, fenêtre,
+    /// vidéo, MyCam) sont posés à chaque image.
+    /// </summary>
+    bool Fixe(string id) => etat.Calques?.FirstOrDefault(c => c.Id == id)?.Media?.Type == "image";
 
     /// <summary>Le direct démarre ou s'arrête (MyStream compose aussi sans MyVirtualCam).</summary>
     public void Direct(bool actif) { direct = actif; Fil(() => sale = true); }
@@ -219,9 +247,14 @@ public sealed class MyStreamMoteur : IRecordingFrameProvider, IDisposable
     void Reconstruire()
     {
         sale = false;
-        tailleImage = Taille(image); tailleDuo = Taille(imageDuo);
+        tailleImage = Taille(image);
         rendu.ImageDisplay(Cle(tailleImage, false));
-        rendu.ImageDuo(Cle(tailleDuo, false));
+        foreach (var c in etat.Calques ?? Array.Empty<CalqueEcran>())
+        {
+            imagesCalques.TryGetValue(c.Id, out var ic);
+            taillesCalques[c.Id] = Taille(ic);
+            rendu.ImageCalque(c.Id, Fixe(c.Id) ? ic : Cle(Taille(ic), false));
+        }
         canvas.UpdateLayout();
         var trous = new List<Trou>();
         var vivantes = new List<Rendu.ImageVivante>();
@@ -229,7 +262,8 @@ public sealed class MyStreamMoteur : IRecordingFrameProvider, IDisposable
         var tout = new Rect(0, 0, Largeur, Hauteur);
         foreach (var iv in vivantes)
         {
-            if ((iv.Duo ? tailleDuo : tailleImage) == null) continue;
+            if (iv.Calque != null && Fixe(iv.Calque)) continue;
+            if ((iv.Calque == null ? tailleImage : taillesCalques.TryGetValue(iv.Calque, out var tc) ? tc : null) == null) continue;
             var el = iv.Element;
             double w = el.RenderSize.Width, h = el.RenderSize.Height;
             if (w <= 0 || h <= 0) continue;
@@ -247,7 +281,7 @@ public sealed class MyStreamMoteur : IRecordingFrameProvider, IDisposable
             int px0 = Math.Max(x0, (int)Math.Floor(place.X)), py0 = Math.Max(y0, (int)Math.Floor(place.Y));
             int px1 = Math.Min(x1, (int)Math.Ceiling(place.Right)), py1 = Math.Min(y1, (int)Math.Ceiling(place.Bottom));
             if (px1 <= px0 || py1 <= py0) continue;
-            trous.Add(new Trou(iv.Duo, iv.Flou, t.Transform(new Point(0, 0)), t.Transform(new Point(w, 0)), t.Transform(new Point(0, h)),
+            trous.Add(new Trou(iv.Calque, iv.Flou, t.Transform(new Point(0, 0)), t.Transform(new Point(w, 0)), t.Transform(new Point(0, h)),
                 iv.Flou ? new OpenCvSharp.Rect(x0, y0, x1 - x0, y1 - y0) : new OpenCvSharp.Rect(px0, py0, px1 - px0, py1 - py0)));
         }
         var c1 = new Mat(Hauteur, Largeur, MatType.CV_8UC4);
@@ -256,7 +290,8 @@ public sealed class MyStreamMoteur : IRecordingFrameProvider, IDisposable
         if (trous.Count > 0)
         {
             rendu.ImageDisplay(Cle(tailleImage, true));
-            rendu.ImageDuo(Cle(tailleDuo, true));
+            foreach (var c in etat.Calques ?? Array.Empty<CalqueEcran>())
+                if (!Fixe(c.Id)) rendu.ImageCalque(c.Id, Cle(taillesCalques.TryGetValue(c.Id, out var tc) ? tc : null, true));
             using var c2 = new Mat(Hauteur, Largeur, MatType.CV_8UC4);
             Rendre(c2);
             Cv2.Subtract(c2, c1, d);
@@ -289,17 +324,18 @@ public sealed class MyStreamMoteur : IRecordingFrameProvider, IDisposable
         s.CopyPixels(Int32Rect.Empty, m.Data, s.PixelWidth * s.PixelHeight * 4, s.PixelWidth * 4);
     }
 
-    /// <summary>L'image vivante en pixels (convertie une fois par image reçue).</summary>
-    Mat? Vivante(bool duo)
+    /// <summary>L'image vivante en pixels (convertie une fois par image reçue) : le contenu principal (null) ou un calque.</summary>
+    Mat? Vivante(string? calque)
     {
-        var b = duo ? imageDuo : image;
-        if (b == null) return null;
-        var m = duo ? vivanteDuo : vivante;
-        if (!ReferenceEquals(b, duo ? imageDuoVue : imageVue))
+        if (calque == null)
         {
-            Copier(b, m);
-            if (duo) imageDuoVue = b; else imageVue = b;
+            if (image == null) return null;
+            if (!ReferenceEquals(image, imageVue)) { Copier(image, vivante); imageVue = image; }
+            return vivante.Empty() ? null : vivante;
         }
+        if (!imagesCalques.TryGetValue(calque, out var b) || b == null) return null;
+        if (!matsCalques.TryGetValue(calque, out var m)) matsCalques[calque] = m = new Mat();
+        if (!ReferenceEquals(b, vuesCalques.TryGetValue(calque, out var vu) ? vu : null)) { Copier(b, m); vuesCalques[calque] = b; }
         return m.Empty() ? null : m;
     }
 
@@ -314,7 +350,7 @@ public sealed class MyStreamMoteur : IRecordingFrameProvider, IDisposable
         {
             c.C1.CopyTo(sortie);
             var t = c.Trous[0];
-            if (Vivante(t.Duo) is { } img)
+            if (Vivante(t.Calque) is { } img)
             {
                 using var m = OpenCv(Affine(t, img.Cols, img.Rows), 1, t.Rognage.X, t.Rognage.Y);
                 using var vers = new Mat(sortie, t.Rognage);
@@ -327,7 +363,7 @@ public sealed class MyStreamMoteur : IRecordingFrameProvider, IDisposable
         media.SetTo(Scalar.All(0));
         foreach (var t in c.Trous)
         {
-            if (Vivante(t.Duo) is not { } img) continue;
+            if (Vivante(t.Calque) is not { } img) continue;
             var a = Affine(t, img.Cols, img.Rows);
             if (t.Flou)
             {
@@ -414,6 +450,6 @@ public sealed class MyStreamMoteur : IRecordingFrameProvider, IDisposable
     {
         if (dispose) return;
         dispose = true;
-        try { fil?.Invoke(() => { minuterie.Stop(); calque?.Dispose(); calque = null; }); fil?.InvokeShutdown(); } catch (Exception) { }
+        try { fil?.Invoke(() => { minuterie.Stop(); calque?.Dispose(); calque = null; foreach (var mat in matsCalques.Values) mat.Dispose(); matsCalques.Clear(); }); fil?.InvokeShutdown(); } catch (Exception) { }
     }
 }

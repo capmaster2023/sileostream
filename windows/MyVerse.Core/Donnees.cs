@@ -59,8 +59,6 @@ public sealed class PositionFenetre
 public sealed class Reglages
 {
     [JsonPropertyName("audio")] public MyVerse.Audio.AudioConfiguration Audio { get; set; } = new();
-    [JsonPropertyName("duoPlace")] public string DuoPlace { get; set; } = "hd";
-    [JsonPropertyName("duoPart")] public double DuoPart { get; set; } = 0.35;
     [JsonPropertyName("version")] public int Version { get; set; } = 4;
     [JsonPropertyName("theme")] public string Theme { get; set; } = "nuit";
     [JsonPropertyName("taille")] public double Taille { get; set; } = 1;
@@ -116,9 +114,6 @@ public sealed class Donnees
     public Dictionary<string, List<string>> Decoupes { get; private set; } = new();
     public List<Agenda> Agendas { get; private set; } = new();
     public List<Annonce> Annonces { get; private set; } = new();
-    public List<DossierDuo> Duos { get; private set; } = new();
-    string FDuos => Path.Combine(Dossier, "duos.json");
-    public void SauverDuos() => Sauver(FDuos, Duos, "duos");
     /// <summary>Ce qui a été repris de la 3.x au premier démarrage (vide sinon).</summary>
     public string Migration { get; private set; } = "";
 
@@ -172,8 +167,10 @@ public sealed class Donnees
         d.Agendas = Lire<List<Agenda>>(d.FAgendas) ?? new List<Agenda>();
         foreach (var a in d.Agendas) { a.Elements ??= new(); a.Nom ??= ""; }
         d.Annonces = Lire<List<Annonce>>(d.FAnnonces) ?? new List<Annonce>();
-        d.Duos = Lire<List<DossierDuo>>(d.FDuos) ?? new List<DossierDuo>();
-        foreach (var x in d.Duos) { x.A ??= new(); x.B ??= new(); x.Nom ??= ""; }
+        // 2.5.0 : plus de Duo (les calques de Médias le remplacent) : ses dossiers quittent les médias et les programmes
+        bool sansDuo = d.Annonces.RemoveAll(x => x.Source?.Type == "duo") > 0;
+        foreach (var ag in d.Agendas) sansDuo |= ag.Elements.RemoveAll(x => x.Source?.Type == "duo") > 0;
+        if (sansDuo) { d.SauverAnnonces(); d.SauverAgendas(); }
         if (nouveau)
         {
             try { d.Migrer(); }

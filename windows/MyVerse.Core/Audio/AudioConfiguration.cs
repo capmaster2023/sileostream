@@ -178,7 +178,7 @@ public sealed class RecordingProfile : IDestinationAudio
     public List<string>? SourceIds { get; set; }
     /// <summary>Sources Display filmées, dans l'ordre (la 1re en grand) : identifiants de la bibliothèque Display, ou <see cref="Projection"/>.</summary>
     public List<string> DisplayIds { get; set; } = new();
-    /// <summary>Ce qui est à l'écran de projection (Bible, chants, Display, Duo).</summary>
+    /// <summary>Ce qui est à l'écran de projection (Bible, chants, Médias et leurs calques).</summary>
     public const string Projection = "projection";
     /// <summary>1.6.0 : le format d'un direct (YouTube, un autre service) : FLV vers une adresse RTMP(S).</summary>
     public const string FormatDirect = "flv";

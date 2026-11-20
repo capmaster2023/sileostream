@@ -7,7 +7,7 @@ namespace MyVerse.Ui;
 
 /// <summary>
 /// Siloé Stream 1.9.3 : le compte Google connecté sur le PC décide des pages. Admin : tout ; Versets : la Bible ;
-/// Chants : les chants ; Affichage : Culte, Médias et Duo (l'église et Zoom). Le bouton « Compte » de la barre de gauche
+/// Chants : les chants ; Affichage : Culte et Médias (l'église et Zoom). Le bouton « Compte » de la barre de gauche
 /// montre qui est connecté et permet de se déconnecter.
 /// </summary>
 public partial class MainWindow
@@ -39,7 +39,7 @@ public partial class MainWindow
         static Visibility V(bool b) => b ? Visibility.Visible : Visibility.Collapsed;
         OngletAgenda.Visibility = V(pages.Contains("agenda"));
         OngletBiblio.Visibility = V(pages.Contains("bible") || pages.Contains("chants"));
-        OngletMediasRail.Visibility = V(pages.Contains("annonces") || pages.Contains("duo"));
+        OngletMediasRail.Visibility = V(pages.Contains("annonces"));
         OngletSon.Visibility = V(pages.Contains("son"));
         OngletMontage.Visibility = V(pages.Contains("montage"));
         OngletMiniature.Visibility = V(pages.Contains("miniature"));
@@ -47,7 +47,6 @@ public partial class MainWindow
         SegBible.Visibility = V(pages.Contains("bible"));
         SegChants.Visibility = V(pages.Contains("chants"));
         SegMedias.Visibility = V(pages.Contains("annonces"));
-        SegDuo.Visibility = V(pages.Contains("duo"));
 
         // en haut : le téléphone, le direct YouTube et la mise à jour pour l'admin ; la projection et l'écran de scène pour l'affichage aussi
         bool admin = role == Roles.Admin;
@@ -150,7 +149,7 @@ public partial class MainWindow
         static string V(UIElement e) => e.Visibility == Visibility.Visible ? "1" : "0";
         OngletAgenda.Visibility = pages.Contains("agenda") ? Visibility.Visible : Visibility.Collapsed;
         OngletBiblio.Visibility = pages.Contains("bible") || pages.Contains("chants") ? Visibility.Visible : Visibility.Collapsed;
-        OngletMediasRail.Visibility = pages.Contains("annonces") || pages.Contains("duo") ? Visibility.Visible : Visibility.Collapsed;
+        OngletMediasRail.Visibility = pages.Contains("annonces") ? Visibility.Visible : Visibility.Collapsed;
         OngletSon.Visibility = pages.Contains("son") ? Visibility.Visible : Visibility.Collapsed;
         OngletReglages.Visibility = pages.Contains("reglages") ? Visibility.Visible : Visibility.Collapsed;
         return $"{V(OngletAgenda)}{V(OngletBiblio)}{V(OngletMediasRail)}{V(OngletSon)}{V(OngletReglages)}";

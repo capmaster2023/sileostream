@@ -10,10 +10,10 @@ using OpenCvSharp;
 namespace MyVerse.Ui;
 
 /// <summary>Only the explicitly selected device/window is captured. No audio is recorded.
-/// Une instance par contenu vivant : App.Sources (écran principal) et App.SourcesDuo (contenu épinglé du Duo).</summary>
+/// Une instance par contenu vivant : App.Sources (écran principal) et une par source superposée (App.Calques, 2.5.0).</summary>
 public sealed class SourcesDisplay : IDisposable
 {
-    /// <summary>Nom de l'image écrite pour la page OBS : display.jpg (écran principal) ou display-duo.jpg (Duo) ;
+    /// <summary>Nom de l'image écrite pour la page OBS : display.jpg (écran principal) ou display-calque-N.jpg (un calque) ;
     /// vide pour un lecteur qui n'écrit rien (vidéo des enregistrements).</summary>
     readonly string export;
     public SourcesDisplay(string export = "display.jpg") { this.export = export; }

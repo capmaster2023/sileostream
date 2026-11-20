@@ -36,7 +36,6 @@ public partial class MainWindow
         if (App.AutoTest == null) SurveillerInterface();
         App.Sources.Change += GrilleDirect;
         minuterieGrille.Tick += (_, _) => { minuterieGrille.Stop(); GrilleMaj(); };
-        R.DuosChange += GrillePlusTard;
         ListeAnnonces.PreviewMouseRightButtonUp += (_, e) =>
         {
             if (e.OriginalSource is DependencyObject o && ItemsControl.ContainerFromElement(ListeAnnonces, o) is ListBoxItem { DataContext: Annonce a })
@@ -85,7 +84,7 @@ public partial class MainWindow
     {
         var m = new ContextMenu();
         m.Items.Add(Article("Afficher en direct", () => R.AfficherAnnonce(a), true));
-        m.Items.Add(Article("Montrer puis garder dans un coin", () => EpinglerDisplay(a)));
+        m.Items.Add(Article("Superposer à l'écran (par-dessus ce qui y est)", () => Superposer(a)));
         m.Items.Add(Article("Modifier…", () => ModifierDisplay(a)));
         m.Items.Add(a.Grille ? Article("Retirer de la grille", () => R.GrilleAnnonce(a.Id, false)) : Article("Ajouter à la grille", () => R.GrilleAnnonce(a.Id, true)));
         m.Items.Add(Article("Ajouter au programme du culte", () =>
@@ -93,7 +92,6 @@ public partial class MainWindow
             if (R.AjouterAnnonceAgenda(a.Id) is { } el) Toast($"« {el.Titre} » ajouté au programme « {R.Agenda.Nom} ».");
         }));
         // 3.3 : un écran qui reste ; quand il passe, il devient l'écran par défaut (Retirer de l'écran revient dessus)
-        // 2.2.0 : un dossier Duo aussi
             m.Items.Add(Article("Ajouter au programme comme écran principal", () =>
             {
                 if (R.AjouterPrincipalAgenda(a.Id) is { } el)
@@ -202,24 +200,6 @@ public partial class MainWindow
                 Margin = new Thickness(10), Stretch = Stretch.Uniform, StretchDirection = StretchDirection.DownOnly,
                 Child = new TextBlock { Text = texte, Width = 300, FontSize = 22, FontWeight = FontWeights.SemiBold, Foreground = Brushes.White, TextAlignment = TextAlignment.Center, TextWrapping = TextWrapping.Wrap },
             });
-        else if (type == "duo")
-        {
-            // le dossier Duo tel qu'il sort sur l'écran principal : ses deux éléments, chacun à sa place et à sa taille
-            if (R.EtatAnnonce(a) is { } etat)
-            {
-                var rendu = new Rendu { Transitions = false, Leger = true, Width = 1920, Height = 1080, IsHitTestVisible = false };
-                rendu.Afficher(etat);
-                if (etat is { Mode: "media", Media: { Type: "image" } m1 }) rendu.ImageDisplay(ImageFichier(m1.Chemin, 640));
-                if (etat.Duo?.Etat is { Mode: "media", Media: { Type: "image" } m2 }) rendu.ImageDuo(ImageFichier(m2.Chemin, 640));
-                vue.Children.Add(new Viewbox { Stretch = Stretch.Uniform, Child = rendu, CacheMode = CacheApercu() });
-                vue.Tag = "duo-rendu";
-            }
-            else vue.Children.Add(new TextBlock
-            {
-                Text = "Duo incomplet : choisissez ses 2 éléments (onglet Duo)", FontSize = 13.5, Margin = new Thickness(12), TextWrapping = TextWrapping.Wrap, TextAlignment = TextAlignment.Center,
-                Foreground = TexteTuile, HorizontalAlignment = HorizontalAlignment.Center, VerticalAlignment = VerticalAlignment.Center,
-            });
-        }
         else
         {
             var attente = new TextBlock
@@ -250,24 +230,39 @@ public partial class MainWindow
         var tete = new StackPanel { Orientation = Orientation.Horizontal, Margin = new Thickness(12, 9, 12, 7) };
         tete.Children.Add(new System.Windows.Shapes.Path
         {
-            Data = (Geometry)FindResource(type switch { "texte" => "IconeTexte", "duo" => "IconeDuo", "camera" or "mycam" or "fenetre" or "video" => "IconeEcran", _ => "IconeDisplay" }),
+            Data = (Geometry)FindResource(type switch { "texte" => "IconeTexte", "camera" or "mycam" or "fenetre" or "video" => "IconeEcran", _ => "IconeDisplay" }),
             Stroke = Pinceau("Brume"), StrokeThickness = 1.8, Width = 14, Height = 14, Stretch = Stretch.Uniform, VerticalAlignment = VerticalAlignment.Center,
             StrokeStartLineCap = PenLineCap.Round, StrokeEndLineCap = PenLineCap.Round, StrokeLineJoin = PenLineJoin.Round,
         });
         tete.Children.Add(new TextBlock
         {
             // 1.3.1 : « FENÊTRE · ÉGLISE » ou « FENÊTRE · STREAMING » pour une source qui ne va qu'à un endroit
-            Text = ((type switch { "texte" => "Texte", "camera" => "Caméra", "mycam" => "MyCam", "fenetre" => "Fenêtre", "video" => "Vidéo", "duo" => "Duo", _ => "Image" })
+            Text = ((type switch { "texte" => "Texte", "camera" => "Caméra", "mycam" => "MyCam", "fenetre" => "Fenêtre", "video" => "Vidéo", _ => "Image" })
                 + (a.Source?.Diffusion switch { SourceDisplay.Eglise => " · Église", SourceDisplay.Streaming => " · MyStream", _ => "" })).ToUpperInvariant(),
             FontSize = 10.5, FontWeight = FontWeights.ExtraBold, Foreground = Pinceau("Brume"), VerticalAlignment = VerticalAlignment.Center, Margin = new Thickness(7, 0, 0, 0),
         });
-        DockPanel.SetDock(tete, Dock.Top);
-        pile.Children.Add(tete);
+        // 2.5.0 : ⧉ superposer la source à l'écran, par-dessus ce qui y est
+        var superposer = new Button
+        {
+            Style = Style_("BtnPlat"), Padding = new Thickness(5, 2, 5, 2), Margin = new Thickness(0, 5, 8, 0), VerticalAlignment = VerticalAlignment.Top,
+            ToolTip = "Superposer à l'écran (par-dessus ce qui y est)",
+            Content = new System.Windows.Shapes.Path
+            {
+                Data = (Geometry)FindResource("IconeDuo"), Stroke = Pinceau("Or"), StrokeThickness = 1.8, Width = 14, Height = 14, Stretch = Stretch.Uniform,
+                StrokeStartLineCap = PenLineCap.Round, StrokeEndLineCap = PenLineCap.Round, StrokeLineJoin = PenLineJoin.Round,
+            },
+        };
+        superposer.Click += (_, ev) => { Superposer(a); ev.Handled = true; };
+        var haut = new DockPanel();
+        DockPanel.SetDock(superposer, Dock.Right);
+        haut.Children.Add(superposer);
+        haut.Children.Add(tete);
+        DockPanel.SetDock(haut, Dock.Top);
+        pile.Children.Add(haut);
         DockPanel.SetDock(bas, Dock.Bottom);
         pile.Children.Add(bas);
         // 1.8.0 : deux boutons nets : en faire la source principale de l'église, ou celle de MyStream
-        // 2.2.0 : les dossiers Duo aussi (ses deux éléments deviennent la source principale de l'église ou de l'antenne)
-        if (type is "image" or "camera" or "mycam" or "fenetre" or "video" or "duo")
+        if (type is "image" or "camera" or "mycam" or "fenetre" or "video")
         {
             Button Bouton(string texte, string tip, Action clic)
             {
@@ -319,27 +314,21 @@ public partial class MainWindow
         catch (Exception) { return null; }
     }
 
-    /// <summary>Un dossier Duo a changé (éléments, mesures) : ses vignettes de la grille suivent, un instant plus tard.</summary>
-    void GrillePlusTard()
-    {
-        if (!R.Annonces.Any(a => a.Grille && a.Source?.Type == "duo")) return;
-        minuterieGrille.Stop();
-        minuterieGrille.Start();
-    }
-
     /// <summary>La tuile à l'écran : cadre rouge, « EN DIRECT », et l'image vivante d'une caméra ou d'une fenêtre.</summary>
     void GrilleDirect()
     {
         var cible = R.ElementCourant == null && !R.Etat.Vide ? R.Cible : null;
-        var dossier = R.Etat.Duo is { Place: "libre" } dl ? dl.Dossier : null;
-        var c = dossier == null ? cible as CibleTexte : null;
-        var tuileDuo = dossier == null ? null : R.Annonces.FirstOrDefault(a => a.Source is { Type: "duo" } s && s.Chemin == dossier)?.Id;
+        var c = cible as CibleTexte;
+        // 2.5.0 : une source superposée (calque montré) est aussi à l'écran
+        var dessus = R.Calques.Where(x => x.Visible).Select(x => x.Annonce).ToHashSet();
         foreach (var t in tuiles)
         {
-            bool ok = c != null && c.Element == t.Id && c.I == t.I || dossier == null && cible is CibleDisplay cd && cd.Id == t.Id || tuileDuo == t.Id;
-            t.Tuile.BorderBrush = Pinceau(ok ? "Direct" : "Nuit3");
-            t.Tuile.BorderThickness = new Thickness(ok ? 2 : 1.5);
-            t.Direct.Visibility = ok ? Visibility.Visible : Visibility.Collapsed;
+            bool ok = c != null && c.Element == t.Id && c.I == t.I || cible is CibleDisplay cd && cd.Id == t.Id;
+            bool superpose = !ok && dessus.Contains(t.Id);
+            t.Tuile.BorderBrush = Pinceau(ok || superpose ? "Direct" : "Nuit3");
+            t.Tuile.BorderThickness = new Thickness(ok || superpose ? 2 : 1.5);
+            t.Direct.Text = superpose ? "SUPERPOSÉ" : "EN DIRECT";
+            t.Direct.Visibility = ok || superpose ? Visibility.Visible : Visibility.Collapsed;
             // 1.7.0 : caméras et fenêtres ont leur propre lecteur (toujours en direct) ; MyCam suit l'écran quand elle y est
             if (t.Vue != null && !lecteursTuiles.ContainsKey(t.Id)) t.Vue.Source = ok ? App.Sources.Image : null;
         }
@@ -351,8 +340,6 @@ public partial class MainWindow
     /// <summary>1.7.0 : les tuiles caméra / fenêtre qui montrent une image vivante (sans être à l'écran).</summary>
     public int TestTuilesVivantes => vuesTuiles.Count(v => v.Value.Vue.Source != null);
     public int TestLecteursTuiles => lecteursTuiles.Count;
-    /// <summary>Une tuile de dossier Duo dessinée comme l'écran principal (et non un simple texte).</summary>
-    public bool TestTuileDuoDessinee => tuiles.Any(t => t.Tuile.Child is DockPanel d && d.Children.OfType<Border>().Any(b => b.Child is Grid { Tag: "duo-rendu" }));
     public bool TestCliquerTuile(int k)
     {
         if (k < 0 || k >= tuiles.Count) return false;

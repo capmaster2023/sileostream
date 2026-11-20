@@ -241,7 +241,7 @@
         <Setter Property="BorderBrush" Value="{StaticResource RougeBord}" />
         <Setter Property="Foreground" Value="{StaticResource RougeTexte}" />
     </Style>
-    <!-- bouton encadré : Épingler, Afficher la sélection, Lire la licence -->
+    <!-- bouton encadré : Afficher la sélection, Lire la licence -->
     <Style x:Key="BtnContour" TargetType="Button" BasedOn="{StaticResource Btn}">
         <Setter Property="BorderBrush" Value="{StaticResource Blanc}" />
         <Setter Property="BorderThickness" Value="1.5" />

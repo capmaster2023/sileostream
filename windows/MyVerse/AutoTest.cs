@@ -1485,79 +1485,70 @@ public static class AutoTest
             var absent = R.NouveauDisplay("Fenêtre fermée", new SourceDisplay { Type = "fenetre", Fenetre = 1, Processus = -1 });
             R.AfficherAnnonce(absent); await Attendre(500);
             Ok(App.Sources.Image == null && App.Sources.Statut.Contains("fermée"), "fenêtre fermée : image effacée et message utile");
-            // 1.0.2 : Duo (deux contenus en même temps à l'écran)
-            // 1.1 : onglet Duo — un dossier de 2 éléments, chacun à sa place, ajouté dans Display
-            var dossier = R.NouveauDuo("Verset et annonce");
-            dossier.A = new PartDuo { Type = "bible", Ref = new[] { 42, 3, 16, 16 }, Titre = "Jean 3:16", X = 0, Y = 0, L = 0.7 };
-            dossier.B = new PartDuo { Type = "display", Id = an.Id, Titre = an.Titre, X = 0.55, Y = 0.55, L = 0.45 };
-            R.EnregistrerDuo(dossier);
-            w.TestOngletDuo();
-            w.TestChoisirDossier(dossier);
-            w.TestAfficherDossier();
-            await Attendre(1600);
-            Ok(R.Etat.Mode == "verset" && R.Etat.Duo is { Place: "libre" } dl0 && dl0.Dossier == dossier.Id, "onglet Duo : le dossier part en direct (verset + annonce)");
-            Capture(w, "31-onglet-duo.png");
-            if (w.Ecran != null) Capture(w.Ecran, "31-onglet-duo-ecran.png");
-            var tuileDuo = R.AjouterDuoDisplay(dossier);
+            // 2.5.0 : Médias en calques (remplace le Duo) : superposer, déplacer, agrandir, monter / descendre, montrer / cacher
             R.Effacer();
-            Ok(R.Etat.Duo == null, "Retirer de l'écran : le dossier part en entier");
-            R.AfficherAnnonce(tuileDuo);
-            await Attendre(400);
-            Ok(R.Etat.Duo is { Place: "libre" } && R.Etat.Mode == "verset", "Display : la tuile du dossier Duo l'envoie en direct");
-            // 3.0.1 : la vignette du dossier montre ses deux éléments comme sur l'écran principal
-            w.TestOngletAnnonces();
-            await Attendre(700);
-            Ok(w.TestTuileDuoDessinee, "grille Display : la vignette du dossier Duo dessine ses deux éléments (comme à l'écran)");
-            Capture(w, "31b-grille-duo.png");
-            await Fenetre(w, () => new ChoixChantWindow(null), "31c-choix-chant.png");
-            R.SupprimerDuo(dossier.Id);
-            Ok(R.Etat.Vide && R.Annonces.All(x => x.Source?.Type != "duo"), "dossier supprimé : sa tuile Display aussi");
-            w.TestOngletAnnonces();
-
-            R.Effacer();
-            R.AfficherAnnonce(an);
-            await Attendre(400);
-            w.TestBasculerDuo();
-            await Attendre(300);
-            Ok(R.Etat.Duo != null && R.Etat.Vide && R.Etat.Duo.Libelle == "Repas fraternel après le culte", "Duo : texte Display épinglé (touche P), écran principal libéré");
             R.AfficherVerset(42, 3, 16, 16);
-            await Attendre(1600);
-            Ok(R.Etat.Duo != null && R.Etat.Mode == "verset", "Duo : un verset + un texte épinglé");
-            Ok(w.TestDuoLibelle == "Repas fraternel après le culte", "carte DUO : contenu épinglé affiché (" + w.TestDuoLibelle + ")");
-            Capture(w, "28-duo.png");
-            if (w.Ecran != null) Capture(w.Ecran, "28-duo-ecran.png");
-            Ok(w.TestDuoPlace("cote", 35) && R.Etat.Duo?.Place == "cote", "carte DUO : côte à côte");
+            await Attendre(400);
+            w.TestOngletAnnonces();
+            w.TestSuperposer(an);
+            await Attendre(500);
+            var calqueTexte = R.Calques.LastOrDefault();
+            Ok(calqueTexte != null && R.Etat.Mode == "verset" && calqueTexte.Annonce == an.Id && calqueTexte.L < 1 && calqueTexte.X > 0.5,
+                "2.5.0 : un texte superposé au verset, dans un coin (haut droite)");
+            w.TestSuperposer(img);
             await Attendre(1300);
-            Capture(w, "29-duo-cote.png");
-            if (w.Ecran != null) Capture(w.Ecran, "29-duo-cote-ecran.png");
-            Ok(w.TestDuoPlace("bg", 50) && R.Etat.Duo is { Place: "bg", Part: 0.5 }, "carte DUO : bas gauche, 50 %");
-            Ok(w.TestDuoPlace("hd", 35) && R.Etat.Duo is { Place: "hd", Part: 0.35 }, "carte DUO : haut droite, 35 %");
-            // une image épinglée : la 2e capture fournit son image vivante pendant qu'un verset est à l'écran
-            R.AfficherAnnonce(img);
-            await Attendre(1300);
-            w.TestEpingler();
-            R.AfficherVerset(42, 3, 16, 16);
-            await Attendre(1600);
-            Ok(R.Etat.Duo?.Etat.Media == img.Source && R.Etat.Mode == "verset", "Duo : un verset + une image épinglée");
-            Ok(App.SourcesDuo.Image != null && App.Sources.Image == null, "Duo : image vivante du contenu épinglé (2e capture)");
-            var duoJpg = new FileInfo(Path.Combine(App.SortieObs.Dossier, "display-duo.jpg"));
-            Ok(duoJpg.Exists && duoJpg.Length > 3000, "Duo : image épinglée publiée pour la page OBS (" + (duoJpg.Exists ? duoJpg.Length : 0) + " octets)");
-            if (App.CameraVirtuelle != null)
+            var calqueImage = R.Calques.LastOrDefault();
+            Ok(R.Calques.Count == 2 && calqueImage?.Annonce == img.Id && R.Etat.Mode == "verset", "2.5.0 : une image superposée par-dessus (deux calques, le verset reste)");
+            Ok(w.TestListeCalques.StartsWith(img.Titre, StringComparison.Ordinal) && w.TestListeCalques.EndsWith("Écran principal", StringComparison.Ordinal),
+                "2.5.0 : la liste des sources : la plus haute d'abord, l'écran principal en bas (" + w.TestListeCalques + ")");
+            if (calqueImage != null && calqueTexte != null)
             {
-                // 1.5.0 : la caméra virtuelle dessine sur son propre fil (un dessin peut prendre 200 ms sur la machine du CI)
-                await Attendre(900);
-                using var mm = System.IO.MemoryMappedFiles.MemoryMappedFile.OpenExisting(@"Local\MyChurch.MyVirtualCam.frames.v1");
-                using var view = mm.CreateViewAccessor();
-                // milieu du coin haut droite (35 % de 1280 × 720, marge 3 %) ; l'image de la caméra virtuelle est rangée de bas en haut
-                var pixel = 64 + ((719 - 147) * 1280 + 1034) * 3;
-                Ok(view.ReadByte(pixel) == 40 && view.ReadByte(pixel + 1) == 30 && view.ReadByte(pixel + 2) == 200,
-                    $"MyVirtualCam reçoit l'image du contenu épinglé ({view.ReadByte(pixel + 2)},{view.ReadByte(pixel + 1)},{view.ReadByte(pixel)})");
+                // glisser puis agrandir par la poignée du coin bas droite, comme à la souris
+                // la 2e source superposée est dans le coin haut gauche : elle part vers la droite et vers le bas
+                Ok(w.TestGlisserCalque(calqueImage.Id, 900, 300), "2.5.0 : glisser un calque dans l'écran de Médias");
+                var deplace = R.Calques.First(c => c.Id == calqueImage.Id);
+                Ok(deplace.X > calqueImage.X + 0.3 && deplace.Y > calqueImage.Y + 0.2 && Math.Abs(deplace.L - calqueImage.L) < 0.001,
+                    $"2.5.0 : le calque glissé change de place, pas de taille ({deplace.X:0.00}, {deplace.Y:0.00})");
+                Ok(w.TestGlisserCalque(calqueImage.Id, 200, 100, 2), "2.5.0 : agrandir par une poignée");
+                var agrandi = R.Calques.First(c => c.Id == calqueImage.Id);
+                Ok(agrandi.L > deplace.L + 0.05 && agrandi.H > deplace.H + 0.05 && Math.Abs(agrandi.X - deplace.X) < 0.001, $"2.5.0 : la poignée agrandit le calque ({agrandi.L:0.00} × {agrandi.H:0.00})");
+                // ▼ deux fois : l'image passe derrière le texte, puis derrière le verset (l'écran principal)
+                Ok(R.MonterCalque(calqueImage.Id, -1) && R.Calques[0].Id == calqueImage.Id && R.Etat.Rang == 0, "2.5.0 : ▼ : l'image passe derrière le texte");
+                Ok(R.MonterCalque(calqueImage.Id, -1) && R.Etat.Rang == 1 && w.TestListeCalques.EndsWith(img.Titre, StringComparison.Ordinal),
+                    "2.5.0 : ▼ : l'image passe sous l'écran principal (le verset par-dessus) : " + w.TestListeCalques);
+                Ok(!R.MonterCalque(calqueImage.Id, -1), "2.5.0 : ▼ ne descend pas plus bas que tout en bas");
+                Ok(R.MonterPrincipal(-1) && R.Etat.Rang == 0 && R.MonterCalque(calqueImage.Id, 1) && R.Calques[^1].Id == calqueImage.Id && !R.MonterCalque(calqueImage.Id, 1),
+                    "2.5.0 : ▲ : l'image remonte devant tout (puis ne monte pas plus haut)");
+                // la case : cacher puis montrer
+                Ok(R.MontrerCalque(calqueTexte.Id, false) && !R.Calques.First(c => c.Id == calqueTexte.Id).Visible && R.Etat.AvecCalques, "2.5.0 : la case cache un calque (il reste dans la liste)");
+                R.MontrerCalque(calqueTexte.Id, true);
+                await Attendre(1300);
+                Ok(App.Calques.ImageDe(calqueImage.Id) != null, "2.5.0 : image vivante du calque (sa propre capture)");
+                var fichierObs = App.Calques.FichierObs(calqueImage.Id);
+                var jpgCalque = new FileInfo(Path.Combine(App.SortieObs.Dossier, fichierObs ?? "absent.jpg"));
+                Ok(fichierObs != null && jpgCalque.Exists && jpgCalque.Length > 3000, $"2.5.0 : image du calque publiée pour la page OBS ({fichierObs}, {(jpgCalque.Exists ? jpgCalque.Length : 0)} octets)");
+                Capture(w, "28-calques.png");
+                if (w.Ecran != null) Capture(w.Ecran, "28-calques-ecran.png");
+                // Échap : le verset part, les calques restent
+                R.Effacer();
+                Ok(R.Etat.Vide && R.Calques.Count == 2 && R.Etat.AvecCalques, "2.5.0 : Retirer de l'écran (Échap) : le verset part, les calques restent");
+                // l'image prend tout l'écran : MyVirtualCam (Zoom) la reçoit
+                R.RetirerCalque(calqueTexte.Id);
+                Ok(R.PleinEcranCalque(calqueImage.Id) && R.Calques[0] is { X: 0, Y: 0, L: 1, H: 1 }, "2.5.0 : ⤢ : le calque prend tout l'écran");
+                if (App.CameraVirtuelle != null)
+                {
+                    await Attendre(1300);
+                    using var mm = System.IO.MemoryMappedFiles.MemoryMappedFile.OpenExisting(@"Local\MyChurch.MyVirtualCam.frames.v1");
+                    using var view = mm.CreateViewAccessor();
+                    int milieu = 64 + (360 * 1280 + 640) * 3;
+                    Ok(view.ReadByte(milieu) == 40 && view.ReadByte(milieu + 1) == 30 && view.ReadByte(milieu + 2) == 200,
+                        $"2.5.0 : MyVirtualCam reçoit l'image du calque ({view.ReadByte(milieu + 2)},{view.ReadByte(milieu + 1)},{view.ReadByte(milieu)})");
+                }
+                Capture(w, "29-calque-plein.png");
+                R.RetirerCalques();
+                await Attendre(400);
+                Ok(R.Calques.Count == 0 && R.Etat.Rang == 0 && App.Calques.ImageDe(calqueImage.Id) == null, "2.5.0 : Tout retirer : plus de calque, sa capture s'arrête");
             }
-            Capture(w, "30-duo-image.png");
-            if (w.Ecran != null) Capture(w.Ecran, "30-duo-image-ecran.png");
-            w.TestBasculerDuo();
-            await Attendre(400);
-            Ok(R.Etat.Duo == null && R.Etat.Mode == "verset" && App.SourcesDuo.Image == null, "Duo retiré (touche P) : le verset reste, la 2e capture s'arrête");
             R.Effacer();
             R.SupprimerAnnonce(img.Id); R.SupprimerAnnonce(absent.Id);
             R.SupprimerAnnonce(an.Id);
@@ -1618,7 +1609,7 @@ public static class AutoTest
             Ok(((SolidColorBrush)MainWindow.Pinceau("Page")).Color == Palette.De("Page", true), "les pinceaux suivent le thème sombre");
             await Attendre(500);
             Capture(w, "41-sombre-reglages.png");
-            foreach (var (page, nom) in new[] { ("agenda", "42-sombre-culte.png"), ("bible", "43-sombre-bible.png"), ("chants", "44-sombre-chants.png"), ("annonces", "45-sombre-display.png"), ("duo", "46-sombre-duo.png"), ("son", "46b-sombre-son.png"), ("montage", "46c-sombre-montage.png"), ("miniature", "46d-sombre-miniature.png") })
+            foreach (var (page, nom) in new[] { ("agenda", "42-sombre-culte.png"), ("bible", "43-sombre-bible.png"), ("chants", "44-sombre-chants.png"), ("annonces", "45-sombre-display.png"), ("son", "46b-sombre-son.png"), ("montage", "46c-sombre-montage.png"), ("miniature", "46d-sombre-miniature.png") })
             {
                 w.TestPage(page);
                 await Attendre(500);
@@ -1627,7 +1618,7 @@ public static class AutoTest
             await Fenetre(w, () => new OutilsWindow(false), "47-sombre-fenetre.png");
             App.AppliquerApparence("clair");
             Ok(!Palette.Actuelle.Sombre && ((SolidColorBrush)MainWindow.Pinceau("Page")).Color == Palette.De("Page", false), "retour au thème clair");
-            foreach (var (page, nom) in new[] { ("agenda", "48-clair-culte.png"), ("annonces", "49-clair-display.png"), ("bible", "49b-clair-bible.png"), ("chants", "49c-clair-chants.png"), ("duo", "49d-clair-duo.png"), ("son", "49e-clair-son.png"), ("montage", "49f-clair-montage.png"), ("miniature", "49g-clair-miniature.png") })
+            foreach (var (page, nom) in new[] { ("agenda", "48-clair-culte.png"), ("annonces", "49-clair-display.png"), ("bible", "49b-clair-bible.png"), ("chants", "49c-clair-chants.png"), ("son", "49e-clair-son.png"), ("montage", "49f-clair-montage.png"), ("miniature", "49g-clair-miniature.png") })
             {
                 w.TestPage(page);
                 await Attendre(500);
@@ -1678,7 +1669,7 @@ public static class AutoTest
                     return sw.Elapsed.TotalMilliseconds;
                 }
                 var temps = new List<string>();
-                foreach (var page in new[] { "bible", "chants", "annonces", "duo", "son", "reglages", "agenda", "bible", "agenda" })
+                foreach (var page in new[] { "bible", "chants", "annonces", "son", "reglages", "agenda", "bible", "agenda" })
                     temps.Add($"{page} {await Mesurer(() => w.TestPage(page)):0} ms");
                 Note("1.5.1 : changements de page (jusqu'à l'image affichée) : " + string.Join(", ", temps));
                 // 1.9.3 : les boutons de pages de chaque rôle (Culte, Bibliothèque, Médias, Son, Réglages), puis retour à l'état réel

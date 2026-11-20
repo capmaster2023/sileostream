@@ -177,33 +177,35 @@ public sealed partial class Regie
         a.Titre = string.IsNullOrWhiteSpace(titre) ? "Annonce" : titre.Trim();
         a.Texte = (texte ?? "").Replace("\r\n", "\n").Trim();
         AnnoncesModifiees();
+        CalquesSuivent(a, id);
     }
 
     /// <summary>
     /// Nouveaux réglages d'une source de la bibliothèque (1.3.1 : la fenêtre capturée, sa zone, où elle va), du même type.
-    /// À l'écran ou épinglée, elle change tout de suite. Faux si la source n'existe pas ou change de type.
+    /// À l'écran ou superposée (calque), elle change tout de suite. Faux si la source n'existe pas ou change de type.
     /// </summary>
     public bool ModifierSource(string id, string titre, SourceDisplay source)
     {
         var a = donnees.Annonces.FirstOrDefault(x => x.Id == id);
-        if (a?.Source is not { } ancienne || ancienne.Type == "duo" || source.Type != ancienne.Type) return false;
+        if (a?.Source is not { } ancienne || source.Type != ancienne.Type) return false;
         if (!string.IsNullOrWhiteSpace(titre)) a.Titre = titre.Trim();
         a.Source = source;
         AnnoncesModifiees();
         var e = Etat;
         if (Cible is CibleDisplay cd && cd.Id == id && e is { Mode: "media" } && e.Media == ancienne) e = e with { Media = source, Ref = a.Titre };
-        if (e.Duo is { Etat: { Mode: "media" } de } d && de.Media == ancienne) e = e with { Duo = d with { Etat = de with { Media = source } } };
         if (!ReferenceEquals(e, Etat))
         {
             Etat = e;
             Signaler();
         }
+        // 2.5.0 : ses calques suivent
+        CalquesSuivent(a, id);
         return true;
     }
 
     public void SupprimerAnnonce(string id)
     {
-        if (donnees.Annonces.RemoveAll(x => x.Id == id) > 0) AnnoncesModifiees();
+        if (donnees.Annonces.RemoveAll(x => x.Id == id) > 0) { AnnoncesModifiees(); CalquesSuivent(null, id); }
     }
 
     /// <summary>L'display entre dans le déroulé (une copie : on peut la retoucher pour ce culte).</summary>
@@ -224,12 +226,6 @@ public sealed partial class Regie
     void AfficherSource(string id, string titre, SourceDisplay? source)
     {
         if (source == null) { Dire("Cette source Display est absente."); return; }
-        if (source.Type == "duo")
-        {
-            if (donnees.Duos.FirstOrDefault(x => x.Id == source.Chemin) is { } dossier) AfficherDuo(dossier);
-            else Dire($"Le duo « {titre} » n'existe plus.");
-            return;
-        }
         Cible = new CibleDisplay(id);
         Oeil?.Invoke(true);
         Etat = Etat with { Mode = "media", Media = source, Lignes = Array.Empty<string>(), Ref = titre, Second = null };

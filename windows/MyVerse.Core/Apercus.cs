@@ -1,7 +1,7 @@
 namespace MyVerse;
 
 /// <summary>
-/// Aperçus : l'écran que donnerait un verset, un chant, une source Display ou un dossier Duo, sans rien afficher
+/// Aperçus : l'écran que donnerait un verset, un chant ou une source Display, sans rien afficher
 /// (vignettes de la grille, vidéo des enregistrements). Aucun événement, aucune mémoire de ce qui a été affiché.
 /// </summary>
 public sealed partial class Regie
@@ -33,24 +33,15 @@ public sealed partial class Regie
         return Neutre() with { Mode = "chant", Lignes = c.Sections[i].Text.Split('\n').Where(l => l.Trim().Length > 0).ToArray() };
     }
 
-    /// <summary>Une source Display : son texte, son média, ou le dossier Duo qu'elle représente.</summary>
+    /// <summary>Une source Display : son texte ou son média.</summary>
     public EtatEcran? EtatAnnonce(Annonce a, int i = 0)
     {
-        if (a.Source is { Type: "duo" } s) return donnees.Duos.FirstOrDefault(d => d.Id == s.Chemin) is { } dossier ? EtatDuo(dossier) : null;
         if (a.Source != null) return Neutre() with { Mode = "media", Media = a.Source, Ref = a.Titre };
         var blocs = BlocsTexte(a.Texte);
         if (blocs.Count == 0) return null;
         i = Math.Clamp(i, 0, blocs.Count - 1);
         return Neutre() with { Mode = "chant", Lignes = blocs[i].Split('\n').Where(l => l.Trim().Length > 0).ToArray() };
     }
-
-    public EtatEcran? EtatPart(PartDuo p) => p.Type switch
-    {
-        "display" => donnees.Annonces.FirstOrDefault(a => a.Id == p.Id) is { } a && a.Source?.Type != "duo" ? EtatAnnonce(a) : null,
-        "chant" => EtatSection(p.Id, 0),
-        "bible" => p.Ref is { Length: >= 4 } r ? EtatVerset(r[0], r[1], Math.Max(1, r[2]), Math.Max(1, r[3] > 0 ? r[3] : r[2])) : null,
-        _ => null,
-    };
 
     /// <summary>
     /// Une diapositive (du déroulé, d'un chant, d'un verset, d'une source Display) telle qu'elle sortirait à l'écran, sans l'afficher :
@@ -86,7 +77,6 @@ public sealed partial class Regie
                 if ((e?.Id == cd.Id ? e : ElementDuDeroule(cd.Id)) is { } ed)
                 {
                     if (ed.Source is not { } s) return null;
-                    if (s.Type == "duo") return donnees.Duos.FirstOrDefault(d => d.Id == s.Chemin) is { } dossier ? EtatDuo(dossier) : null;
                     return Neutre() with { Mode = "media", Media = s, Ref = ed.Titre };
                 }
                 return donnees.Annonces.FirstOrDefault(a => a.Id == cd.Id) is { } ad ? EtatAnnonce(ad) : null;
@@ -98,13 +88,4 @@ public sealed partial class Regie
     }
 
     ElementAgenda? ElementDuDeroule(string id) => Agenda.Elements.FirstOrDefault(x => x.Id == id);
-
-    /// <summary>Le dossier Duo comme sur l'écran principal : l'élément 1 dessous, l'élément 2 par-dessus, à leurs mesures.</summary>
-    public EtatEcran? EtatDuo(DossierDuo d)
-    {
-        if (!d.A.Choisi || !d.B.Choisi) return null;
-        Borner(d.A); Borner(d.B);
-        if (EtatPart(d.B) is not { } second || EtatPart(d.A) is not { } premier) return null;
-        return premier with { Duo = new DuoEcran(second with { Duo = null, Presentation = "plein" }, d.Nom, "libre", 0.35) { Dossier = d.Id, Cadres = Cadres(d) } };
-    }
 }

@@ -7,7 +7,7 @@ namespace MyVerse.Ui;
 
 /// <summary>
 /// Siloé Stream 1.5.0, design « Télécommande » :
-/// - trois pages dans la barre de gauche (Culte, Bibliothèque, Son) ; la Bibliothèque a ses onglets (Bible, Chants, Médias, Duo) ;
+/// - trois pages dans la barre de gauche (Culte, Bibliothèque, Son) ; la Bibliothèque a ses onglets (Bible, Chants, Médias) ;
 /// - en bas, la télécommande, la même sur toutes les pages : ce qui est à l'écran (petit aperçu, titre, « Refrain, 2 sur 6 »),
 ///   Précédent, le gros Suivant, Noir, Effacer ;
 /// - à droite, les outils de l'écran repliés en lignes (Style, Taille, Coin, Écran de repos, Raccourcis) : un clic ouvre la ligne.
@@ -32,11 +32,9 @@ public partial class MainWindow
         SegBible.Click += (_, _) => MontrerOnglet("bible");
         SegChants.Click += (_, _) => MontrerOnglet("chants");
         SegMedias.Click += (_, _) => MontrerOnglet("annonces");
-        SegDuo.Click += (_, _) => MontrerOnglet("duo");
 
         Tiroir(TiroirStyle, CorpsStyle);
         Tiroir(TiroirTaille, CorpsTaille);
-        Tiroir(TiroirCoin, CorpsCoin);
         Tiroir(TiroirRepos, CarteDefaut);
         Tiroir(TiroirAide, CorpsAide);
         Taille.ValueChanged += (_, _) => MajOutils();
@@ -55,10 +53,10 @@ public partial class MainWindow
         tete.Unchecked += (_, _) => corps.Visibility = Visibility.Collapsed;
     }
 
-    /// <summary>La page ouverte : le bouton « Bibliothèque » s'allume sur Bible, Chants, Médias et Duo, avec l'onglet de la page.</summary>
+    /// <summary>La page ouverte : le bouton « Bibliothèque » s'allume sur Bible, Chants et Médias, avec l'onglet de la page.</summary>
     void MajPagesBiblio(string o)
     {
-        bool biblio = o is "bible" or "chants" or "annonces" or "duo";
+        bool biblio = o is "bible" or "chants" or "annonces";
         if (biblio) dernierBiblio = o;
         OngletBiblio.IsChecked = biblio && o != "annonces";
         OngletMediasRail.IsChecked = o == "annonces";
@@ -66,7 +64,6 @@ public partial class MainWindow
         SegBible.IsChecked = o == "bible";
         SegChants.IsChecked = o == "chants";
         SegMedias.IsChecked = o == "annonces";
-        SegDuo.IsChecked = o == "duo";
     }
 
     /// <summary>Les valeurs écrites au bout des lignes d'outils : le fond, la taille, l'écran de repos.</summary>
@@ -92,7 +89,7 @@ public partial class MainWindow
             try { diapos = R.Diapos(cur); }
             catch (Exception x) { Journal.Erreur("télécommande", x); }
         }
-        bool rien = e.Vide && e.Duo == null;
+        bool rien = e.Rien;
         if (noir) { BarreTitre.Text = "Écran noir"; BarreSous.Text = "Touche B ou Suivant pour rallumer"; }
         else if (cur != null && diapos is { Count: > 0 } d && pos is int p && p >= 0 && p < d.Count)
         {
@@ -144,10 +141,10 @@ public partial class MainWindow
 
     // ------------------------------------------------------------ pour le test automatique
     public string TestTelecommande => BarreTitre.Text + " / " + BarreSous.Text;
-    /// <summary>Ouvre (ou referme) une ligne d'outil : « style », « taille », « coin », « repos », « aide ».</summary>
+    /// <summary>Ouvre (ou referme) une ligne d'outil : « style », « taille », « repos », « aide ».</summary>
     public void TestTiroir(string nom, bool ouvert)
     {
-        var t = nom switch { "style" => TiroirStyle, "taille" => TiroirTaille, "coin" => TiroirCoin, "repos" => TiroirRepos, _ => TiroirAide };
+        var t = nom switch { "style" => TiroirStyle, "taille" => TiroirTaille, "repos" => TiroirRepos, _ => TiroirAide };
         t.IsChecked = ouvert;
     }
 }

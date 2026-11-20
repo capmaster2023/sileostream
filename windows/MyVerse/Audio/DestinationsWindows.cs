@@ -121,7 +121,7 @@ public sealed class EnregistrementWindow : FenetreSon
         optionsVideo.Children.Add(Libelle("Ce qu'on voit", 10));
         optionsVideo.Children.Add(Note("Cochez dans l'ordre : la 1re est en grand.", 0));
         var liste = new UniformGrid { Columns = 2, Margin = new Thickness(0, 10, 0, 0) };
-        AjouterDisplay(liste, RecordingProfile.Projection, "Ce qui est à l'écran", "Bible, chants, Display, Duo");
+        AjouterDisplay(liste, RecordingProfile.Projection, "Ce qui est à l'écran", "Bible, chants, Médias et leurs calques");
         foreach (var a in App.Donnees.Annonces)
             AjouterDisplay(liste, a.Id, a.Titre.Length > 0 ? a.Titre : "Sans titre", a.Description.Split('\n')[0].Trim());
         optionsVideo.Children.Add(liste);

@@ -35,7 +35,7 @@ public partial class MainWindow
             if (mediaSalle == null) { ecran?.Rendu.ImageDisplay(b); EgliseRendu.ImageDisplay(b); }
             // 1.6.0 : MyStream (Zoom, YouTube) suit le lecteur de son image : celui-ci, l'écran de repos ou sa source principale
             if (lecteurStream == App.Sources) ImageStream();
-            if (duoMemeSource || lecteurStreamDuo == App.Sources) ImagesDuo();
+            calquesRendu.ImageDisplay(b);
             DisplaySourceInfo.Text = App.Sources.Statut;
         };
         App.SourcesDefaut.Change += () =>
@@ -60,19 +60,6 @@ public partial class MainWindow
         menu.Items.Add(Article("Vidéos avec audio intégré", AjouterVideo));
         // 2.1.0 : les caméras ont leur propre bouton, juste en dessous (« + Ajouter un périphérique vidéo »)
         menu.Items.Add(Article("Capture de fenêtre", AjouterFenetre));
-        // les dossiers de l'onglet Duo : un clic les met dans la bibliothèque et dans la grille
-        var duos = R.Duos.ToList();
-        if (duos.Count > 0) menu.Items.Add(new Separator());
-        foreach (var x in duos)
-        {
-            var d = x;
-            menu.Items.Add(Article("Duo · " + d.Nom, () =>
-            {
-                if (!d.A.Choisi || !d.B.Choisi) { Toast($"« {d.Nom} » n'a pas encore ses 2 éléments : complétez-le dans l'onglet Duo."); return; }
-                R.AjouterDuoDisplay(d);
-                Toast($"« {d.Nom} » est dans la grille : un clic l'envoie en direct.");
-            }));
-        }
         return menu;
     }
 
@@ -203,7 +190,7 @@ public partial class MainWindow
 
     /// <summary>
     /// 2.0.3 : MyVirtualCam est une caméra officielle de Siloé Stream, comme l'OBS Virtual Camera dans OBS : elle est proposée partout
-    /// où l'on choisit une caméra (médias, Duo, source principale de l'écran, programme), même pas encore ajoutée aux médias ni installée.
+    /// où l'on choisit une caméra (médias, source principale de l'écran, programme), même pas encore ajoutée aux médias ni installée.
     /// Rend sa source des médias : celle qui existe, sinon créée une seule fois (installée d'abord au besoin, Windows demande l'autorisation) ;
     /// null si Windows ne la donne pas. « Dans l'église seulement » : elle ne repart jamais à l'antenne (pas d'image en tunnel sans fin).
     /// </summary>
@@ -433,8 +420,8 @@ public partial class MainWindow
         var menu = MenuAjouterSource();
         var commandes = menu.Items.OfType<MenuItem>().ToList();
         Ouvrir(menu, DisplayAjouter, PlacementMode.Bottom);
-        // 2.1.0 : les médias seulement (texte, images, vidéos, fenêtre, Duo) ; les caméras ont leur bouton
-        bool ok = menu.IsOpen && commandes.Count == 4 + R.Duos.Count && commandes[0].Header?.ToString() == "Nouveau texte"
+        // 2.1.0 : les médias seulement (texte, images, vidéos, fenêtre) ; les caméras ont leur bouton
+        bool ok = menu.IsOpen && commandes.Count == 4 && commandes[0].Header?.ToString() == "Nouveau texte"
             && !commandes.Any(c => c.Header?.ToString() is "Caméra Sony par Wi-Fi (sans câble)" or "MyVirtualCam (l'image de MyStream)");
         menu.IsOpen = false;
         var cameras = MenuAjouterPeripherique().Items.OfType<MenuItem>().ToList();

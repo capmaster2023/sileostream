@@ -17,21 +17,15 @@ public sealed record EtatEcran
     [JsonPropertyName("second")] public TexteSecond? Second { get; init; }
 
     public sealed record TexteSecond([property: JsonPropertyName("texte")] string Texte);
-    /// <summary>Duo : ce qui est épinglé en même temps (coin ou côte à côte).</summary>
-    [JsonPropertyName("duo"), JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] public DuoEcran? Duo { get; init; }
+    /// <summary>2.5.0 : les calques (sources des Médias superposées, comme dans OBS), du dessous vers le dessus ; null : aucun.</summary>
+    [JsonPropertyName("calques"), JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] public IReadOnlyList<CalqueEcran>? Calques { get; init; }
+    /// <summary>2.5.0 : la place du contenu principal (versets, chants, média en grand) dans la pile : le nombre de calques dessous.</summary>
+    [JsonPropertyName("rang")] public int Rang { get; init; }
     [JsonIgnore] public bool Vide => Mode == "vide";
-}
-
-/// <summary>Le second contenu du Duo. Mode : hd, hg, bd, bg (un coin) ou cote (côte à côte). Taille : part de l'écran pour un coin.</summary>
-public sealed record DuoEcran(
-    [property: JsonPropertyName("etat")] EtatEcran Etat,
-    [property: JsonPropertyName("libelle")] string Libelle,
-    [property: JsonPropertyName("place")] string Place,
-    [property: JsonPropertyName("part")] double Part)
-{
-    /// <summary>Place « libre » (dossier de l'onglet Duo) : le dossier, et les cadres [x1, y1, largeur1, x2, y2, largeur2] en parts de l'écran.</summary>
-    [JsonPropertyName("dossier"), JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] public string? Dossier { get; init; }
-    [JsonPropertyName("cadres"), JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] public double[]? Cadres { get; init; }
+    /// <summary>2.5.0 : au moins un calque montré.</summary>
+    [JsonIgnore] public bool AvecCalques => Calques is { Count: > 0 } l && l.Any(c => c.Visible);
+    /// <summary>2.5.0 : rien du tout à l'écran (ni contenu principal, ni calque montré).</summary>
+    [JsonIgnore] public bool Rien => Vide && !AvecCalques;
 }
 
 /// <summary>Ce qui est à l'écran : des versets (éventuellement un morceau d'un verset découpé) ou une strophe de chant.</summary>
@@ -87,7 +81,6 @@ public sealed partial class Regie
     void Signaler()
     {
         if (muet) return;
-        LacherDuoLibre();
         Change?.Invoke();
     }
     public void Dire(string m) { Journal.Info("message : " + m); Message?.Invoke(m); }
@@ -171,48 +164,12 @@ public sealed partial class Regie
         Signaler();
     }
 
-    // ------------------------------------------------------------ Duo
-    /// <summary>Épingle ce qui est à l'écran (il part dans le coin) ; l'écran principal se libère pour autre chose.</summary>
-    public bool Epingler(string? libelle = null)
-    {
-        if (Etat.Vide) { Dire("Affichez d'abord ce que vous voulez épingler."); return false; }
-        var e = Etat with { Duo = null, Presentation = "plein" };
-        if (string.IsNullOrWhiteSpace(libelle))
-            libelle = e.Ref.Length > 0 ? e.Ref : e.Lignes.FirstOrDefault(l => l.Trim().Length > 0)?.Trim() ?? "Source";
-        var r = donnees.Reglages;
-        Etat = Etat with { Duo = new DuoEcran(e, libelle.Trim(), PlaceValide(r.DuoPlace), PartValide(r.DuoPart)) };
-        Vider();
-        return true;
-    }
-
-    /// <summary>Retire le contenu épinglé ; l'écran principal ne change pas.</summary>
-    public void Desepingler()
-    {
-        if (Etat.Duo == null) return;
-        Etat = Etat with { Duo = null };
-        if (Etat.Vide) Oeil?.Invoke(false);
-        Signaler();
-    }
-
-    static string PlaceValide(string? place) => place is "hd" or "hg" or "bd" or "bg" or "cote" ? place : "hd";
-    static double PartValide(double part) => double.IsNaN(part) ? 0.35 : Math.Clamp(Math.Round(part, 2), 0.2, 0.5);
-
-    /// <summary>Place du contenu épinglé (hd, hg, bd, bg ou cote) et sa part de l'écran (0,2 à 0,5). Gardé pour la prochaine fois.</summary>
-    public void PlaceDuo(string place, double part)
-    {
-        var r = donnees.Reglages;
-        r.DuoPlace = PlaceValide(place);
-        r.DuoPart = PartValide(part);
-        donnees.SauverReglages();
-        if (Etat.Duo is { } d && d.Place != "libre") { Etat = Etat with { Duo = d with { Place = r.DuoPlace, Part = r.DuoPart } }; Signaler(); }
-    }
-
     // ------------------------------------------------------------ retirer, suivant, précédent
     /// <summary>
     /// « Retirer de l'écran » (Échap) : l'écran principal revient direct sur l'écran par défaut (Siloé Stream 3.3), choisi dans la colonne
     /// de l'écran en direct : un écran principal du déroulé, le fond seul, ou noir (l'écran se vide, comme avant).
     /// Sur l'écran par défaut, Suivant reprend après ce qui a été retiré et Précédent le remet.
-    /// Le contenu épinglé (Duo) reste : « Retirer le duo » l'enlève.
+    /// 2.5.0 : les calques restent (Médias › ✕ ou « Tout retirer » les enlèvent).
     /// </summary>
     public void Effacer()
     {
@@ -229,29 +186,19 @@ public sealed partial class Regie
         Signaler();
     }
 
-    /// <summary>Vide l'écran principal, sans écran par défaut (Épingler, dossier Duo supprimé). Le contenu épinglé (Duo) reste.</summary>
+    /// <summary>Vide l'écran principal, sans écran par défaut. 2.5.0 : les calques restent.</summary>
     void Vider(bool signaler = true)
     {
-        // avec un Duo, il reste quelque chose à montrer : la source OBS reste visible
-        // un dossier Duo part en entier ; un contenu épinglé reste
-        var garde = Etat.Duo is { Place: "libre" } ? null : Etat.Duo;
-        Oeil?.Invoke(garde != null);
-        Etat = Etat with { Mode = "vide", Media = null, Lignes = Array.Empty<string>(), Ref = "", Second = null, Duo = garde };
+        // avec des calques montrés, il reste quelque chose à l'écran : la source OBS reste visible
+        Oeil?.Invoke(Etat.AvecCalques);
+        Etat = Etat with { Mode = "vide", Media = null, Lignes = Array.Empty<string>(), Ref = "", Second = null };
         Cible = null;
         ElementCourant = null;
         defautApresRetrait = false;
         if (signaler) Signaler();
     }
 
-    /// <summary>Vrai pendant Suivant / Précédent : le dossier Duo à l'écran reste, son premier élément avance.</summary>
-    bool avance;
     public void Bouger(int d)
-    {
-        avance = true;
-        try { BougerSeul(d); } finally { avance = false; }
-    }
-
-    void BougerSeul(int d)
     {
         if (Reprise(d)) return;
         BougerDepuis(d);

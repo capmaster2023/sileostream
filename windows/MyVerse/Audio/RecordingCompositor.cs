@@ -19,7 +19,7 @@ namespace MyVerse.Ui.Audio;
 /// La composition vidéo d'un enregistrement (Siloé Stream 1.2), à cadence exacte et hors du fil de l'interface, comme le rendu d'OBS.
 /// <para>
 /// WPF ne dessine plus chaque image : quelques fois par seconde (quand le contenu change), il rend la mise en page des sources Display
-/// (fond, texte, Duo) deux fois, les images vivantes remplacées par une clé noire puis blanche. La différence des deux rendus dit,
+/// (fond, texte, calques) deux fois, les images vivantes remplacées par une clé noire puis blanche. La différence des deux rendus dit,
 /// pour chaque pixel, combien l'image vivante s'y voit (texte par-dessus, demi-transparence du fond flou compris).
 /// </para>
 /// <para>
@@ -188,8 +188,10 @@ public sealed class RecordingCompositor : IRecordingFrameProvider, IDisposable
         public required FrameworkElement Cadre;
         public Annonce? Annonce;
         public EtatEcran? Etat;
-        public SourcesDisplay? Premier, Second;
-        public Fournisseur? Principal, Duo;
+        public SourcesDisplay? Premier;
+        public Fournisseur? Principal;
+        /// <summary>2.5.0 : les fournisseurs des calques montrés (null : texte ou image fixe, dessinés par WPF).</summary>
+        public readonly Dictionary<string, Fournisseur?> Calques = new();
     }
 
     readonly Canvas canvas = new() { Background = Brushes.Black };
@@ -220,7 +222,7 @@ public sealed class RecordingCompositor : IRecordingFrameProvider, IDisposable
         sortie = new Mat(height, width, MatType.CV_8UC4);
         flouPetit = new Mat(Math.Max(1, height / 4), Math.Max(1, width / 4), MatType.CV_8UC4);
         flouGrand = new Mat(height, width, MatType.CV_8UC4);
-        // quelques fois par seconde seulement : la mise en page (texte, Duo, fond) ; les images vivantes sont posées à chaque image, ailleurs
+        // quelques fois par seconde seulement : la mise en page (texte, calques, fond) ; les images vivantes sont posées à chaque image, ailleurs
         timer = new(DispatcherPriority.Normal) { Interval = TimeSpan.FromMilliseconds(200) };
         try
         {
@@ -252,7 +254,7 @@ public sealed class RecordingCompositor : IRecordingFrameProvider, IDisposable
     {
         Reconstruire(true);
         foreach (var v in vues.Where(v => v.Annonce != null))
-            foreach (var f in new[] { v.Principal, v.Duo }.OfType<Fournisseur>())
+            foreach (var f in v.Calques.Values.Append(v.Principal).OfType<Fournisseur>())
             {
                 var until = Stopwatch.StartNew();
                 while (f.Taille == null && until.ElapsedMilliseconds < 8000) await Task.Delay(50);
@@ -264,28 +266,32 @@ public sealed class RecordingCompositor : IRecordingFrameProvider, IDisposable
 
     public void Start() => timer.Start();
 
-    /// <summary>Le fournisseur des images vivantes d'un contenu (null : texte, ou rien à l'écran).</summary>
-    Fournisseur? FournisseurPour(Vue v, bool duo)
+    /// <summary>
+    /// Le fournisseur des images vivantes d'un contenu : le principal (<paramref name="calque"/> null) ou un calque (null : texte,
+    /// image fixe d'un calque, ou rien à l'écran).
+    /// </summary>
+    Fournisseur? FournisseurPour(Vue v, string? calque)
     {
         SourceDisplay? source;
         SourcesDisplay? lecteur;
         if (v.Annonce == null)
         {
-            lecteur = duo ? App.SourcesDuo : App.Sources;
-            source = lecteur.Source;
+            lecteur = calque == null ? App.Sources : App.Calques.LecteurDe(calque);
+            source = lecteur?.Source;
+            // 2.5.0 : une image fixe dans un calque (un logo) est dessinée par WPF, avec sa transparence
+            if (calque != null && source?.Type == "image") return null;
         }
         else
         {
-            var e = duo ? v.Etat?.Duo?.Etat : v.Etat;
-            source = e is { Mode: "media", Media: { } m } ? m : null;
+            if (calque != null) return null;
+            source = v.Etat is { Mode: "media", Media: { } m } ? m : null;
             lecteur = null;
             if (source != null && source.Type is ("video" or "fenetre" or "image"))
             {
                 // vidéo, fenêtre ou image d'une source de la bibliothèque : son propre lecteur, sans toucher à l'écran
-                ref SourcesDisplay? l = ref (duo ? ref v.Second : ref v.Premier);
-                l ??= new SourcesDisplay("");
-                l.ChoisirSource(source);
-                lecteur = l;
+                v.Premier ??= new SourcesDisplay("");
+                v.Premier.ChoisirSource(source);
+                lecteur = v.Premier;
             }
         }
         // seules les images vivantes ont un fournisseur ; le reste est dessiné par WPF
@@ -348,9 +354,12 @@ public sealed class RecordingCompositor : IRecordingFrameProvider, IDisposable
             foreach (var v in vues)
             {
                 v.Etat = v.Annonce == null ? App.Regie.Etat : App.Regie.EtatAnnonce(v.Annonce) ?? v.Etat;
-                v.Principal = FournisseurPour(v, false);
-                v.Duo = FournisseurPour(v, true);
-                sig.Add(Empreinte(v.Etat)); sig.Add(v.Principal); sig.Add(v.Principal?.Taille); sig.Add(v.Duo); sig.Add(v.Duo?.Taille);
+                v.Principal = FournisseurPour(v, null);
+                v.Calques.Clear();
+                foreach (var c in v.Etat?.Calques ?? Array.Empty<CalqueEcran>())
+                    if (c.Visible) v.Calques[c.Id] = FournisseurPour(v, c.Id);
+                sig.Add(Empreinte(v.Etat)); sig.Add(v.Principal); sig.Add(v.Principal?.Taille);
+                foreach (var (id, f) in v.Calques) { sig.Add(id); sig.Add(f); sig.Add(f?.Taille); }
             }
             if (!force && sig.SequenceEqual(signature) && Environment.TickCount64 - derniereReconstruction < 2000) return;
             signature = sig;
@@ -360,7 +369,8 @@ public sealed class RecordingCompositor : IRecordingFrameProvider, IDisposable
             {
                 if (v.Etat != null) v.Rendu.Afficher(v.Etat);
                 v.Rendu.ImageDisplay(Cle(v.Principal?.Taille, false));
-                v.Rendu.ImageDuo(Cle(v.Duo?.Taille, false));
+                foreach (var c in v.Etat?.Calques ?? Array.Empty<CalqueEcran>())
+                    v.Rendu.ImageCalque(c.Id, v.Calques.TryGetValue(c.Id, out var f) && f != null ? Cle(f.Taille, false) : App.Calques.ImageDe(c.Id));
             }
             canvas.UpdateLayout();
             // la place de chaque image vivante dans le canevas, rognée par son dessin et par sa source Display
@@ -374,7 +384,7 @@ public sealed class RecordingCompositor : IRecordingFrameProvider, IDisposable
                 var cadreVue = v.Cadre.TransformToAncestor(canvas).TransformBounds(new Rect(v.Cadre.RenderSize));
                 foreach (var iv in images)
                 {
-                    var f = iv.Duo ? v.Duo : v.Principal;
+                    var f = iv.Calque == null ? v.Principal : v.Calques.TryGetValue(iv.Calque, out var fc) ? fc : null;
                     var el = iv.Element;
                     double w = el.RenderSize.Width, h = el.RenderSize.Height;
                     if (f == null || w <= 0 || h <= 0) continue;
@@ -398,7 +408,8 @@ public sealed class RecordingCompositor : IRecordingFrameProvider, IDisposable
                 foreach (var v in vues)
                 {
                     v.Rendu.ImageDisplay(Cle(v.Principal?.Taille, true));
-                    v.Rendu.ImageDuo(Cle(v.Duo?.Taille, true));
+                    foreach (var (id, f) in v.Calques)
+                        if (f != null) v.Rendu.ImageCalque(id, Cle(f.Taille, true));
                 }
                 using var c2 = new Mat(height, width, MatType.CV_8UC4);
                 Rendre(c2);
@@ -410,7 +421,7 @@ public sealed class RecordingCompositor : IRecordingFrameProvider, IDisposable
             lock (verrouCalque) { ancien = calque; calque = nouveau; }
             ancien?.Dispose();
             // les fournisseurs qui ne servent plus (caméra changée) sont rendus
-            var utiles = vues.SelectMany(v => new[] { v.Principal, v.Duo }).OfType<Fournisseur>().ToHashSet();
+            var utiles = vues.SelectMany(v => v.Calques.Values.Append(v.Principal)).OfType<Fournisseur>().ToHashSet();
             foreach (var k in fournisseurs.Where(kv => !utiles.Contains(kv.Value)).Select(kv => kv.Key).ToList())
             {
                 var f = fournisseurs[k];
@@ -536,7 +547,7 @@ public sealed class RecordingCompositor : IRecordingFrameProvider, IDisposable
             fournisseurs.Clear();
             media.Dispose(); produit.Dispose(); sortie.Dispose(); flouPetit.Dispose(); flouGrand.Dispose();
         }
-        foreach (var v in vues) { v.Premier?.Dispose(); v.Second?.Dispose(); }
+        foreach (var v in vues) v.Premier?.Dispose();
         vues.Clear();
     }
 }

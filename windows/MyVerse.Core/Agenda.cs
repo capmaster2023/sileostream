@@ -83,7 +83,7 @@ public sealed class Annonce
     [JsonPropertyName("source"), JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] public SourceDisplay? Source { get; set; }
     /// <summary>Dans la grille de Display (un clic = en direct).</summary>
     [JsonPropertyName("grille")] public bool Grille { get; set; }
-    [JsonIgnore] public string Description => Source is { EstMyVirtualCam: true } ? "MyVirtualCam · l'image de MyStream (Zoom, YouTube), montrée dans l'église" : Source?.Type switch { "duo" => "Duo · 2 éléments ensemble", "camera" => $"Caméra USB · {(Source.TailleVoulue == "4k" ? "4K" : Source.TailleVoulue)} · {Source.IpsVoulues} images/s (clic droit pour changer)", "mycam" => "Téléphone MyCam", "fenetre" => "Capture de fenêtre · " + SourceDisplay.NomDiffusion(Source.Diffusion), "image" => "Image · " + Path.GetFileName(Source.Chemin), "video" => "Vidéo · " + Path.GetFileName(Source.Chemin), _ => Texte };
+    [JsonIgnore] public string Description => Source is { EstMyVirtualCam: true } ? "MyVirtualCam · l'image de MyStream (Zoom, YouTube), montrée dans l'église" : Source?.Type switch { "camera" => $"Caméra USB · {(Source.TailleVoulue == "4k" ? "4K" : Source.TailleVoulue)} · {Source.IpsVoulues} images/s (clic droit pour changer)", "mycam" => "Téléphone MyCam", "fenetre" => "Capture de fenêtre · " + SourceDisplay.NomDiffusion(Source.Diffusion), "image" => "Image · " + Path.GetFileName(Source.Chemin), "video" => "Vidéo · " + Path.GetFileName(Source.Chemin), _ => Texte };
 }
 
 /// <summary>Un agenda (comme dans VideoPsalm) : la liste préparée d'un culte.</summary>

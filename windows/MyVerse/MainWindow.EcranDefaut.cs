@@ -53,7 +53,7 @@ public partial class MainWindow
     void MajCulteLive(EtatEcran e, Suivante? s)
     {
         CulteRendu.Afficher(e);
-        CulteApercu.BorderBrush = Pinceau(e.Vide && e.Duo == null ? "Nuit3" : "Ecran");
+        CulteApercu.BorderBrush = Pinceau(e.Rien ? "Nuit3" : "Ecran");
         var a = AEcran(e);
         CulteAEcran.Text = a.Length > 0 ? char.ToUpperInvariant(a[0]) + a[1..] : "";
         CulteEnsuite.Text = "Ensuite : " + (s?.Label ?? "rien");
@@ -68,7 +68,7 @@ public partial class MainWindow
         if (noir) return "écran noir";
         if (R.Cible is CibleDefaut)
             return R.ElementCourant is { } p ? "écran principal · " + p.Titre : "écran de repos · " + R.LibelleEcranDefaut;
-        if (e.Vide) return e.Duo != null ? "dans le coin · " + e.Duo.Libelle : "rien";
+        if (e.Vide) return e.AvecCalques ? "calques · " + string.Join(", ", e.Calques!.Where(c => c.Visible).Select(c => c.Libelle)) : "rien";
         if (R.Cible is CibleChant cc && R.Trouver(cc.Id) is { } c)
         {
             // 1.5.0 : « À toi la gloire, refrain »

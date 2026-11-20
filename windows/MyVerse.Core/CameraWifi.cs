@@ -17,7 +17,7 @@ namespace MyVerse;
 /// <item>PTP/IP (port 15740) avec l'extension Sony « SDIO », des modèles plus récents ; l'image est lue avec GetObject 0xFFFFC002.</item>
 /// </list>
 /// Les images entrent dans le registre MyCam (<see cref="MyCams"/>) sous l'identifiant <see cref="Id"/> : la caméra est une
-/// source « mycam » comme un téléphone (Display, Duo, MyStream, enregistrements), sans rien de plus à l'affichage.
+/// source « mycam » comme un téléphone (Médias, calques, MyStream, enregistrements), sans rien de plus à l'affichage.
 /// </summary>
 public sealed class CameraWifi : IDisposable
 {

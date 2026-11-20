@@ -39,8 +39,8 @@ public partial class App : Application
     public static Regie Regie { get; private set; } = null!;
     public static SortieObs SortieObs { get; private set; } = null!;
     public static SourcesDisplay Sources { get; private set; } = null!;
-    /// <summary>Capture du contenu épinglé (Duo), en même temps que celle de l'écran principal.</summary>
-    public static SourcesDisplay SourcesDuo { get; private set; } = null!;
+    /// <summary>2.5.0 : les captures des calques (sources superposées dans Médias), en plus de celle de l'écran principal.</summary>
+    public static CalquesVivants Calques { get; private set; } = null!;
     /// <summary>
     /// Capture de l'écran par défaut montré à la place du direct : dans la salle pendant une source « En streaming » (1.3.1),
     /// sur MyVirtualCam pendant une source « Dans l'église » (1.3.2). Jamais les deux à la fois ; rien n'est publié pour OBS.
@@ -190,7 +190,7 @@ public partial class App : Application
             return Math.Clamp(Math.Max(l, Donnees.Reglages.Ecran?.W ?? 1920), 1920, 3840);
         };
         Sources = new SourcesDisplay();
-        SourcesDuo = new SourcesDisplay("display-duo.jpg");
+        Calques = new CalquesVivants(Sources);
         SourcesDefaut = new SourcesDisplay("");
         SourcesStream = new SourcesDisplay("");
         if (AutoTest == null || Environment.GetEnvironmentVariable("SILOE_TEST_CAM") == "1")
@@ -367,7 +367,7 @@ public partial class App : Application
         try { Direct?.Dispose(); } catch (Exception x) { Journal.Erreur("fin du direct", x); }
         Audio?.Dispose();
         Sources?.Dispose();
-        SourcesDuo?.Dispose();
+        Calques?.Dispose();
         SourcesDefaut?.Dispose();
         SourcesStream?.Dispose();
         MyStream?.Dispose();

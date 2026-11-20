@@ -66,11 +66,11 @@ public sealed partial class Regie
 
     /// <summary>
     /// 1.8.0 : un média devient la source principale de l'église (son écran par défaut) : l'écran principal du déroulé qui le
-    /// montre, ajouté au besoin. Faux pour un texte. 2.2.0 : un dossier Duo peut aussi être la source principale.
+    /// montre, ajouté au besoin. Faux pour un texte.
     /// </summary>
     public bool ChoisirPrincipaleEglise(string annonceId)
     {
-        if (donnees.Annonces.FirstOrDefault(x => x.Id == annonceId) is not { Source: { Type: "image" or "camera" or "mycam" or "fenetre" or "video" or "duo" } s }) return false;
+        if (donnees.Annonces.FirstOrDefault(x => x.Id == annonceId) is not { Source: { Type: "image" or "camera" or "mycam" or "fenetre" or "video" } s }) return false;
         var e = Agenda.Elements.FirstOrDefault(x => x.Type == "principal" && x.Source is { } xs && MemeSource(xs, s)) ?? AjouterPrincipalAgenda(annonceId);
         if (e == null) return false;
         ChoisirEcranDefaut(e.Id);
@@ -87,13 +87,12 @@ public sealed partial class Regie
 
     /// <summary>
     /// Un écran principal dans le déroulé : une source Display (image, caméra, fenêtre, vidéo), un display texte (sa première diapositive),
-    /// ou rien (le fond seul : l'habillage sans texte). Null si la source n'existe pas, est un dossier Duo ou est un texte vide.
+    /// ou rien (le fond seul : l'habillage sans texte). Null si la source n'existe pas ou est un texte vide.
     /// </summary>
     public ElementAgenda? AjouterPrincipalAgenda(string? annonceId, int position = -1)
     {
         if (annonceId == null) return Ajouter(new ElementAgenda { Type = "principal", Titre = "Fond seul" }, position);
         if (donnees.Annonces.FirstOrDefault(x => x.Id == annonceId) is not { } a) return null;
-        if (a.Source is { Type: "duo" } sd && !donnees.Duos.Any(d => d.Id == sd.Chemin)) { Dire($"Le duo « {a.Titre} » n'existe plus."); return null; }
         if (a.Source == null && BlocsTexte(a.Texte).Count == 0) { Dire($"« {a.Titre} » est vide."); return null; }
         return Ajouter(new ElementAgenda
         {
@@ -110,7 +109,6 @@ public sealed partial class Regie
         "mycam" => "MyCam",
         "fenetre" => "Capture de fenêtre",
         "video" => "Vidéo",
-        "duo" => "Duo",
         _ => BlocsTexte(e.Texte).Count > 0 ? "Texte" : "Fond seul",
     };
 
@@ -120,47 +118,38 @@ public sealed partial class Regie
     {
         if (e.Source is { Type: "image" or "camera" or "mycam" or "fenetre" or "video" } s)
             return b with { Mode = "media", Media = s, Lignes = Array.Empty<string>(), Ref = e.Titre, Second = null };
-        // 2.2.0 : un dossier Duo comme écran principal : ses deux éléments, chacun à sa place (habillage de l'écran gardé)
-        if (e.Source is { Type: "duo" } sd)
-            return EtatDuoSur(sd.Chemin, b) ?? EtatFond(b);
         var blocs = BlocsTexte(e.Texte);
         if (blocs.Count > 0)
             return b with { Mode = "chant", Media = null, Lignes = blocs[0].Split('\n').Where(l => l.Trim().Length > 0).ToArray(), Ref = "", Second = null };
         return EtatFond(b);
     }
 
-    /// <summary>2.2.0 : le dossier Duo <paramref name="dossierId"/> avec l'habillage de <paramref name="b"/> (null s'il est incomplet ou supprimé).</summary>
-    EtatEcran? EtatDuoSur(string dossierId, EtatEcran b) =>
-        donnees.Duos.FirstOrDefault(d => d.Id == dossierId) is { } dossier && EtatDuo(dossier) is { } ed
-            ? ed with { Theme = b.Theme, Taille = b.Taille, Presentation = b.Presentation }
-            : null;
-
     /// <summary>Le fond seul : l'habillage choisi, sans texte.</summary>
     static EtatEcran EtatFond(EtatEcran b) => b with { Mode = "fond", Media = null, Lignes = Array.Empty<string>(), Ref = "", Second = null };
 
-    /// <summary>L'écran sans son contenu principal (ni texte ni média) : le contenu épinglé du Duo reste.</summary>
+    /// <summary>L'écran sans son contenu principal (ni texte ni média) : les calques restent.</summary>
     static EtatEcran SansContenu(EtatEcran b) => b with { Mode = "vide", Media = null, Lignes = Array.Empty<string>(), Ref = "", Second = null };
 
     /// <summary>
-    /// Ce qui part vers OBS et la page publique : l'écran par défaut est pour la salle, eux restent vides (le contenu épinglé du Duo
-    /// reste), comme quand on retirait les paroles avant la 3.3 ; la page OBS reste transparente par-dessus la caméra d'OBS.
-    /// Une source « Dans l'église » (1.3.1) ne part pas non plus, ni en grand ni épinglée. MyVirtualCam, elle, suit <see cref="EtatCamera"/>.
+    /// Ce qui part vers OBS et la page publique : l'écran par défaut est pour la salle, eux restent vides (les calques restent),
+    /// comme quand on retirait les paroles avant la 3.3 ; la page OBS reste transparente par-dessus la caméra d'OBS.
+    /// Une source « Dans l'église » (1.3.1) ne part pas non plus, ni en grand ni en calque. MyVirtualCam, elle, suit <see cref="EtatCamera"/>.
     /// </summary>
     public EtatEcran EtatDiffusion(EtatEcran e)
     {
-        var r = e.Duo?.Etat.Media is { EgliseSeulement: true } ? e with { Duo = null } : e;
+        var r = CalquesPermis(e, s => s.EgliseSeulement);
         return Cible is CibleDefaut || r is { Mode: "media", Media.EgliseSeulement: true } ? SansContenu(r) : r;
     }
 
     /// <summary>
     /// Ce que montre MyVirtualCam, la caméra de Zoom (1.3.2) : comme l'écran de projection, sauf une source « Dans l'église »
-    /// (ni en grand, ni épinglée) : à sa place, l'écran par défaut (le logo, une image, le fond seul…). Une fenêtre Zoom projetée
+    /// (ni en grand, ni en calque) : à sa place, l'écran par défaut (le logo, une image, le fond seul…). Une fenêtre Zoom projetée
     /// dans l'église ne revient pas dans Zoom (pas d'effet miroir), et Zoom voit l'écran principal au lieu d'un écran noir.
     /// L'écran par défaut lui-même part aussi vers MyVirtualCam (jusqu'à la 1.3.1, elle restait noire).
     /// </summary>
     public EtatEcran EtatCamera(EtatEcran e)
     {
-        var r = e.Duo?.Etat.Media is { EgliseSeulement: true } ? e with { Duo = null } : e;
+        var r = CalquesPermis(e, s => s.EgliseSeulement);
         if (r is not { Mode: "media", Media.EgliseSeulement: true }) return r;
         return EcranDefautSur(SansContenu(r), s => !s.EgliseSeulement);
     }
@@ -168,17 +157,17 @@ public sealed partial class Regie
     /// <summary>
     /// Ce qui part sur l'écran de projection, dans l'église (1.3.1) : tout, sauf une source « En streaming ». À sa place, la salle garde
     /// l'écran par défaut (noir, le fond seul ou un écran principal du déroulé), comme après « Retirer de l'écran ».
-    /// Un contenu épinglé « En streaming » n'y est pas non plus.
+    /// Un calque « MyStream seulement » n'y est pas non plus.
     /// </summary>
     public EtatEcran EtatSalle(EtatEcran e)
     {
-        var r = e.Duo?.Etat.Media is { StreamingSeulement: true } ? e with { Duo = null } : e;
+        var r = CalquesPermis(e, s => s.StreamingSeulement);
         if (r is not { Mode: "media", Media.StreamingSeulement: true }) return r;
         return EcranDefautSur(SansContenu(r), s => !s.StreamingSeulement);
     }
 
     /// <summary>
-    /// L'écran par défaut posé sur <paramref name="vide"/> (même habillage, même Duo) : rien pour « noir », le fond seul, ou l'écran
+    /// L'écran par défaut posé sur <paramref name="vide"/> (même habillage, mêmes calques) : rien pour « noir », le fond seul, ou l'écran
     /// principal choisi. Un écran principal dont la source ne peut pas aller là (<paramref name="permis"/>) laisse l'écran vide.
     /// </summary>
     EtatEcran EcranDefautSur(EtatEcran vide, Func<SourceDisplay, bool> permis) => EcranDefaut switch
@@ -196,8 +185,8 @@ public sealed partial class Regie
         Cible = new CibleDefaut(e.Id);
         defautApresRetrait = false;
         OublierReprise();
-        // pour la salle : la source OBS reste cachée (sauf contenu épinglé)
-        Oeil?.Invoke(Etat.Duo != null);
+        // pour la salle : la source OBS reste cachée (sauf calques montrés)
+        Oeil?.Invoke(Etat.AvecCalques);
         Etat = EtatPrincipal(e, Etat);
         Noter("e:" + e.Id, e.Titre, "principal");
         Signaler();

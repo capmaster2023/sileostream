@@ -388,16 +388,16 @@ public sealed partial class Regie
     static bool EstMyCam(SourceDisplay? s, string deviceId) => s is { Type: "mycam" } && s.Peripherique == deviceId;
 
     /// <summary>
-    /// Témoin d'un téléphone MyCam : « live » s'il est à l'écran (ou épinglé dans le Duo), « next » s'il passe avec Suivant, sinon « off ».
+    /// Témoin d'un téléphone MyCam : « live » s'il est à l'écran (en grand ou dans un calque montré), « next » s'il passe avec Suivant, sinon « off ».
     /// L'écran noir éteint le témoin rouge.
     /// </summary>
     public string TemoinMyCam(string deviceId)
     {
-        if (!EstNoir() && (EstMyCam(Etat.Media, deviceId) || EstMyCam(Etat.Duo?.Etat.Media, deviceId))) return "live";
+        if (!EstNoir() && (EstMyCam(Etat.Media, deviceId) || Calques.Any(c => c.Visible && EstMyCam(c.Media, deviceId)))) return "live";
         try
         {
             var n = Prochaine();
-            if (n != null && EtatCible(n.Cible, ElementCourant) is { } e && (EstMyCam(e.Media, deviceId) || EstMyCam(e.Duo?.Etat.Media, deviceId))) return "next";
+            if (n != null && EtatCible(n.Cible, ElementCourant) is { } e && EstMyCam(e.Media, deviceId)) return "next";
         }
         catch (Exception ex) { Journal.Erreur("témoin MyCam", ex); }
         return "off";

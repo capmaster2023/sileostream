@@ -95,32 +95,43 @@ public sealed class Rendu : Grid
         scene.Opacity = 0;
         fond.Opacity = 0;
         TextOptions.SetTextFormattingMode(this, TextFormattingMode.Ideal);
-        SizeChanged += (_, _) => { Placer(); Ajuster(); PlacerDuo(); };
+        SizeChanged += (_, _) => { Placer(); Ajuster(); PlacerCalques(); };
     }
 
     public void ImageDisplay(ImageSource? image)
     {
         media.Source = image;
-        if (gauche != null) { gauche.media.Source = image; gauche.MajFlou(); }
         MajFlou();
     }
 
     // ------------------------------------------------------------ Siloé Stream 1.2 : les images vivantes, pour l'enregistrement
-    /// <summary>Une image vivante du dessin : l'élément, son contenu (celui du Duo ou le principal), net ou fond flou ; et le dessin qui la rogne.</summary>
-    internal readonly record struct ImageVivante(Image Element, bool Duo, bool Flou, FrameworkElement Cadre);
+    /// <summary>
+    /// Une image vivante du dessin : l'élément, son contenu (<paramref name="Calque"/> : l'identifiant du calque, null pour le contenu
+    /// principal), net ou fond flou ; et le dessin qui la rogne.
+    /// </summary>
+    internal readonly record struct ImageVivante(Image Element, string? Calque, bool Flou, FrameworkElement Cadre);
 
     /// <summary>
-    /// Les images vivantes visibles (caméra, MyCam, vidéo…), dans l'ordre du dessin (dessous d'abord) : l'enregistrement les dessine lui-même
-    /// à chaque image, le reste (fond, texte, Duo) est rendu par WPF quelques fois par seconde.
+    /// Les images vivantes visibles (caméra, MyCam, vidéo…), dans l'ordre du dessin (dessous d'abord) : l'enregistrement et MyStream
+    /// les dessinent eux-mêmes à chaque image, le reste (fond, texte, calques de texte) est rendu par WPF quelques fois par seconde.
+    /// 2.5.0 : les calques à leur étage, le contenu principal au sien.
     /// </summary>
-    internal void ImagesVivantes(List<ImageVivante> liste, bool duo = false)
+    internal void ImagesVivantes(List<ImageVivante> liste)
     {
         if (Visibility != Visibility.Visible) return;
-        if (mediaFlou.Visibility == Visibility.Visible && mediaFlou.Source != null) liste.Add(new(mediaFlou, duo, true, this));
-        if (media.Visibility == Visibility.Visible && media.Source != null) liste.Add(new(media, duo, false, this));
-        // Duo : la moitié gauche (dessous) montre le contenu principal, le contenu épinglé (dessus) celui du Duo
-        if (gauche != null && (epingle == null || GetZIndex(gauche) <= GetZIndex(epingle))) { gauche.ImagesVivantes(liste, duo); epingle?.ImagesVivantes(liste, true); }
-        else { epingle?.ImagesVivantes(liste, true); gauche?.ImagesVivantes(liste, duo); }
+        for (int p = 0; p <= listeCalques.Count; p++)
+        {
+            if (p == rang) { ImagesVivantesSeul(liste, null); continue; }
+            var c = listeCalques[p < rang ? p : p - 1];
+            if (c.Visible && calques.TryGetValue(c.Id, out var enfant)) enfant.ImagesVivantesSeul(liste, c.Id);
+        }
+    }
+
+    void ImagesVivantesSeul(List<ImageVivante> liste, string? calque)
+    {
+        if (Visibility != Visibility.Visible) return;
+        if (mediaFlou.Visibility == Visibility.Visible && mediaFlou.Source != null) liste.Add(new(mediaFlou, calque, true, this));
+        if (media.Visibility == Visibility.Visible && media.Source != null) liste.Add(new(media, calque, false, this));
     }
 
     bool leger;
@@ -135,15 +146,14 @@ public sealed class Rendu : Grid
         {
             leger = value;
             if (value) { pile.Effect = null; mediaFlou.Effect = null; FondFlou = false; }
-            if (gauche != null) gauche.Leger = value;
-            if (epingle != null) epingle.Leger = value;
+            foreach (var c in calques.Values) c.Leger = value;
         }
     }
 
     bool sansEffets;
     /// <summary>
     /// Dessin pour l'enregistrement (Siloé Stream 1.2) : le fond flou est rendu sans son effet (l'enregistrement le floute lui-même à chaque image),
-    /// et les dessins du Duo aussi.
+    /// et les dessins des calques aussi.
     /// </summary>
     internal bool SansEffets
     {
@@ -152,8 +162,7 @@ public sealed class Rendu : Grid
         {
             sansEffets = value;
             mediaFlou.Effect = value || leger ? null : flou;
-            if (gauche != null) gauche.SansEffets = value;
-            if (epingle != null) epingle.SansEffets = value;
+            foreach (var c in calques.Values) c.SansEffets = value;
         }
     }
 
@@ -168,103 +177,92 @@ public sealed class Rendu : Grid
         if (mediaFlou.Visibility != v) mediaFlou.Visibility = v;
     }
 
-    // ------------------------------------------------------------ Duo : un second contenu dans un coin, ou côte à côte
-    Rendu? gauche, epingle;
-    DuoEcran? duo;
-    ImageSource? imageDuo;
+    // ------------------------------------------------------------ 2.5.0 : les calques (sources superposées, comme dans OBS)
+    readonly Dictionary<string, Rendu> calques = new();
+    readonly Dictionary<string, ImageSource?> imagesCalques = new();
+    IReadOnlyList<CalqueEcran> listeCalques = Array.Empty<CalqueEcran>();
+    /// <summary>L'étage du contenu principal dans la pile (le nombre de calques dessous).</summary>
+    int rang;
+    /// <summary>Le dessin d'un calque : un média n'a pas de fond noir derrière lui (un logo PNG garde sa transparence).</summary>
+    bool dansCalque;
 
-    /// <summary>Image vivante (caméra, fenêtre, image) du contenu épinglé.</summary>
-    public void ImageDuo(ImageSource? image)
+    /// <summary>L'image vivante (caméra, fenêtre, image, vidéo) d'un calque.</summary>
+    public void ImageCalque(string id, ImageSource? image)
     {
-        imageDuo = image;
-        if (epingle != null) { epingle.media.Source = image; epingle.MajFlou(); }
-    }
-
-    Rendu Enfant(ref Rendu? r)
-    {
-        if (r == null)
-        {
-            r = new Rendu { Transitions = Transitions, HorizontalAlignment = HorizontalAlignment.Left, VerticalAlignment = VerticalAlignment.Top, SansEffets = sansEffets, Leger = leger };
-            Children.Add(r);
-        }
-        r.Transitions = Transitions;
-        return r;
+        imagesCalques[id] = image;
+        if (calques.TryGetValue(id, out var c)) { c.media.Source = image; c.MajFlou(); }
     }
 
     /// <summary>Taille connue : celle du dessin, sinon celle demandée (aperçu 1920 × 1080, caméra virtuelle) avant la première mise en page.</summary>
     static double Cote(double reel, double demande) => reel > 0 ? reel : double.IsNaN(demande) ? 0 : demande;
 
-    void PlacerDuo()
+    /// <summary>Les calques de l'état : un dessin chacun, à sa place, dans l'ordre de la pile (le contenu principal à son étage).</summary>
+    void MajCalques(EtatEcran e)
     {
-        if (duo == null)
+        var ids = listeCalques.Select(c => c.Id).ToHashSet();
+        foreach (var id in calques.Keys.Where(k => !ids.Contains(k)).ToList())
         {
-            if (gauche != null) gauche.Visibility = Visibility.Collapsed;
-            if (epingle != null) epingle.Visibility = Visibility.Collapsed;
-            return;
+            Children.Remove(calques[id]);
+            calques.Remove(id);
+            imagesCalques.Remove(id);
         }
-        // les deux dessins existent toujours quand il y a un Duo, même si la taille n'est pas encore connue
-        var ep = Enfant(ref epingle);
-        ep.Visibility = Visibility.Visible;
-        ep.media.Source = imageDuo;
-        ep.MajFlou();
-        Rendu? g = null;
-        if (duo.Place is "cote" or "libre")
+        foreach (var c in listeCalques)
         {
-            g = Enfant(ref gauche);
-            SetZIndex(g, 1); SetZIndex(ep, 2);
-            g.Visibility = Visibility.Visible;
-            g.media.Source = media.Source;
-            g.MajFlou();
+            if (!calques.TryGetValue(c.Id, out var r))
+            {
+                r = new Rendu { HorizontalAlignment = HorizontalAlignment.Left, VerticalAlignment = VerticalAlignment.Top, SansEffets = sansEffets, Leger = leger, FondFlou = FondFlou, dansCalque = true };
+                calques[c.Id] = r;
+                Children.Add(r);
+            }
+            r.Transitions = Transitions;
+            r.Visibility = c.Visible ? Visibility.Visible : Visibility.Collapsed;
+            r.AfficherSeul(c.Etat with { Theme = e.Theme, Taille = e.Taille, Presentation = "plein", Calques = null, Rang = 0 });
+            imagesCalques.TryGetValue(c.Id, out var image);
+            if (!ReferenceEquals(r.media.Source, image)) { r.media.Source = image; r.MajFlou(); }
         }
-        else if (gauche != null) gauche.Visibility = Visibility.Collapsed;
+        // l'ordre : le fond tout en bas, puis chaque étage (dessous d'abord) ; le contenu principal : fond flou, image, texte
+        SetZIndex(fond, 0);
+        for (int p = 0; p <= listeCalques.Count; p++)
+        {
+            int z = 10 * (p + 1);
+            if (p == rang) { SetZIndex(mediaFlou, z); SetZIndex(media, z + 1); SetZIndex(scene, z + 2); continue; }
+            if (calques.TryGetValue(listeCalques[p < rang ? p : p - 1].Id, out var r)) SetZIndex(r, z);
+        }
+        PlacerCalques();
+    }
+
+    void PlacerCalques()
+    {
+        if (calques.Count == 0) return;
         double W = Cote(ActualWidth, Width), H = Cote(ActualHeight, Height);
         if (W <= 0 || H <= 0) return;
-        if (g != null && duo.Place == "libre" && duo.Cadres is { Length: >= 6 } k)
+        foreach (var c in listeCalques)
         {
-            // dossier de l'onglet Duo : chaque élément a sa place et sa taille (même forme que l'écran)
-            g.Width = W * k[2]; g.Height = H * k[2]; g.Margin = new Thickness(W * k[0], H * k[1], 0, 0);
-            ep.Width = W * k[5]; ep.Height = H * k[5]; ep.Margin = new Thickness(W * k[3], H * k[4], 0, 0);
-        }
-        else if (g != null)
-        {
-            // côte à côte : deux moitiés de même forme que l'écran, centrées en hauteur ; le fond principal reste visible autour
-            double w = W / 2, h = H / 2, y = (H - h) / 2;
-            g.Width = w; g.Height = h; g.Margin = new Thickness(0, y, 0, 0);
-            ep.Width = w; ep.Height = h; ep.Margin = new Thickness(w, y, 0, 0);
-        }
-        else
-        {
-            double part = Math.Clamp(duo.Part, 0.2, 0.5);
-            double w = W * part, h = H * part, m = 0.03 * H;
-            ep.Width = w; ep.Height = h;
-            ep.Margin = new Thickness(duo.Place is "hg" or "bg" ? m : W - w - m, duo.Place is "hd" or "hg" ? m : H - h - m, 0, 0);
+            if (!calques.TryGetValue(c.Id, out var r)) continue;
+            r.Width = Math.Max(1, W * c.L);
+            r.Height = Math.Max(1, H * c.H);
+            r.Margin = new Thickness(W * c.X, H * c.Y, 0, 0);
         }
     }
 
-    /// <summary>Affiche un nouvel état ; avec un Duo, le contenu épinglé en plus.</summary>
+    /// <summary>Pendant qu'on le glisse (page Médias) : le calque se dessine à cette place, sans attendre la régie.</summary>
+    internal void PlacerCalqueLocal(string id, double x, double y, double l, double h)
+    {
+        if (!calques.TryGetValue(id, out var r)) return;
+        double W = Cote(ActualWidth, Width), H = Cote(ActualHeight, Height);
+        if (W <= 0 || H <= 0) return;
+        r.Width = Math.Max(1, W * l);
+        r.Height = Math.Max(1, H * h);
+        r.Margin = new Thickness(W * x, H * y, 0, 0);
+    }
+
+    /// <summary>Affiche un nouvel état : le contenu principal, et (2.5.0) les calques par-dessus ou dessous, à leur étage.</summary>
     public void Afficher(EtatEcran e)
     {
-        duo = e.Duo;
-        var seul = e with { Duo = null };
-        PlacerDuo();
-        if (duo == null)
-        {
-            // plus de Duo : les dessins cachés ne gardent ni texte ni image
-            if (epingle != null) { epingle.media.Source = null; imageDuo = null; }
-            if (gauche != null) gauche.media.Source = null;
-            AfficherSeul(seul);
-            return;
-        }
-        epingle!.Afficher(duo.Etat with { Duo = null, Theme = e.Theme, Taille = e.Taille, Presentation = "plein" });
-        if (duo.Place is "cote" or "libre")
-        {
-            gauche!.Afficher(seul with { Presentation = "plein" });
-            // l'écran principal ne garde que son fond, visible derrière les deux moitiés
-            AfficherSeul(seul with { Mode = "vide", Media = null, Lignes = Array.Empty<string>(), Ref = "", Second = null });
-            Animer(fond, 1, 0);
-            return;
-        }
-        AfficherSeul(seul);
+        listeCalques = e.Calques ?? (IReadOnlyList<CalqueEcran>)Array.Empty<CalqueEcran>();
+        rang = Math.Clamp(e.Rang, 0, listeCalques.Count);
+        AfficherSeul(e with { Calques = null, Rang = 0 });
+        MajCalques(e);
     }
 
     // ------------------------------------------------------------ fonds des thèmes
@@ -335,7 +333,9 @@ public sealed class Rendu : Grid
         if (e.Mode == "media")
         {
             version++; cle = "media";
-            Animer(scene, 0, 0); Animer(fond, 1, 0); fond.Background = Brushes.Black;
+            Animer(scene, 0, 0);
+            if (dansCalque) Animer(fond, 0, 0);
+            else { Animer(fond, 1, 0); fond.Background = Brushes.Black; }
             return;
         }
         // A live source may have temporarily replaced the theme background.

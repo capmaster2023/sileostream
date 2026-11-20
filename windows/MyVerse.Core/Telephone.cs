@@ -163,7 +163,7 @@ public sealed class AppareilsJumeles
 /// <summary>
 /// Siloé Stream 1.7.1 : les rôles des téléphones. Admin : tout (et démarrer / fermer Siloé Stream) ; Bible : les versets ;
 /// Chants : les chants ; Caméra : MyCam seulement. Le PC refuse ce que le rôle ne permet pas, l'app cache ces onglets.
-/// 1.9.3 : Affichage (ce qui est montré dans l'église et sur Zoom : le culte, les médias, le duo), et les mêmes rôles
+/// 1.9.3 : Affichage (ce qui est montré dans l'église et sur Zoom : le culte, les médias), et les mêmes rôles
 /// pour les comptes Google connectés sur le PC : chacun ne voit que les pages de son rôle (<see cref="Pages"/>).
 /// </summary>
 public static class Roles
@@ -195,10 +195,10 @@ public static class Roles
     /// </summary>
     public static IReadOnlyList<string> Pages(string? role) => Connu(role) switch
     {
-        Admin => new[] { "agenda", "bible", "chants", "annonces", "duo", "son", "montage", "miniature", "reglages" },
+        Admin => new[] { "agenda", "bible", "chants", "annonces", "son", "montage", "miniature", "reglages" },
         Bible => new[] { "bible" },
         Chants => new[] { "chants" },
-        Affichage => new[] { "agenda", "annonces", "duo" },
+        Affichage => new[] { "agenda", "annonces" },
         _ => Array.Empty<string>(),
     };
 

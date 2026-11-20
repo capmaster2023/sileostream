@@ -44,11 +44,10 @@ public partial class MainWindow
         minuterieVignettes.Tick += (_, _) => { minuterieVignettes.Stop(); VignettesMaj(); };
         DefilVignettes.SizeChanged += (_, _) => LargeurVignettes();
         R.ChantsChange += () => { if (editionChant) { chantsEnAttente = true; return; } ListeAgendaMaj(); VignettesPlusTard(); };
-        R.DuosChange += VignettesPlusTard;
         VB.Change += VignettesPlusTard;
     }
 
-    /// <summary>Un chant, une Bible ou un dossier Duo a changé : les vignettes suivent, un instant plus tard (une seule fois).</summary>
+    /// <summary>Un chant ou une Bible a changé : les vignettes suivent, un instant plus tard (une seule fois).</summary>
     void VignettesPlusTard()
     {
         minuterieVignettes.Stop();
@@ -62,7 +61,7 @@ public partial class MainWindow
         "bible" => "TypeLecture",
         "compte" => "TypeAccueil",
         "principal" => "TypePrincipal",
-        _ => e.Source?.Type == "duo" ? "TypeDuo" : "TypeDisplay",
+        _ => "TypeDisplay",
     };
 
     string TitreElement(ElementAgenda e) => e.Type == "chant" && R.Trouver(e.ChantId) is { } c ? c.Title : e.Titre;
@@ -149,7 +148,6 @@ public partial class MainWindow
             var rendu = new Rendu { Transitions = false, Leger = true, Width = 1920, Height = 1080, IsHitTestVisible = false };
             rendu.Afficher(etat);
             if (etat is { Mode: "media", Media: { Type: "image" } m1 }) rendu.ImageDisplay(ImageFichier(m1.Chemin, 480));
-            if (etat.Duo?.Etat is { Mode: "media", Media: { Type: "image" } m2 }) rendu.ImageDuo(ImageFichier(m2.Chemin, 480));
             ecran.Children.Add(new Viewbox { Stretch = Stretch.Uniform, Child = rendu, CacheMode = CacheApercu() });
             if (etat.Theme == "transparent") ecran.Background = Pinceau("Damier");
             if (etat is { Mode: "media", Media.Type: "camera" or "mycam" or "fenetre" or "video" } && etat.Media is { } mv)

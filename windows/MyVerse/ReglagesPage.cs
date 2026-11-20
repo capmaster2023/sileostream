@@ -49,7 +49,7 @@ public sealed class ReglagesPage : Grid
         var aDistance = Section("À distance", "Contrôler Siloé Stream avec le téléphone de n'importe où, par Internet (passe par le relais Siloé Stream du VPS). "
             + "Réglé une fois ici : ensuite, dès que ce PC est allumé, il est joignable, et le téléphone peut même démarrer ou fermer Siloé Stream.", distance);
         var comptes = Section("Église et comptes", "Chacun se connecte avec son compte Google (par siloestream.tech) et ne voit que les pages de son rôle : "
-            + "Versets (la Bible), Chants, Affichage (ce qui est montré dans l'église et sur Zoom : Culte, Médias, Duo). L'admin ajoute les membres par leur Gmail.", eglise);
+            + "Versets (la Bible), Chants, Affichage (ce qui est montré dans l'église et sur Zoom : Culte, Médias). L'admin ajoute les membres par leur Gmail.", eglise);
 
         // l'ordre de la page : Licences (dernière section du son) passe tout en bas
         son.Children.Remove(son.Licences);

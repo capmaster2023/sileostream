@@ -7,7 +7,7 @@ using OpenCvSharp;
 namespace MyVerse.Ui.Audio;
 
 /// <summary>
-/// Les caméras USB et les cartes de capture HDMI (Cam Link, « USB Video »…), partagées par l'écran, le Duo, MyStream et l'enregistrement :
+/// Les caméras USB et les cartes de capture HDMI (Cam Link, « USB Video »…), partagées par l'écran, les calques, MyStream et l'enregistrement :
 /// une seule ouverture par appareil, rendue quand plus personne ne s'en sert.
 /// <para>
 /// 1.6.5 : fluide. Les cartes de capture USB 2.0 (« USB Video ») ne donnent que 5 images par seconde en 1080p non compressé :

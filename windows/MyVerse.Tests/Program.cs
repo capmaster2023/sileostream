@@ -302,7 +302,7 @@ Groupe("Donnees");
 if (Actif())
 {
     var d0 = Donnees.Charger(Temp(), res);
-    Ok(d0.Chants.Count == 0 && d0.Agendas.Count == 0 && d0.Annonces.Count == 0 && d0.Duos.Count == 0, $"4.2 : premier démarrage vide, aucun chant ({d0.Chants.Count})");
+    Ok(d0.Chants.Count == 0 && d0.Agendas.Count == 0 && d0.Annonces.Count == 0, $"4.2 : premier démarrage vide, aucun chant ({d0.Chants.Count})");
     var a0 = d0.Reglages.Audio; a0.Normalize();
     Ok(a0.Sons.Count == 0 && a0.Profiles.Count == 0 && a0.VirtualSounds.Count == 0,
         "2.4.0 : premier démarrage : aucun son ajouté tout seul (on choisit ses sons), aucun enregistrement ni envoi");
@@ -928,14 +928,14 @@ if (Actif())
     Ok(rg.EtatCible(rg.Diapos(eF)[0].Cible, eF) is { Mode: "fond" } && rg.EtatCible(new CibleDefaut("fond")) is { Mode: "fond" }, "vignette du fond seul");
 
     rg.AfficherElement(eC, 0);
-    rg.Epingler();
-    Ok(rg.Etat.Vide && rg.Etat.Duo != null && rg.Cible == null, "Épingler libère l'écran sans écran par défaut (comme avant)");
+    // 2.5.0 : un calque reste quand on retire le contenu principal
+    var annonceCalque = rg.NouvelleAnnonce("Annonce en calque", "Bienvenue à tous");
+    Ok(rg.Superposer(annonceCalque) is { L: < 1 } && !rg.Etat.Vide, "2.5.0 : superposer garde ce qui est à l'écran (le calque dans un coin)");
     rg.Effacer();
-    Ok(rg.Etat.Mode == "fond" && rg.Etat.Duo != null, "Retirer avec un contenu épinglé : le fond par défaut, l'épinglé reste");
-    Ok(rg.EtatDiffusion(rg.Etat) is { Mode: "vide" } dd && dd.Duo != null, "OBS : seulement le contenu épinglé");
-    rg.Bouger(1);
-    Ok(rg.Cible is CibleDefaut, "rien n'a été retiré : Suivant ne reprend rien");
-    rg.Desepingler();
+    Ok(rg.Etat.Mode == "fond" && rg.Calques.Count == 1, "Retirer avec un calque : le fond par défaut, le calque reste");
+    Ok(rg.EtatDiffusion(rg.Etat) is { Mode: "vide" } dd && dd.Calques is { Count: 1 }, "OBS : seulement le calque");
+    rg.RetirerCalques();
+    rg.SupprimerAnnonce(annonceCalque.Id);
 
     rg.AfficherVerset(42, 3, 16, 16);
     rg.Effacer();
@@ -1027,27 +1027,25 @@ if (Actif())
         "En streaming : la salle garde l'écran principal choisi (le logo)");
     Ok(rg.EtatDiffusion(rg.Etat).Media == diapos.Source, "… pendant que MyVirtualCam reçoit les diapos");
 
-    // le Duo : un contenu épinglé « Dans l'église » ne part pas en streaming, un contenu « En streaming » n'est pas dans la salle
-    rg.AfficherAnnonce(zoom);
-    rg.Epingler("Zoom");
+    // 2.5.0 : les calques : un calque « Dans l'église » ne part pas en streaming, un calque « En streaming » n'est pas dans la salle
+    rg.Superposer(zoom);
     rg.AfficherVerset(42, 3, 16, 16);
-    Ok(rg.EtatSalle(rg.Etat) is { Mode: "verset" } s1 && s1.Duo?.Etat.Media == zoom.Source, "Duo : la salle voit le verset et Zoom épinglé");
-    Ok(rg.EtatDiffusion(rg.Etat) is { Mode: "verset" } d1 && d1.Duo == null, "Duo : MyVirtualCam reçoit le verset, sans Zoom");
-    rg.Desepingler();
-    rg.AfficherAnnonce(diapos);
-    rg.Epingler("Diapos");
+    Ok(rg.EtatSalle(rg.Etat) is { Mode: "verset" } s1 && s1.Calques?.Any(c => c.Media == zoom.Source) == true, "calques : la salle voit le verset et Zoom superposé");
+    Ok(rg.EtatDiffusion(rg.Etat) is { Mode: "verset" } d1 && d1.Calques == null, "calques : MyVirtualCam reçoit le verset, sans Zoom");
+    rg.RetirerCalques();
+    rg.Superposer(diapos);
     rg.AfficherVerset(42, 3, 17, 17);
-    Ok(rg.EtatSalle(rg.Etat).Duo == null && rg.EtatDiffusion(rg.Etat).Duo?.Etat.Media == diapos.Source, "Duo : des diapos épinglées « En streaming » restent hors de la salle");
-    rg.Desepingler();
+    Ok(rg.EtatSalle(rg.Etat).Calques == null && rg.EtatDiffusion(rg.Etat).Calques?.Any(c => c.Media == diapos.Source) == true, "calques : des diapos superposées « En streaming » restent hors de la salle");
+    rg.RetirerCalques();
 
     rg.AfficherAnnonce(zoom);
     Ok(rg.ModifierSource(zoom.Id, "Zoom (culte)", zoom.Source! with { Diffusion = null }), "modifier une fenêtre : accepté");
     Ok(rg.Etat.Media is { Diffusion: null } && rg.Etat.Ref == "Zoom (culte)" && rg.EtatDiffusion(rg.Etat).Mode == "media",
         "à l'écran : le nouveau réglage s'applique tout de suite");
     Ok(Donnees.Charger(don.Dossier, res).Annonces.First(a => a.Id == zoom.Id) is { Titre: "Zoom (culte)", Source.Diffusion: null }, "réglage enregistré");
-    rg.Epingler("Zoom");
-    Ok(rg.ModifierSource(zoom.Id, "", zoom.Source! with { Diffusion = SourceDisplay.Eglise }) && rg.Etat.Duo?.Etat.Media?.EgliseSeulement == true && rg.EtatDiffusion(rg.Etat).Duo == null,
-        "épinglée : le nouveau réglage suit aussi");
+    rg.Superposer(zoom);
+    Ok(rg.ModifierSource(zoom.Id, "", zoom.Source! with { Diffusion = SourceDisplay.Eglise }) && rg.Calques[^1].Media?.EgliseSeulement == true && rg.EtatDiffusion(rg.Etat).Calques == null,
+        "superposée : le nouveau réglage suit aussi");
     Ok(!rg.ModifierSource(zoom.Id, "", new SourceDisplay { Type = "image", Chemin = "x.png" }) && !rg.ModifierSource("absent", "", zoom.Source!),
         "changer de type, ou une source absente : refusé");
 }
@@ -1077,11 +1075,10 @@ if (Actif())
     rg.AfficherVerset(42, 3, 16, 16);
     Ok(rg.EtatCamera(rg.Etat) == rg.Etat, "un verset : MyVirtualCam comme l'écran de projection");
 
-    rg.AfficherAnnonce(zoom);
-    rg.Epingler("Zoom");
+    rg.Superposer(zoom);
     rg.AfficherVerset(42, 3, 17, 17);
-    Ok(rg.EtatCamera(rg.Etat) is { Mode: "verset" } c2 && c2.Duo == null, "Zoom épinglé : MyVirtualCam montre le verset, sans Zoom");
-    rg.Desepingler();
+    Ok(rg.EtatCamera(rg.Etat) is { Mode: "verset" } c2 && c2.Calques == null, "Zoom superposé : MyVirtualCam montre le verset, sans Zoom");
+    rg.RetirerCalques();
 
     // Zoom lui-même comme écran principal : il ne repart jamais vers MyVirtualCam
     var eZoom = rg.AjouterPrincipalAgenda(zoom.Id)!;
@@ -1140,18 +1137,20 @@ if (Actif())
     rg.Effacer();
     Ok(rg.Cible is CibleDefaut && rg.EtatSalle(rg.Etat).Mode == "fond" && rg.EtatStream(rg.Etat).Media == cam.Source && rg.StreamSuitEglise,
         "l'église sur son écran de repos : MyStream sur la caméra (et suit toujours l'église)");
-    var noir = rg.Etat with { Mode = "vide", Media = null, Lignes = Array.Empty<string>(), Ref = "", Second = null, Duo = null };
+    var noir = rg.Etat with { Mode = "vide", Media = null, Lignes = Array.Empty<string>(), Ref = "", Second = null, Calques = null };
     Ok(rg.EtatStream(noir).Media == cam.Source, "écran noir : MyStream montre la caméra");
     rg.AfficherVerset(43, 3, 16, 16);
     Ok(rg.EtatStream(rg.Etat).Mode == "verset", "… et le verset suivant repart sur MyStream");
-    // un contenu gardé dans un coin
-    rg.Epingler("Jean 3:16");
-    Ok(rg.EtatStream(rg.Etat) is { Mode: "media" } s3 && s3.Media == cam.Source && s3.Duo?.Libelle == "Jean 3:16", "un verset dans le coin (MyStream suit l'église) : la caméra avec le coin");
+    // 2.5.0 : une source superposée (un calque), l'église sans rien pour Internet
+    var annonceCoin = rg.NouvelleAnnonce("Coin", "Bienvenue");
+    rg.Superposer(annonceCoin);
+    rg.Effacer();
+    Ok(rg.EtatStream(rg.Etat) is { Mode: "media" } s3 && s3.Media == cam.Source && s3.Calques?.FirstOrDefault()?.Libelle == "Coin", "un calque (MyStream suit l'église) : la caméra avec le calque");
 
     // « Source principale » (touche M) : MyStream revient sur la caméra, l'église garde ce qu'elle montre
     Ok(rg.StreamPrincipale() && rg.StreamSurPrincipale && !rg.StreamSuitEglise, "touche M : MyStream revient sur sa source principale");
-    Ok(rg.EtatStream(rg.Etat) is { Mode: "media", Duo: null } s4 && s4.Media == cam.Source, "… la caméra seule, sans le coin");
-    rg.Desepingler();
+    Ok(rg.EtatStream(rg.Etat) is { Mode: "media", Calques: null } s4 && s4.Media == cam.Source, "… la caméra seule, sans le calque");
+    rg.RetirerCalques();
     rg.AfficherVerset(43, 3, 17, 17);
     Ok(rg.EtatStream(rg.Etat).Media == cam.Source && rg.Etat.Mode == "verset", "le verset suivant reste dans l'église : MyStream garde la caméra");
     Ok(rg.StreamPrincipale() && rg.StreamSurPrincipale, "touche M déjà sur la source principale : rien ne change");
@@ -1231,56 +1230,7 @@ if (Actif())
     Ok(vcam.Description.Contains("MyVirtualCam") && !vcam.Description.Contains("images/s"), "1.6.8 : sa description : « " + vcam.Description + " »");
 }
 
-Groupe("Dossiers Duo");
-if (Actif())
-{
-    var don = Donnees.Charger(Temp(), res);
-    var rg = new Regie(don, new Bibles(don));
-    rg.AjouterChants(new[] { new Chant { Title = "7 - Chant du Duo", Sections = { new Section { Label = "Couplet 1", Text = "Ligne A" }, new Section { Label = "Refrain", Text = "Ligne B" } } } }, "Recueil de test");
-    int changes = 0; string dit = "";
-    rg.Change += () => changes++;
-    rg.Message += m => dit = m;
-    var d = rg.NouveauDuo("Chant et verset");
-    Ok(rg.Duos.Count == 1 && !rg.AfficherDuo(d) && dit.Contains("deux éléments"), "dossier vide : refusé, avec un message");
-    var ch = don.Chants.First(c => c.Sections.Count > 1);
-    d.A = new PartDuo { Type = "chant", Id = ch.Id, Titre = ch.Title, X = 0, Y = 0, L = 1 };
-    d.B = new PartDuo { Type = "bible", Ref = new[] { 42, 3, 16, 16 }, Titre = "Jean 3:16", X = 0.9, Y = 0.03, L = 0.35 };
-    rg.EnregistrerDuo(d);
-    Ok(d.B.X <= 0.65 + 1e-9, "mesures bornées : le cadre reste dans l'écran");
-    changes = 0;
-    Ok(rg.AfficherDuo(d), "afficher un dossier : chant + verset");
-    Egal(changes, 1, "un seul changement d'écran pour les deux éléments");
-    Ok(rg.Etat.Mode == "chant" && rg.Etat.Duo is { Place: "libre" } e1 && e1.Etat.Mode == "verset" && e1.Dossier == d.Id && e1.Cadres is { Length: 6 }, "écran : le chant, avec le verset dans le Duo (place libre, 6 mesures)");
-    rg.Bouger(1);
-    Ok(rg.Cible is CibleChant { I: 1 } && rg.Etat.Duo != null, "Suivant : la strophe suivante, le dossier reste");
-    d.B.L = 0.2; rg.EnregistrerDuo(d, false);
-    Ok(rg.Etat.Duo?.Cadres?[5] == 0.2, "mesure changée pendant l'affichage : appliquée tout de suite");
-    rg.AfficherVerset(42, 3, 17, 17);
-    Ok(rg.Etat.Duo == null && rg.Etat.Mode == "verset", "autre chose à l'écran : le dossier s'en va");
-    rg.AfficherDuo(d);
-    rg.AfficherSection(ch.Id, 0);
-    Ok(rg.Etat.Duo == null && rg.Etat.Mode == "chant", "clic sur l'élément 1 seul : il s'affiche seul, le dossier s'en va");
-    var an = rg.AjouterDuoDisplay(d);
-    Ok(an.Grille && an.Source?.Type == "duo" && rg.AjouterDuoDisplay(d).Id == an.Id && rg.Annonces.Count(x => x.Source?.Type == "duo") == 1, "+ Display : une seule tuile, dans la grille");
-    rg.AfficherAnnonce(an);
-    Ok(rg.Etat.Duo is { Place: "libre" } && rg.Etat.Mode == "chant", "clic sur la tuile Display : le dossier part en direct");
-    rg.Effacer();
-    Ok(rg.Etat.Vide && rg.Etat.Duo == null, "Retirer de l'écran : tout le dossier part");
-    changes = 0;
-    var apercu = rg.EtatAnnonce(an);
-    Ok(apercu is { Mode: "chant", Duo: { Place: "libre" } ad } && ad.Etat.Mode == "verset" && ad.Cadres is { Length: 6 } && ad.Dossier == d.Id, "aperçu du dossier (vignette, vidéo) : le chant, avec le verset par-dessus");
-    Ok(rg.Etat.Vide && changes == 0 && rg.Cible == null, "aperçu : rien ne s'affiche, aucun changement d'écran");
-    var texteAn = rg.NouvelleAnnonce("Annonce", "Bienvenue\nà tous\n\nDeuxième");
-    Ok(rg.EtatAnnonce(texteAn) is { Mode: "chant", Lignes.Count: 2 } && rg.EtatAnnonce(texteAn, 1)?.Lignes[0] == "Deuxième", "aperçu d'un texte Display : ses diapositives");
-    Ok(rg.EtatVerset(42, 3, 16, 16) is { Mode: "verset" } ev && ev.Ref.StartsWith("Jean 3"), "aperçu d'un verset");
-    Ok(rg.EtatDuo(new DossierDuo()) == null, "aperçu d'un dossier incomplet : rien");
-    var relu = Donnees.Charger(don.Dossier, res);
-    Ok(relu.Duos.Count == 1 && relu.Duos[0].A.Type == "chant" && relu.Duos[0].B.Ref?[2] == 16, "dossiers relus du disque");
-    rg.SupprimerDuo(d.Id);
-    Ok(rg.Duos.Count == 0 && rg.Annonces.All(x => x.Source?.Type != "duo"), "supprimer le dossier : sa tuile Display part aussi");
-}
-
-Groupe("Duo");
+Groupe("Calques de Médias (2.5.0)");
 if (Actif())
 {
     var don = Donnees.Charger(Temp(), res);
@@ -1289,75 +1239,92 @@ if (Actif())
     rg.Change += () => changes++;
     rg.Oeil += v => oeil = v;
     rg.Message += m => dit = m;
-    Egal(don.Reglages.DuoPlace, "hd", "place par défaut : haut droite");
-    Egal(don.Reglages.DuoPart, 0.35, "taille par défaut : 35 %");
-    // rien à l'écran : rien à épingler
-    Ok(!rg.Epingler() && rg.Etat.Duo == null && dit.Contains("Affichez d'abord"), "épingler un écran vide : refusé, avec un message");
-    Ok(!System.Text.Json.JsonSerializer.Serialize(rg.Etat, Donnees.Json).Contains("\"duo\""), "etat.json sans Duo : pas de clé « duo »");
-    // un verset épinglé, puis un chant à l'écran
+    var texte = rg.NouvelleAnnonce("Annonce", "Repas après le culte\n\nDeuxième diapo");
+    var camera = rg.NouveauDisplay("Caméra salle", new SourceDisplay { Type = "camera", Peripherique = "@device:pnp:salle" });
+    var logo = rg.NouveauDisplay("Logo", new SourceDisplay { Type = "image", Chemin = "logo.png" });
+    var vide = rg.NouvelleAnnonce("Vide", "");
+    Ok(!System.Text.Json.JsonSerializer.Serialize(rg.Etat, Donnees.Json).Contains("\"calques\""), "etat.json sans calque : pas de clé « calques »");
+    Ok(rg.Superposer(vide) == null && dit.Contains("vide") && rg.Calques.Count == 0, "superposer un texte vide : refusé, avec un message");
+    // écran vide : la première source superposée prend tout l'écran
+    oeil = null;
+    var c1 = rg.Superposer(camera)!;
+    Ok(c1 is { X: 0, Y: 0, L: 1, H: 1, Visible: true } && c1.Etat.Mode == "media" && c1.Media == camera.Source && rg.Etat.Vide && oeil == true,
+        "écran vide : la caméra superposée prend tout l'écran (la source OBS se montre)");
+    // un verset (contenu principal) : les calques restent
     rg.AfficherVerset(42, 3, 16, 16);
-    changes = 0;
-    Ok(rg.Epingler(), "épingler un verset");
-    Ok(rg.Etat.Vide && rg.Cible == null && rg.Etat.Lignes.Count == 0, "épingler libère l'écran principal");
-    Ok(rg.Etat.Duo is { Place: "hd", Part: 0.35 } d1 && d1.Libelle == "Jean 3:16 (LSG)" && d1.Etat.Mode == "verset" && d1.Etat.Lignes[0].StartsWith("Car Dieu"), "le verset est dans le Duo (libellé, texte, place, taille)");
-    Ok(changes > 0 && oeil == true, "épingler : l'écran est prévenu et la source OBS reste visible");
-    var idDuo = rg.EnregistrerChant(null, "Chant du duo", new List<Section> { new() { Label = "Couplet 1", Text = "Ligne une\nLigne deux" }, new() { Label = "Refrain", Text = "Gloire à toi" } });
-    rg.AfficherSection(idDuo, 0);
-    Ok(rg.Etat.Mode == "chant" && rg.Etat.Lignes[0] == "Ligne une" && rg.Etat.Duo?.Libelle == "Jean 3:16 (LSG)", "un chant + un verset épinglé");
-    rg.Bouger(1);
-    Ok(rg.Etat.Lignes[0] == "Gloire à toi" && rg.Etat.Duo != null, "Suivant garde le Duo");
-    rg.Theme("aube"); rg.Taille(0.9); rg.Presentation("bandeau");
-    Ok(rg.Etat.Duo != null && rg.Etat.Theme == "aube", "habillage de l'écran : le Duo reste");
-    rg.Presentation("plein");
+    Ok(rg.Etat.Mode == "verset" && rg.Calques.Count == 1 && rg.Etat.Rang == 0, "un verset à l'écran : le calque reste");
+    var c2 = rg.Superposer(texte)!;
+    Ok(c2.L < 1 && c2.X > 0.5 && c2.Y < 0.1 && c2.Etat.Mode == "chant" && c2.Etat.Lignes[0] == "Repas après le culte", "un texte superposé : un coin (haut droite), sa première diapositive");
+    var c3 = rg.Superposer(logo)!;
+    Ok(c3.X < 0.1 && c3.Y < 0.1, "la source suivante : un autre coin (haut gauche)");
+    Ok(rg.Calques.Select(c => c.Id).SequenceEqual(new[] { c1.Id, c2.Id, c3.Id }), "les calques, du dessous vers le dessus (la dernière superposée en haut)");
+    // place et taille gardées dans l'écran
+    Ok(rg.PlacerCalque(c2.Id, 0.9, -0.5, 0.5, 2) && rg.Calques[1] is { X: 0.5, Y: 0, L: 0.5, H: 1 }, "place et taille gardées dans l'écran");
+    Ok(rg.PlacerCalque(c2.Id, 0.2, 0.3, 0.001, 0.4) && rg.Calques[1].L == Regie.TailleMinCalque, "taille minimale : 5 % de l'écran");
+    Ok(!rg.PlacerCalque("absent", 0, 0, 1, 1), "un calque absent : refusé");
+    // ▲ ▼ : la pile entière, le contenu principal compris
+    Ok(!rg.MonterCalque(c3.Id, 1), "le calque du haut ne monte pas plus haut");
+    Ok(rg.MonterCalque(c3.Id, -1) && rg.Calques.Select(c => c.Id).SequenceEqual(new[] { c1.Id, c3.Id, c2.Id }), "▼ : le logo passe derrière le texte");
+    Ok(rg.MonterCalque(c1.Id, -1) && rg.Etat.Rang == 1 && rg.Calques[0].Id == c1.Id, "▼ : la caméra passe sous le verset (le verset par-dessus la caméra)");
+    Ok(!rg.MonterCalque(c1.Id, -1), "tout en bas : ▼ ne fait rien");
+    Ok(rg.MonterCalque(c1.Id, 1) && rg.Etat.Rang == 0, "▲ : la caméra repasse devant le verset");
+    Ok(rg.MonterPrincipal(1) && rg.Etat.Rang == 1 && rg.MonterPrincipal(-1) && !rg.MonterPrincipal(-1) && rg.Etat.Rang == 0, "le contenu principal monte et descend dans la pile");
+    // la case : cacher, montrer
+    oeil = null;
+    Ok(rg.MontrerCalque(c3.Id, false) && !rg.Calques.First(c => c.Id == c3.Id).Visible && rg.Etat.AvecCalques && oeil == true, "la case cache un calque (il reste dans la liste)");
+    rg.MontrerCalque(c3.Id, true);
+    // etat.json (page OBS) : les calques et leur place
     var json = System.Text.Json.JsonSerializer.Serialize(rg.Etat, Donnees.Json);
-    Ok(json.Contains("\"duo\"") && json.Contains("\"place\"") && json.Contains("\"libelle\"") && json.Contains("\"part\""), "etat.json contient le Duo (pour la page OBS)");
+    Ok(json.Contains("\"calques\"") && json.Contains("\"rang\"") && json.Contains("\"annonce\"") && json.Contains("\"visible\""), "etat.json contient les calques (pour la page OBS)");
     var relu = System.Text.Json.JsonSerializer.Deserialize<EtatEcran>(json, Donnees.Json)!;
-    Ok(relu.Duo is { Place: "hd" } dr && dr.Etat.Ref == "Jean 3:16 (LSG)" && dr.Etat.Duo == null, "etat.json relu : même Duo");
-    // Effacer garde le Duo
+    Ok(relu.Calques is { Count: 3 } rc && rc[1].Id == c3.Id && rc[2].Etat.Lignes[0] == "Repas après le culte", "etat.json relu : mêmes calques");
+    // Retirer de l'écran (Échap) : le verset part, les calques restent
     oeil = null;
     rg.Effacer();
-    Ok(rg.Etat.Vide && rg.Etat.Duo?.Libelle == "Jean 3:16 (LSG)", "Retirer de l'écran garde le Duo");
-    Ok(oeil == true, "Retirer avec un Duo : la source OBS reste visible");
-    // place et taille, bornées et gardées
-    rg.PlaceDuo("cote", 0.9);
-    Ok(rg.Etat.Duo is { Place: "cote", Part: 0.5 }, "côte à côte, taille bornée à 50 %");
-    rg.PlaceDuo("bg", 0.01);
-    Ok(rg.Etat.Duo is { Place: "bg", Part: 0.2 }, "bas gauche, taille bornée à 20 %");
-    rg.PlaceDuo("n'importe quoi", 0.4);
-    Ok(rg.Etat.Duo is { Place: "hd", Part: 0.4 }, "place inconnue : haut droite");
-    rg.PlaceDuo("hg", double.NaN);
-    Ok(rg.Etat.Duo is { Place: "hg", Part: 0.35 }, "taille illisible : 35 %");
-    rg.PlaceDuo("bd", 0.3);
-    var regRelu = Donnees.Charger(don.Dossier, res).Reglages;
-    Ok(regRelu.DuoPlace == "bd" && regRelu.DuoPart == 0.3, "place et taille gardées pour la prochaine fois");
-    // épingler autre chose remplace le Duo (jamais de Duo dans un Duo)
-    rg.AfficherSection(idDuo, 1);
-    Ok(rg.Epingler() && rg.Etat.Duo is { Place: "bd", Part: 0.3 } d2 && d2.Libelle == "Gloire à toi" && d2.Etat.Mode == "chant" && d2.Etat.Duo == null, "épingler un chant remplace le verset épinglé");
-    rg.AfficherVerset(18, 23, 1, 1);
-    Ok(rg.Etat.Mode == "verset" && rg.Etat.Duo?.Etat.Mode == "chant", "un verset + un chant épinglé");
-    // désépingler
-    changes = 0;
-    rg.Desepingler();
-    Ok(rg.Etat.Duo == null && rg.Etat.Mode == "verset" && changes == 1, "Retirer le duo : l'écran principal ne change pas");
-    rg.Desepingler();
-    Ok(changes == 1, "Retirer le duo sans Duo : rien ne se passe");
-    // deux sources Display en même temps
-    var camera = rg.NouveauDisplay("Caméra salle", new SourceDisplay { Type = "camera", Peripherique = "@device:pnp:duo" });
-    var image = rg.NouveauDisplay("Logo", new SourceDisplay { Type = "image", Chemin = "/test/logo.png" });
-    rg.AfficherAnnonce(camera);
-    Ok(rg.Epingler() && rg.Etat.Duo is { Libelle: "Caméra salle" } d3 && d3.Etat.Mode == "media" && d3.Etat.Media == camera.Source && rg.Etat.Media == null, "une source Display épinglée (caméra)");
-    rg.AfficherAnnonce(image);
-    Ok(rg.Etat.Mode == "media" && rg.Etat.Media == image.Source && rg.Etat.Duo?.Etat.Media == camera.Source, "deux sources Display en même temps");
+    Ok(rg.Etat.Vide && rg.Calques.Count == 3 && oeil == true, "Retirer de l'écran : les calques restent (la source OBS reste visible)");
+    // une source modifiée : ses calques suivent ; supprimée : ils partent
+    rg.ModifierAnnonce(texte.Id, "Annonce du jour", "Culte à 10 h");
+    Ok(rg.Calques.First(c => c.Id == c2.Id) is { Libelle: "Annonce du jour" } cm && cm.Etat.Lignes[0] == "Culte à 10 h", "texte modifié : son calque suit");
+    Ok(rg.ModifierSource(camera.Id, "", camera.Source! with { Diffusion = SourceDisplay.Eglise }) && rg.Calques[0].Media?.EgliseSeulement == true, "source modifiée : son calque suit");
+    // où vont les calques : « Dans l'église » ni sur Internet ni dans OBS, « MyStream seulement » pas dans la salle
     rg.AfficherVerset(42, 3, 16, 16);
-    Ok(rg.Etat.Media == null && rg.Etat.Duo?.Etat.Media == camera.Source, "une source épinglée + un verset");
-    Ok(rg.Epingler("  Mon libellé  ") && rg.Etat.Duo?.Libelle == "Mon libellé", "libellé choisi (menu « Afficher puis épingler »)");
-    // tout retirer : la source OBS se cache
+    Ok(rg.EtatSalle(rg.Etat).Calques?.Count == 3, "la salle voit tous les calques de l'église");
+    Ok(rg.EtatDiffusion(rg.Etat) is { Calques: { Count: 2 } cd } && cd.All(c => c.Id != c1.Id), "OBS et MyVirtualCam : sans la caméra « Dans l'église »");
+    rg.ModifierSource(camera.Id, "", camera.Source! with { Diffusion = SourceDisplay.Streaming });
+    Ok(rg.EtatSalle(rg.Etat).Calques is { Count: 2 } && rg.EtatDiffusion(rg.Etat).Calques?.Count == 3, "une caméra « MyStream seulement » : hors de la salle, sur Internet");
+    // le rang suit quand un calque du dessous part
+    rg.MonterCalque(c1.Id, -1);
+    Ok(rg.Etat.Rang == 1 && rg.EtatSalle(rg.Etat).Rang == 0, "salle sans la caméra du dessous : le verset reste au bon étage");
+    rg.SupprimerAnnonce(texte.Id);
+    Ok(rg.Calques.Count == 2 && rg.Calques.All(c => c.Id != c2.Id), "source supprimée : son calque part");
+    Ok(rg.RetirerCalque(c1.Id) && rg.Etat.Rang == 0 && rg.Calques.Count == 1, "retirer le calque du dessous : le rang du verset suit");
+    // témoin MyCam : un téléphone dans un calque montré est « à l'écran »
+    var tel = rg.NouveauDisplay("Téléphone", new SourceDisplay { Type = "mycam", Peripherique = "tel-1" });
+    rg.Superposer(tel);
+    Ok(rg.TemoinMyCam("tel-1") == "live", "témoin MyCam : rouge quand le téléphone est dans un calque montré");
+    // Tout retirer
+    rg.Effacer();
     oeil = null;
-    rg.Desepingler();
-    Ok(rg.Etat.Vide && rg.Etat.Duo == null && oeil == false, "plus rien à l'écran : la source OBS se cache");
-    // un Duo n'est pas gardé d'une séance à l'autre
+    rg.RetirerCalques();
+    Ok(rg.Calques.Count == 0 && rg.Etat.Rang == 0 && oeil == false, "Tout retirer : plus de calque, la source OBS se cache");
+    // les calques ne sont pas gardés d'une séance à l'autre
     var rg2 = new Regie(Donnees.Charger(don.Dossier, res), new Bibles(don));
-    Ok(rg2.Etat.Duo == null && rg2.Etat.Vide, "au démarrage : pas de Duo");
+    Ok(rg2.Calques.Count == 0 && rg2.Etat.Vide, "au démarrage : pas de calque");
+}
+
+Groupe("Plus de Duo (2.5.0)");
+if (Actif())
+{
+    var dir = Temp();
+    File.WriteAllText(Path.Combine(dir, "reglages.json"), "{}");
+    File.WriteAllText(Path.Combine(dir, "annonces.json"), """[{"id":"a1","titre":"Verset et annonce","source":{"type":"duo","chemin":"d1"},"grille":true},{"id":"a2","titre":"Logo","source":{"type":"image","chemin":"logo.png"}}]""");
+    File.WriteAllText(Path.Combine(dir, "agendas.json"), """[{"id":"g1","nom":"Culte","elements":[{"id":"e1","type":"display","titre":"Duo","source":{"type":"duo","chemin":"d1"}},{"id":"e2","type":"display","titre":"Logo","source":{"type":"image","chemin":"logo.png"}}]}]""");
+    File.WriteAllText(Path.Combine(dir, "duos.json"), """[{"id":"d1","nom":"Verset et annonce"}]""");
+    var d = Donnees.Charger(dir, res);
+    Ok(d.Annonces.Count == 1 && d.Annonces[0].Id == "a2" && d.Agendas[0].Elements.Count == 1 && d.Agendas[0].Elements[0].Id == "e2",
+        "2.5.0 : les dossiers Duo quittent les médias et les programmes (le reste est gardé)");
+    Ok(Donnees.Charger(dir, res) is { Annonces.Count: 1 } d2 && d2.Agendas[0].Elements.Count == 1, "… et c'est enregistré");
+    Ok(Roles.Pages(Roles.Admin).All(x => x != "duo"), "plus de page Duo");
 }
 
 Groupe("Enregistrements et sorties");
@@ -2174,8 +2141,8 @@ if (Actif())
         "Affichage (téléphone) : médias, culte et Suivant ; pas la Bible, ni les chants, ni fermer");
     Ok(!Roles.Permis(Roles.Bible, "display.show") && !Roles.Permis(Roles.Bible, "agenda.show"), "Versets : ni les médias, ni le culte");
     Ok(Roles.Pages(Roles.Bible).SequenceEqual(new[] { "bible" }) && Roles.Pages(Roles.Chants).SequenceEqual(new[] { "chants" }), "pages du logiciel : Versets = Bible, Chants = chants");
-    Ok(Roles.Pages(Roles.Affichage).SequenceEqual(new[] { "agenda", "annonces", "duo" }), "pages du logiciel : Affichage = Culte, Médias, Duo");
-    Ok(Roles.Pages(Roles.Admin).Count == 9 && Roles.Pages(Roles.Admin).Contains("montage") && Roles.Pages(Roles.Admin).Contains("miniature") && Roles.Pages(Roles.Admin).Contains("reglages") && Roles.Pages(Roles.Camera).Count == 0, "pages du logiciel : Admin tout, Caméraman aucune");
+    Ok(Roles.Pages(Roles.Affichage).SequenceEqual(new[] { "agenda", "annonces" }), "pages du logiciel : Affichage = Culte, Médias");
+    Ok(Roles.Pages(Roles.Admin).Count == 8 && Roles.Pages(Roles.Admin).Contains("montage") && Roles.Pages(Roles.Admin).Contains("miniature") && Roles.Pages(Roles.Admin).Contains("reglages") && Roles.Pages(Roles.Camera).Count == 0, "pages du logiciel : Admin tout, Caméraman aucune");
 
     // la page siloestream.tech/connexion renvoie le jeton Google au logiciel, sur 127.0.0.1
     var rq = ConnexionGoogle.Analyser("POST /connexion HTTP/1.1\r\nHost: 127.0.0.1", "idToken=abc.def%2Bg+h&etat=XyZ_-1");
