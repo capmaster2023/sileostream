@@ -1,0 +1,228 @@
+D:\a\sileostream\sileostream\windows\MyVerse.Core\Regie.cs(80,10): warning CS0649: Field 'Regie.muet' is never assigned to, and will always have its default value false [D:\a\sileostream\sileostream\windows\MyVerse.Core\MyVerse.Core.csproj]
+chargement LSG + KJV : 151 ms (31102 + 31102 versets)
+
+== Livres
+
+== Recherche
+  index LSG : 694 ms
+  index KJV + KIR : 339 ms
+  20 recherches de 6 mots dans 3 Bibles : 266 ms
+
+== Import Bible
+
+== Chants
+
+== Ranger
+
+== Recueils
+
+== Donnees
+
+== Reglages 1.2
+
+== Transfert
+
+== Regie
+
+== Telephone
+
+== Agenda
+
+== Ecran par defaut 3.3
+
+== Display 6.0
+
+== Fenêtre : église, streaming ou les deux (1.3.1)
+
+== MyVirtualCam : l'écran principal au lieu du noir (1.3.2)
+
+== MyStream (1.6.4 / 1.6.6) : indépendant de l'église
+
+== Calques de Médias (2.5.0)
+
+== Plus de Duo (2.5.0)
+
+== Enregistrements et sorties
+
+== MyCam H.264 (4.1)
+  décodeur : FFmpeg 62.28.102 (avcodec-62.dll)
+[h264 @ 000001BC02CC5EC0] QP 4294966471 out of range
+[h264 @ 000001BC02CC5EC0] no frame!
+
+== MyCam 4.0
+
+== Son simple (1.3)
+
+== Projecteur (1.0)
+
+== Audio OBS
+  libobs 33.0.1 · modules : win-wasapi, obs-filters, obs-ffmpeg · pistes : actives
+    obs│ 100 CoInitializeEx failed: 0x80010106
+    obs│ 300 CPU Name: AMD EPYC 7763 64-Core Processor
+    obs│ 300 CPU Speed: 2445MHz
+    obs│ 300 Physical Cores: 2, Logical Cores: 4
+    obs│ 300 Physical Memory: 16378MB Total, 12752MB Free
+    obs│ 300 Windows Version: 10.0 Build 26100 (release: 24H2; revision: 33674; 64-bit)
+    obs│ 300 Running as administrator: true
+    obs│ 300 Windows 10/11 Gaming Features:
+    obs│ 300 	Game Mode: Probably On (no reg key set)
+    obs│ 300 ---------------------------------
+    obs│ 300 audio settings reset:
+	samples per sec: 48000
+	speakers:        2
+	max buffering:   960 milliseconds
+	buffering type:  dynamically increasing
+    obs│ 300 ---------------------------------
+    obs│ 300 Initializing D3D11...
+    obs│ 300 Available Video Adapters:
+    obs│ 300 Loading up D3D11 on adapter Microsoft Basic Render Driver (0)
+    obs│ 300 D3D11 loaded successfully, feature level used: b000
+    obs│ 300 DXGI increase maximum frame latency success
+    obs│ 300 D3D11 GPU priority setup failed (not admin?)
+    obs│ 300 ---------------------------------
+    obs│ 300 video settings reset:
+	base resolution:   64x64
+	output resolution: 64x64
+	downscale filter:  Bilinear
+	fps:               10/1
+	format:            NV12
+	YUV mode:          Rec. 709/Partial
+    obs│ 300 NV12 texture support not available
+    obs│ 300 P010 texture support not available
+    obs│ 300 Siloé Stream : entrées séparées disponibles (une bande par entrée de carte son)
+    obs│ 300 [Media Source 'Siloé Stream 9d094f2b6c444aaa8201fb44ebbe11d7']: settings:
+	input:                   C:\Users\runneradmin\AppData\Local\Temp\siloestream-obs-2db74d685f724bfda6d7ad097c10d1c2\sinus.wav
+	input_format:            (null)
+	speed:                   100
+	is_looping:              yes
+	is_linear_alpha:         no
+	is_hw_decoding:          no
+	is_clear_on_media_end:   yes
+	restart_on_activate:     no
+	close_when_inactive:     no
+	full_decode:             no
+	ffmpeg_options:
+    obs│ 200 [audio monitoring: 'Siloé Stream 9d094f2b6c444aaa8201fb44ebbe11d7'] audio_monitor_init_wasapi: Failed to get device: 80070490
+    obs│ 300 [Media Source 'Siloé Stream 41fa56fa184d4b06b241b61ff48a7536']: settings:
+	input:                   C:\Users\runneradmin\AppData\Local\Temp\siloestream-obs-2db74d685f724bfda6d7ad097c10d1c2\sinus.wav
+	input_format:            (null)
+	speed:                   100
+	is_looping:              yes
+	is_linear_alpha:         no
+	is_hw_decoding:          no
+	is_clear_on_media_end:   yes
+	restart_on_activate:     no
+	close_when_inactive:     no
+	full_decode:             no
+	ffmpeg_options:
+    obs│ 300 [win-wasapi: 'Siloé Stream b39e5738adca4f77bb998fcb3f5c6c84'] update settings:
+	device id: default
+	use device timing: 0
+    obs│ 300 WASAPI: Device '' Terminated
+    obs│ 300 adding 42 milliseconds of audio buffering, total audio buffering is now 42 milliseconds (source: Siloé Stream b39e5738adca4f77bb998fcb3f5c6c84)
+    obs│ 300 [Media Source 'Siloé Stream c8abc5288f3c46459f45664b45025518']: settings:
+	input:                   
+	input_format:            (null)
+	speed:                   100
+	is_looping:              yes
+	is_linear_alpha:         no
+	is_hw_decoding:          no
+	is_clear_on_media_end:   yes
+	restart_on_activate:     no
+	close_when_inactive:     no
+	full_decode:             no
+	ffmpeg_options:
+    obs│ 300 [Media Source 'Siloé Stream c8abc5288f3c46459f45664b45025518']: settings:
+	input:                   C:\Users\runneradmin\AppData\Local\Temp\siloestream-obs-2db74d685f724bfda6d7ad097c10d1c2\sinus.wav
+	input_format:            (null)
+	speed:                   100
+	is_looping:              yes
+	is_linear_alpha:         no
+	is_hw_decoding:          no
+	is_clear_on_media_end:   yes
+	restart_on_activate:     no
+	close_when_inactive:     no
+	full_decode:             no
+	ffmpeg_options:
+    obs│ 300 [Media Source 'Siloé Stream c8abc5288f3c46459f45664b45025518']: settings:
+	input:                   C:\Users\runneradmin\AppData\Local\Temp\siloestream-obs-2db74d685f724bfda6d7ad097c10d1c2\sinus.wav
+	input_format:            (null)
+	speed:                   100
+	is_looping:              no
+	is_linear_alpha:         no
+	is_hw_decoding:          no
+	is_clear_on_media_end:   yes
+	restart_on_activate:     no
+	close_when_inactive:     no
+	full_decode:             no
+	ffmpeg_options:
+    obs│ 300 [Media Source 'Siloé Stream c8abc5288f3c46459f45664b45025518']: settings:
+	input:                   
+	input_format:            (null)
+	speed:                   100
+	is_looping:              yes
+	is_linear_alpha:         no
+	is_hw_decoding:          no
+	is_clear_on_media_end:   yes
+	restart_on_activate:     no
+	close_when_inactive:     no
+	full_decode:             no
+	ffmpeg_options:
+    obs│ 300 [Media Source 'Siloé Stream 91a1217dc90c4bd6a2a30ad6c030d894']: settings:
+	input:                   
+	input_format:            (null)
+	speed:                   100
+	is_looping:              yes
+	is_linear_alpha:         no
+	is_hw_decoding:          no
+	is_clear_on_media_end:   yes
+	restart_on_activate:     no
+	close_when_inactive:     no
+	full_decode:             no
+	ffmpeg_options:
+    obs│ 300 [win-wasapi: 'Siloé Stream fcf65bd07d284251a65eb8f6f8e5da16'] update settings:
+	device id: default
+	use device timing: 0
+    obs│ 200 [WASAPISource::TryInitialize]:[default] Failed GetDefaultAudioEndpoint: 80070490
+    obs│ 300 WASAPI: Device 'default' failed to start (source: Siloé Stream fcf65bd07d284251a65eb8f6f8e5da16)
+    obs│ 300 Device '' invalidated.  Retrying (source: Siloé Stream fcf65bd07d284251a65eb8f6f8e5da16)
+    obs│ 300 [Media Source 'Siloé Stream 91a1217dc90c4bd6a2a30ad6c030d894']: settings:
+	input:                   C:\Users\runneradmin\AppData\Local\Temp\siloestream-obs-2db74d685f724bfda6d7ad097c10d1c2\sinus.wav
+	input_format:            (null)
+	speed:                   100
+	is_looping:              yes
+	is_linear_alpha:         no
+	is_hw_decoding:          no
+	is_clear_on_media_end:   yes
+	restart_on_activate:     no
+	close_when_inactive:     no
+	full_decode:             no
+	ffmpeg_options:
+    obs│ 300 WASAPI: Device '' Terminated
+    obs│ 300 Freeing OBS context data
+
+== Recherche 1.4.0 : recueil + numéro, paroles mal écrites
+
+== Recherche vocale (2.2.0) : ce qui est entendu devient un chant ou un verset
+
+== Miniatures YouTube (2.3.0)
+
+== YouTube (1.6.0)
+
+== À distance par Internet (1.7.0) : relais, agent, démarrer Siloé Stream
+
+== Rôles des téléphones (1.7.1)
+
+== Comptes Google sur le PC (1.9.3)
+
+== Caméras USB fluides (1.6.5)
+
+== Directs automatiques (1.6.4)
+
+== Caméra Sony par Wi-Fi (1.9.5)
+
+== Enregistrement
+
+== Montage et publication YouTube (2.2.0)
+
+928/928 vérifications réussies — tout est bon

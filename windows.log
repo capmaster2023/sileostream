@@ -1,0 +1,7 @@
+  Determining projects to restore...
+  Restored D:\a\sileostream\sileostream\windows\MyVerse.Core\MyVerse.Core.csproj (in 13.11 sec).
+  Restored D:\a\sileostream\sileostream\windows\MyVerse\MyVerse.csproj (in 13.18 sec).
+D:\a\sileostream\sileostream\windows\MyVerse.Core\Regie.cs(80,10): warning CS0649: Field 'Regie.muet' is never assigned to, and will always have its default value false [D:\a\sileostream\sileostream\windows\MyVerse.Core\MyVerse.Core.csproj]
+  MyVerse.Core -> D:\a\sileostream\sileostream\windows\MyVerse.Core\bin\Release\net8.0\MyVerse.Core.dll
+  MyVerse -> D:\a\sileostream\sileostream\windows\MyVerse\bin\Release\net8.0-windows\win-x64\SiloeStream.dll
+  MyVerse -> D:\a\sileostream\sileostream\out\SiloeStream\

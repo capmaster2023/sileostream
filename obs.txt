@@ -1,0 +1,4 @@
+OBS 33.0.1 : SHA-256 0d9436451c2d772b33428e3fdae9776f071895c335de17283176306fb72651d3
+runtime Visual C++ : C:\Program Files\Microsoft Visual Studio\18\Enterprise\VC\Redist\MSVC\14.51.36231\x64\Microsoft.VC145.CRT
+20 DLL vérifiées : avutil-60.dll, avcodec-62.dll, avdevice-62.dll, obs-filters.dll, obs-ffmpeg.dll, obs.dll, srt.dll, zlib.dll, libx264-164.dll, libobs-d3d11.dll, swscale-9.dll, w32-pthreads.dll, VCRUNTIME140.dll, swresample-6.dll, win-wasapi.dll, avformat-62.dll, librist.dll, avfilter-11.dll, MSVCP140.dll, VCRUNTIME140_1.dll
+dossier obs : 274 fichiers, 56.6 Mo

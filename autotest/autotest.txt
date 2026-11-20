@@ -1,0 +1,477 @@
+  Siloé Stream 2.5.0 · données : D:\a\_temp\myverse-donnees · 0 chants
+✓ 4.2 : premier lancement vide (0 chants, 0 son : le son des vidéos)
+✓ 4.2 : Bibles livrées : Louis Segond 1910, King James (anglais)
+✓ 1.6.6 : premier lancement : MyStream noir (rien de choisi)
+  police Serif : Literata · Sans : Atkinson Hyperlegible Next · Titre : Unbounded
+  police de l'interface : Manrope · titres : Manrope · chiffres : IBM Plex Mono
+✓ police Manrope incluse (interface 3.2, design « Pupitre »)
+✓ Manrope : les vrais poids 500, 600, 700, 800 (500, 600, 700, 800)
+✓ police IBM Plex Mono incluse (heures et chronos)
+✓ Manrope : espace très fine U+200A des étiquettes en capitales espacées
+✓ police Literata incluse
+✓ police Atkinson incluse
+  capture 00-accueil-culte.png (1584×861)
+✓ projection indépendante : anciens réglages OBS ignorés
+✓ Display : menu déroulant d'ajout et commandes accessibles
+  2.1.0 : vérifications : Projecteur:attention|YouTube:erreur|Son:attention|Caméras:attention
+✓ 2.1.0 : Commencer le culte vérifie le projecteur, YouTube, le son et les caméras
+  capture 00b-display-menu.png (1584×861)
+  capture 01-bible.png (1584×861)
+✓ Jean 3:16 à l'écran : Jean 3:16 (LSG)
+  capture 02-verset.png (1584×861)
+  écrans : HyperVMonitor 1920×1080 @ 0,0 principal
+✓ fenêtre de projection ouverte
+  capture 03-ecran.png (1920×1080)
+✓ Suivant → Jean 3:17 (LSG)
+  capture 04-ecran-suivant.png (1920×1080)
+  capture 05-ecran-bandeau-vert.png (1920×1080)
+✓ versets bilingues : Jean 3:17 (LSG · KJV)
+  capture 06-bilingue.png (1584×861)
+  capture 07-ecran-bilingue.png (1920×1080)
+  capture 08-recherche.png (1584×861)
+✓ liste des chants : 12. Grâce infinie
+✓ chant à l'écran
+  capture 09-chants.png (1584×861)
+  capture 10-ecran-chant.png (1920×1080)
+✓ recherche par numéro 12 : 12. Grâce infinie
+  capture 09b-numero.png (1584×861)
+✓ numéro absent : liste vide
+✓ boutons + devant les chants et les versets : 1 / 1
+✓ déroulé : 4 éléments, le compte à rebours en premier
+✓ heure prévue : 10:30
+✓ compte à rebours : Le culte commence dans / 04:58
+✓ le compte à rebours descend : Le culte commence dans / 04:57
+  capture 19b-ecran-compte.png (1920×1080)
+✓ recherche du culte (Ctrl K) : Jean 3:16
+✓ 1.5.1 : Entrée sur « jean 3 16 » : Bible › Jean 3, le verset 16 choisi, rien de montré à l'écran
+  capture 63-v151-recherche-aller-verset.png (1584×861)
+✓ 1.5.1 : Entrée sur un chant : Bibliothèque › Chants, le chant ouvert, rien de montré à l'écran
+✓ déroulé : Suivant passe à la lecture · Jean 3:16 (LSG)
+✓ page Culte : toutes les diapositives du culte en vignettes (7 / 7)
+✓ vignette à l'écran : Jean 3:16 · À l'écran
+✓ vignette suivante et aperçu « Suivant » : Jean 3:17 / Jean 3:17
+  capture 19-culte.png (1584×861)
+✓ résumé du culte : Accueil · 12. Grâce infinie (2 couplets) · Jean 3:16-17
+✓ textes à partager sur WhatsApp
+✓ déroulé : puis les displays
+  capture 20-culte-displays.png (1584×861)
+  capture 21-ecran-displays.png (1920×1080)
+✓ écran noir (touche B)
+✓ la diapositive suivante rallume l'écran
+✓ 1.5.0 : barre de gauche étroite, trois pages (Culte, Bibliothèque, Son) (1600 px)
+✓ écran principal ajouté au déroulé, proposé dans « Écran par défaut » : Noir* | Fond seul | Fond seul
+✓ clic sur l'écran principal dans « Écran par défaut »
+✓ le choix ne touche pas aux paroles à l'écran · Retour direct : Fond seul
+✓ Retirer de l'écran : retour direct sur l'écran par défaut (fond seul), OBS vide
+✓ vignette et écran live : Fond seul · À l'écran · Écran de repos · Fond seul
+  capture 21b-culte-ecran-par-defaut.png (1584×861)
+  capture 21c-ecran-par-defaut.png (1920×1080)
+✓ Précédent remet ce qui a été retiré : Repas fraternel après le culte
+✓ écran par défaut remis à noir, écran principal retiré du déroulé
+✓ MyCam : l'image du téléphone est à l'écran (En direct)
+✓ MyCam : témoin rouge pour le téléphone
+  capture 21d-mycam-direct.png (1584×861)
+  capture 21e-mycam-ecran.png (1920×1080)
+✓ 4.0.1 : display.jpg tenu ouvert par OBS (accès refusé) : MyCam continue (En direct)
+✓ MyCam en hauteur : image tournée d'un quart de tour (360 × 640)
+  capture 21f-mycam-en-hauteur.png (1920×1080)
+✓ MyCam H.264 : décodeur prêt (FFmpeg 62.28.102 (avcodec-62.dll))
+✓ MyCam H.264 : vidéo décodée à l'écran (64 × 48, pixel 134,64,20)
+✓ MyCam H.264 : format affiché (640 × 360 · H.264 · Wi-Fi · batterie 88 %)
+  capture 21g-mycam-h264.png (1920×1080)
+✓ 1.2 : enregistrement vidéo de MyCam démarré : Enregistrement vidéo en cours
+✓ 1.2 : MyCam enregistrée à 30.0 images différentes par seconde (téléphone : 30 i/s, 293 images envoyées, 138 dans le fichier)
+✓ MyCam retirée : témoin éteint
+  capture 22-ecran-lin.png (1920×1080)
+  capture 22b-ecran-ciel.png (1920×1080)
+✓ écran de scène ouvert
+  capture 23-scene.png (1084×601)
+  capture 24-displays.png (1584×861)
+✓ display ajoutée au déroulé
+✓ display à l'écran : Repas fraternel après le culte / Tout le monde est invité
+✓ double-clic titre Display : en direct
+✓ image Display chargée et projetée
+  capture 25-display-image.png (1584×861)
+✓ grille Display : 2 tuiles (un texte, une image)
+✓ clic sur une tuile de la grille : en direct
+  capture 27-display-grille.png (1584×861)
+  son : Le moteur du son est prêt.
+✓ moteur du son (OBS) démarré dans Siloé Stream (Le moteur du son est prêt.)
+✓ OBS accepte les entrées séparées d'une carte son
+✓ ffmpeg livré avec Siloé Stream (D:\a\sileostream\sileostream\out\SiloeStream\ffmpeg\ffmpeg.exe)
+✓ 2.4.0 : le son des vidéos n'est plus ajouté tout seul
+✓ 1.3 : le son des vidéos de Display, choisi, s'entend dans l'église
+✓ page Son : la carte des vidéos et « Ajouter un son » (Vidéos de Display · 2 tuiles)
+✓ le son des vidéos attend une vidéo : « Pas de vidéo à l'écran »
+✓ 2.4.0 : le son des vidéos se retire comme les autres
+  capture 32-son-vide.png (1584×861)
+  capture 32b-son-ou-va-le-son.png (1584×861)
+✓ 2.4.2 : une voix : aucun traitement automatique, pas dans l'église (pas de larsen)
+✓ un instrument : gardé tel quel (la musique ne se « nettoie » pas)
+✓ une musique : entendue dans l'église
+✓ les sons ajoutés passent avant le son des vidéos, qui reste le dernier
+✓ le culte en vidéo (MKV), la prédication en son seul (MP3)
+✓ pistes données par Siloé Stream : tout le son sur la 1 (Zoom 1, Culte 1), la salle sur la 2, le pasteur seul sur la 3
+✓ pas de larsen : le son de l'ordinateur ne repart jamais vers la sortie d'où il vient
+✓ ce que chacun reçoit, en mots : « Pasteur seulement », « Tout le son »
+  envoi « Zoom » : Il manque le câble audio virtuel
+  capture 32c-son-sons.png (1584×861)
+✓ chaque son est une source d'OBS
+✓ entrées 2 et 3 d'une carte son : chacune son son ; le pasteur (toutes les entrées) reste une capture
+✓ la musique ne part pas toute seule : « Prête : cliquez Lire » (-∞ dBFS)
+✓ Lire : la barre bouge, sinus à −6 dBFS (-6.0 dBFS)
+✓ Lire : la musique joue
+✓ le mot de la carte : « Bon niveau »
+✓ volume à 50 % : -24.1 dBFS
+✓ Pause : « En pause »
+✓ Couper : « Coupé »
+✓ la piste de Zoom (tout le son) reçoit la musique (-6.0 dBFS)
+✓ enregistrement vidéo « Culte » démarré : Enregistrement vidéo en cours
+✓ 2e enregistrement en même temps (« Prédication », MP3) : Enregistrement en cours · MP3
+✓ les pistes ne bougent pas quand un enregistrement démarre : Culte 1, Prédication 3
+✓ le culte (tout le son) reçoit la musique (-6.0 dBFS)
+✓ la prédication (le pasteur seul) ne reçoit pas la musique (-∞ dBFS)
+  capture 36-enregistrements-en-cours.png (1584×861)
+✓ « Prédication » arrêtée, « Culte » continue
+✓ vidéo MKV finalisée : Culte (test)_2026-11-20_01-59-39.mkv (588314 octets, Terminé : C:\Users\runneradmin\AppData\Local\Temp\siloestream-autotest-4da2b919\culte\Culte (test)_2026-11-20_01-59-39.mkv)
+✓ MP3 de la prédication : Prédication (test)_2026-11-20_01-59-39.mp3 (54188 octets, libmp3lame)
+✓ MKV relu en entier par ffmpeg : une piste vidéo et une piste audio
+✓ MKV : durée 4.8 s
+    Stream #0:0: Video: h264 (High), yuv420p(tv, progressive), 1280x720, 30 fps, 30 tbr, 1k tbn
+    Stream #0:1: Audio: aac (LC), 48000 Hz, stereo, fltp, start -0.021000
+    Stream #0:0 -> #0:0 (h264 (native) -> wrapped_avframe (native))
+    Stream #0:1 -> #0:1 (aac (native) -> pcm_s16le (native))
+    Stream #0:0: Video: wrapped_avframe, yuv420p(tv, progressive), 1280x720, q=2-31, 200 kb/s, 30 fps, 30 tbn
+    Stream #0:1: Audio: pcm_s16le, 48000 Hz, stereo, s16, 1536 kb/s
+✓ MP3 relu en entier par ffmpeg (2.2 s)
+  capture 36b-enregistrements-termines.png (1584×861)
+✓ « Enregistrer le culte » d'un clic : « Culte », MP3, tout le son, démarré (Enregistrement en cours · MP3)
+  capture 36c-enregistrer-le-culte.png (1584×861)
+✓ le fichier du culte : Culte_2026-11-20_01-59-45.mp3 (57644 octets) dans C:\Users\runneradmin\Videos\Siloé Stream\Culte
+  capture 32d-son-sombre.png (1584×861)
+✓ carte son branchée : le son est là
+✓ débranchée : « Débranché », le son reste (rien n'est retiré)
+  capture 38-son-debranche.png (1584×861)
+✓ rebranchée : le son revient ; un nouveau micro branché n'est pas ajouté tout seul
+  capture 33-ajouter-un-son.png (764×681)
+✓ fenêtre Ajouter un son
+  capture 33b-ajouter-un-micro.png (764×681)
+✓ fenêtre Ajouter un son
+  capture 34-regler-un-son.png (744×741)
+✓ fenêtre Régler « Pasteur »
+  capture 34b-enregistrement-video.png (684×953)
+✓ fenêtre Régler « Culte (test) »
+  capture 34c-nouvel-enregistrement.png (684×787)
+✓ fenêtre Nouvel enregistrement
+  capture 35-envoi-zoom.png (684×761)
+✓ fenêtre Régler « Zoom »
+  capture 39d-reglages-son.png (1584×861)
+✓ clic sur la tuile image : en direct
+  capture 26-ecran-image.png (1920×1080)
+✓ image Display publiée pour la source navigateur OBS
+✓ MyVirtualCam publie automatiquement en 720p
+✓ MyVirtualCam reçoit les pixels réels de la projection
+✓ 1.3.1 : source « Dans l'église » : à l'écran de projection, MyVirtualCam ne la reçoit pas
+✓ 1.3.1 : pastille d'une source « Dans l'église » : Église seulement
+✓ 1.3.2 : un écran principal choisi comme écran par défaut
+✓ 1.3.2 : source « Dans l'église » à l'écran : MyVirtualCam montre l'écran par défaut (pas un écran noir)
+✓ 1.3.1 : source « En streaming » : MyVirtualCam la reçoit, l'écran de projection garde l'écran par défaut
+✓ 1.3.1 : pastille « MyStream seulement » : MyStream seulement
+  capture 26b-ecran-streaming-seulement.png (1920×1080)
+✓ 1.3.1 : les deux : MyVirtualCam et l'écran de projection la reçoivent de nouveau
+✓ 1.3.2 : l'écran par défaut part aussi sur MyVirtualCam (OBS reste vide)
+  capture 25c-capture-fenetre.png (764×894)
+✓ fenêtre Capture de fenêtre
+✓ fenêtre fermée : image effacée et message utile
+✓ 2.5.0 : un texte superposé au verset, dans un coin (haut droite)
+✓ 2.5.0 : une image superposée par-dessus (deux calques, le verset reste)
+✓ 2.5.0 : la liste des sources : la plus haute d'abord, l'écran principal en bas (Image de test | Repas fraternel | Écran principal)
+✓ 2.5.0 : glisser un calque dans l'écran de Médias
+✓ 2.5.0 : le calque glissé change de place, pas de taille (0.50, 0.31)
+✓ 2.5.0 : agrandir par une poignée
+✓ 2.5.0 : la poignée agrandit le calque (0.45 × 0.44)
+✓ 2.5.0 : ▼ : l'image passe derrière le texte
+✓ 2.5.0 : ▼ : l'image passe sous l'écran principal (le verset par-dessus) : Repas fraternel | Écran principal | Image de test
+✓ 2.5.0 : ▼ ne descend pas plus bas que tout en bas
+✓ 2.5.0 : ▲ : l'image remonte devant tout (puis ne monte pas plus haut)
+✓ 2.5.0 : la case cache un calque (il reste dans la liste)
+✓ 2.5.0 : image vivante du calque (sa propre capture)
+✓ 2.5.0 : image du calque publiée pour la page OBS (display-calque-1.jpg, 15030 octets)
+  capture 28-calques.png (1584×861)
+  capture 28-calques-ecran.png (1920×1080)
+✓ 2.5.0 : Retirer de l'écran (Échap) : le verset part, les calques restent
+✓ 2.5.0 : ⤢ : le calque prend tout l'écran
+✓ 2.5.0 : MyVirtualCam reçoit l'image du calque (200,30,40)
+  capture 29-calque-plein.png (1584×861)
+✓ 2.5.0 : Tout retirer : plus de calque, sa capture s'arrête
+  capture 11-vide.png (1584×861)
+✓ clic sur une vignette : en direct (Jean 3:17 (LSG))
+✓ la vignette cliquée passe « À L'ÉCRAN »
+✓ en-tête du programme : Culte du dimanche 15 novembre / 4 moments, 7 diapositives, à 10:30
+  capture 39-pupitre-culte.png (1584×861)
+✓ 1.5.0 : télécommande : Jean 3:16-17 / Jean 3:16, 1 sur 2
+  capture 60-v150-outil-style.png (1584×861)
+  capture 61-v150-outil-repos.png (1584×861)
+  capture 62-v150-bibliotheque-chants.png (1584×861)
+✓ bouton de la barre de gauche : thème sombre
+✓ bouton de la barre de gauche : retour au clair
+✓ Display : le + ajoute la source à la grille
+✓ Display : le ✓ la retire de la grille
+  capture 40-reglages.png (1584×861)
+✓ thème sombre appliqué et enregistré
+✓ les pinceaux suivent le thème sombre
+  capture 41-sombre-reglages.png (1584×861)
+  capture 42-sombre-culte.png (1584×861)
+  capture 43-sombre-bible.png (1584×861)
+  capture 44-sombre-chants.png (1584×861)
+  capture 45-sombre-display.png (1584×861)
+  capture 46b-sombre-son.png (1584×861)
+  capture 46c-sombre-montage.png (1584×861)
+  capture 46d-sombre-miniature.png (1584×861)
+  capture 47-sombre-fenetre.png (884×741)
+✓ fenêtre Réglages
+✓ retour au thème clair
+  capture 48-clair-culte.png (1584×861)
+  capture 49-clair-display.png (1584×861)
+  capture 49b-clair-bible.png (1584×861)
+  capture 49c-clair-chants.png (1584×861)
+  capture 49e-clair-son.png (1584×861)
+  capture 49f-clair-montage.png (1584×861)
+  capture 49g-clair-miniature.png (1584×861)
+  1.5.0 : un clic sur Suivant (page Culte) : 85 ms en moyenne sur 20 clics
+  1.5.0 : mesures :
+  MyStream : dessin (sur son fil) : 6 fois, 214.3 ms en moyenne, 242 ms au plus
+  mise à jour de l'écran (un clic) : 20 fois, 51.3 ms en moyenne, 74 ms au plus
+  MyVirtualCam : écriture : 6 fois, 4.2 ms en moyenne, 4 ms au plus
+✓ 1.5.0 : un clic sur Suivant prend 85 ms (moins de 500 ms)
+  1.5.0 : recherche complète « je lava vers dieu » : 37 ms (4 résultats)
+  1.5.1 : programme de test : 7 moments, 39 diapositives
+  1.5.1 : changements de page (jusqu'à l'image affichée) : bible 26 ms, chants 21 ms, annonces 24 ms, son 20 ms, reglages 25 ms, agenda 36 ms, bible 16 ms, agenda 33 ms
+✓ 1.9.3 : pages par rôle (Versets : Bibliothèque ; Affichage : Culte et Médias ; Caméraman : aucune ; Admin : tout)
+✓ 1.9.3 : sans compte connecté ni connexion obligatoire, le logiciel est entier
+  1.5.1 : boutons (jusqu'à l'image affichée) : Suivant 299 ms, Précédent 90 ms, Noir 33 ms, Noir (rallumer) 396 ms, outil Style 33 ms, outil fermé 239 ms, ouvrir un chant 186 ms, Bible : chapitre 278 ms, retour au Culte 21 ms
+  1.5.1 : mesures :
+  MyStream : dessin (sur son fil) : 5 fois, 233.7 ms en moyenne, 261 ms au plus
+  mise à jour de l'écran (un clic) : 4 fois, 27.7 ms en moyenne, 39 ms au plus
+  vignettes du culte (tout redessiner) : 3 fois, 10.3 ms en moyenne, 13 ms au plus
+  MyVirtualCam : écriture : 5 fois, 4.2 ms en moyenne, 5 ms au plus
+✓ Échap : Jean 3:16 en direct (Jean 3:16 (LSG))
+✓ Échap dans la recherche Bible : la recherche s'annule, le verset reste à l'écran
+✓ 2e Échap (recherche vide) : on quitte le champ, le verset reste
+✓ Échap dans la recherche de chants : le verset reste
+✓ Échap dans le numéro de chant : le verset reste
+✓ Échap dans la recherche du culte (Ctrl K) : le verset reste
+✓ Échap dans un autre champ : rien n'est effacé, le verset reste
+✓ les recherches annulées n'ont rien changé à l'écran
+✓ Échap hors d'un champ : l'écran se vide, comme avant
+✓ anti-veille : projection ouverte, Windows n'éteint ni l'écran ni le PC (écran)
+✓ projection sur le projecteur (simulé), retenue pour le prochain démarrage
+✓ projecteur débranché : la projection se ferme (elle ne recouvre pas la régie) et Siloé Stream l'attend
+✓ état affiché : Projecteur débranché
+✓ projection fermée : Windows peut de nouveau éteindre l'écran (non)
+  capture 50-projecteur-debranche.png (1584×861)
+✓ un autre écran branché (écran de scène) n'est pas pris pour le projecteur
+✓ projecteur rebranché (autre place, autre résolution) : la projection se rouvre toute seule dessus
+✓ nouvelle résolution du projecteur : la projection la suit sans se fermer
+✓ le projecteur devenu l'écran principal : pas de projection plein écran par-dessus la régie
+✓ l'écran de la régie revient : la projection se rouvre sur le projecteur
+✓ Arrêter la projection : elle se ferme et n'attend rien
+✓ arrêtée par l'opérateur : ni le rebranchement ni le démarrage ne la rouvrent
+✓ démarrage : la projection se rouvre toute seule sur le dernier écran
+✓ fermée par l'opérateur (croix, Alt+F4) : elle ne se rouvrira pas au démarrage
+✓ démarrage sans le projecteur : Siloé Stream l'attend
+✓ projecteur branché après le démarrage : la projection s'ouvre toute seule
+✓ démarrage : jamais de plein écran automatique sur l'écran de la régie
+✓ démarrage : une projection en fenêtre se rouvre en fenêtre
+✓ projection rouverte pour la suite du test
+✓ 1.5.1 : éditeur : le chant collé s'enregistre tout seul, sans bouton Enregistrer
+✓ 1.5.1 : « Retour en arrière » est prêt
+✓ 1.5.1 : Retour en arrière : le nouveau chant revient à vide (il n'est plus dans la liste)
+  capture 12-editeur.png (1084×721)
+✓ fenêtre Chant
+✓ 1.5.1 : fermer l'éditeur garde le chant enregistré
+✓ 1.6.0 : l'église vide : MyStream montre sa source principale
+✓ 1.6.4 : sous MyStream : L'antenne montre Caméra de test, quoi que montre l'écran.
+✓ 1.6.0 : Zoom (MyVirtualCam) reçoit la source principale de MyStream ((60, 160, 20))
+✓ 1.6.4 : un verset à l'église : MyStream garde la caméra (sans les paroles)
+✓ 1.6.4 : Zoom voit la caméra seule, sans bandeau de paroles ((60, 160, 20) / (60, 160, 20))
+  capture 64-v164-mystream-camera.png (1584×861)
+✓ 1.6.6 : le verset prend tout l'écran sans être coupé (87,79 — 1746 × 849)
+✓ 1.6.6 : « Taille du texte » à 160 % : le texte reste dans l'écran (87,79 — 1746 × 849)
+✓ 1.6.4 : « Envoyer dans le stream » : le verset part sur MyStream (« L'ANTENNE SUIT L'ÉCRAN »)
+✓ 1.6.4 : Zoom voit le verset envoyé dans le stream ((7, 18, 29))
+  capture 64b-v164-envoye-dans-le-stream.png (1584×861)
+✓ 1.6.4 : le verset suivant part aussi sur MyStream : Jean 3:17 (LSG)
+✓ 1.6.4 : « Source principale » : MyStream revient sur la caméra, l'église garde le verset
+✓ 1.6.4 : le verset suivant reste dans l'église, MyStream garde la caméra
+✓ 1.6.4 : le menu « Source » sans les options des paroles (5 lignes)
+✓ 1.6.0 : fenêtre du direct ouverte (« Connecter le compte YouTube », titre « Culte du dimanche 22 novembre »)
+  capture 65-v160-youtube.png (704×683)
+✓ 1.6.0 : le direct part (« En direct 0:00:04 », encodeur libx264) : En direct : l'image et le son partent.
+✓ 1.6.4 : pendant le direct, le PC reste éveillé (écran + PC)
+  capture 66-v160-youtube-en-direct.png (704×872)
+  capture 67-v160-en-direct.png (1584×861)
+✓ 1.6.0 : Arrêter le direct (« YouTube ») : Direct terminé (0:00:05).
+  serveur RTMP de test : [in#0/flv @ 00000140d8515700] Error during demuxing: I/O error
+  direct reçu : Duration: 00:00:05.23, start: 0.046000, bitrate: 25 kb/s | Stream #0:0: Video: h264 (High), yuv420p(progressive), 1280x720, 4500 kb/s, 30 fps, 30 tbr, 1k tbn, start 0.067000 | Stream #0:1: Audio: aac (LC), 48000 Hz, stereo, fltp, 160 kb/s, start 0.046000 | Stream #0:0 -> #0:0 (h264 (native) -> wrapped_avframe (native)) | Stream #0:1 -> #0:1 (aac (native) -> pcm_s16le (native)) | Stream #0:0: Video: wrapped_avframe, yuv420p(progressive), 1280x720, q=2-31, 200 kb/s, 30 fps, 30 tbn | Stream #0:1: Audio: pcm_s16le, 48000 Hz, stereo, s16, 1536 kb/s
+✓ 1.6.0 : le serveur a reçu MyStream (H.264 1280 × 720) et le son (AAC) : 16655 octets
+✓ 1.6.4 : direct automatique préparé (Tous les jours à 01:59)
+✓ 1.6.4 : le direct automatique démarre tout seul à l'heure (Tous les jours à 01:59) : En direct : l'image et le son partent.
+✓ 1.6.4 : la fenêtre du direct le montre : Tous les jours à 01:59 / 720p · arrêt après 1 h / En direct maintenant · arrêt à 03:00
+  capture 68-v164-direct-automatique.png (704×953)
+✓ 1.6.4 : un 2e tour à la même heure : le direct continue, rien ne repart
+✓ 1.6.4 : après sa durée, le direct automatique s'arrête tout seul : Direct terminé (0:00:04).
+✓ 1.6.4 : il ne repart pas le même jour
+  serveur RTMP de test : [in#0/flv @ 0000027015ed5700] Error during demuxing: I/O error
+  direct automatique reçu : Duration: 00:00:05.00, start: 0.046000, bitrate: 25 kb/s | Stream #0:0: Video: h264 (High), yuv420p(progressive), 1280x720, 4500 kb/s, 30 fps, 30 tbr, 1k tbn, start 0.067000 | Stream #0:1: Audio: aac (LC), 48000 Hz, stereo, fltp, 160 kb/s, start 0.046000 | Stream #0:0 -> #0:0 (h264 (native) -> wrapped_avframe (native)) | Stream #0:1 -> #0:1 (aac (native) -> pcm_s16le (native)) | Stream #0:0: Video: wrapped_avframe, yuv420p(progressive), 1280x720, q=2-31, 200 kb/s, 30 fps, 30 tbn | Stream #0:1: Audio: pcm_s16le, 48000 Hz, stereo, s16, 1536 kb/s
+✓ 1.6.4 : le serveur a reçu le direct automatique (H.264 et AAC) : 16007 octets
+  capture 69-v164-programmer-direct.png (624×953)
+✓ fenêtre Programmer un direct automatique
+✓ 1.6.6 : « Aucune » : MyStream reste noir, l'église garde le verset : Aucune source : l'antenne reste noire. Choisissez sa source principale, ou « ENVOYER À L'ANTENNE ».
+  capture 64c-v166-mystream-noir.png (1584×861)
+✓ 1.6.6 : sans source principale, « Envoyer dans le stream » : MyStream montre l'église
+✓ 1.6.6 : M : MyStream ne suit plus l'église (noir)
+✓ 1.6.8 : « DIME ET OFFRANDE / MEPCMTL01@GMAIL.COM » entier à 100% (85 — 1750 px de large)
+  capture 64d-v168-texte-entier.png (1584×861)
+✓ 1.6.8 : « DIME ET OFFRANDE / MEPCMTL01@GMAIL.COM » entier à 50% (343 — 1235 px de large)
+✓ 1.6.8 : « DIME ET OFFRANDE / MEPCMTL01@GMAIL.COM » entier à 160% (85 — 1750 px de large)
+✓ 1.6.7 : caméra introuvable : la source attend et réessaie (« Caméra absente : Siloé Stream réessaie toutes les 2 secondes. »)
+✓ 1.6.7 : plusieurs essais en 5 secondes (la source ne s'arrête pas)
+✓ 1.6.8 : MyVirtualCam se choisit à part (liste des médias), pas parmi les caméras ordinaires
+  caméras DirectShow : aucune
+  1.6.5 : pas de caméra DirectShow sur cet ordinateur : réglage non essayé
+✓ 1.7.0 : une fenêtre de la grille reste en direct dans sa tuile sans être à l'écran (1 tuile(s) vivante(s))
+  capture 64e-v170-tuiles-vivantes.png (1584×861)
+✓ 1.7.0 : la fenêtre choisie apparaît tout de suite à l'écran (dernière image de sa tuile)
+✓ 1.7.0 : tuile retirée : son lecteur s'arrête
+✓ 1.7.0 : Réglages › À distance : coupé par défaut (« Contrôle à distance / coupé : le téléphone ne joint ce PC que sur le Wi-Fi de l'église »)
+✓ 1.7.0 : activé, relais éteint : « injoignable » (« Contrôle à distance / actif · relais « 127.0.0.1:9 » injoignable (VPS éteint, adresse fausse, ou pas d'Internet) »)
+✓ 1.7.0 : contrôle à distance actif : le relais est dans le code QR
+  capture 64f-v170-reglages-distance.png (1584×861)
+  capture 13-decoupe.png (964×521)
+✓ fenêtre Découper la diapositive
+  capture 14-import.png (704×706)
+✓ fenêtre Importer des chants
+  capture 15-bibles.png (704×480)
+✓ fenêtre Bibles
+  capture 17-telephone.png (844×479)
+✓ fenêtre Télécommande Android
+  capture 18-outils.png (884×741)
+✓ fenêtre Réglages
+✓ 2.2.0 : clip de test fabriqué
+✓ 2.2.0 : page Montage ouverte
+✓ 2.2.0 : enregistrement ajouté à la piste vidéo (8.02 s)
+✓ 2.2.0 : couper à la tête de lecture (S)
+✓ 2.2.0 : annuler (Ctrl Z) revient à une séquence
+✓ 2.2.0 : fondu, titre et générique (10.52 s)
+  capture 70-v220-montage.png (1584×861)
+✓ 2.2.0 : export du montage (5.1 s, Réencodage 1280 × 720 · Processeur (x264) · H.264 · qualité 19) : Exporté : export.mp4
+✓ 2.2.0 : l'export se relit (1280 × 720 · 30 i/s · H.264 · AAC · 0:10, 10.53 s)
+  capture 71-v220-montage-export.png (1584×861)
+  capture 72-v220-publier-youtube.png (744×953)
+✓ fenêtre Publier sur YouTube
+✓ 2.3.0 : image de la vidéo envoyée dans Miniature (Montage de test - 0-01 - 020130.png)
+  capture 74-v230-miniature.png (1584×861)
+✓ 2.3.0 : miniature exportée pour YouTube (1280 × 720, 139 Ko) et choisie pour la publication
+✓ 2.4.0 : recherche de couleur par code et par nom (« bleu », « bordeaux »)
+✓ 2.4.0 : roue des couleurs (teinte, saturation, luminosité) sans perte
+✓ 2.4.0 : couleurs de la photo (#02FD01 #0105FC #FAFC01 #03FCFB #FD0200 #FB03FB)
+✓ 2.4.0 : panneau de couleurs ouvert pour le titre
+  capture 76-v240-couleurs.png (1584×861)
+✓ 2.4.0 : pipette (#FFFFFF) appliquée au titre, Ctrl Z revient à #FFFFFF
+  capture 75-v230-miniature-modele.png (1584×861)
+  capture 73-v220-recherche-vocale.png (544×316)
+✓ fenêtre Recherche vocale
+  PDF : 1. GRACE INFINIE [Couplet 1, Refrain, Couplet 2] | 2. MON DIEU EST BON [Couplet 1, Couplet 2] | 3. YERA YERA [Couplet 1, Refrain]
+✓ recueil PDF : 3 chants numérotés avec refrain
+✓ serveur des téléphones (port 47900)
+✓ sortie OBS (etat.json)
+✓ page OBS (ecran.html)
+
+
+===== journal =====
+[2026-11-20 01:58:39] INFO — démarrage de Siloé Stream 2.5.0 (Windows) —
+[2026-11-20 01:58:39] INFO écoute des téléphones sur le port 47900
+[2026-11-20 01:58:39] INFO MyCam H.264 : FFmpeg 62.28.102 (avcodec-62.dll)
+[2026-11-20 01:58:39] INFO directs automatiques : 0 actif(s)
+[2026-11-20 01:58:40] INFO anti-veille : arrêtée
+[2026-11-20 01:58:40] INFO affichage : carte graphique, 0 chants, 0 recueils
+[2026-11-20 01:58:40] INFO son : atténuation de Windows non désactivée (aucune sortie audio ?)
+[2026-11-20 01:58:40] INFO son : libobs 33.0.1, modules win-wasapi, obs-filters, obs-ffmpeg, pistes actives
+[2026-11-20 01:58:40] INFO lenteur : page « agenda » affichée en 402 ms (0 nettoyage(s) de mémoire ; tuiles en direct 0, source à l'écran aucune, MyStream aucune, mémoire 59 Mo, nettoyages complets 1)
+[2026-11-20 01:58:40] INFO lenteur : page « agenda » affichée en 402 ms (0 nettoyage(s) de mémoire ; tuiles en direct 0, source à l'écran aucune, MyStream aucune, mémoire 59 Mo, nettoyages complets 1)
+[2026-11-20 01:58:42] INFO lenteur : page « annonces » affichée en 463 ms (0 nettoyage(s) de mémoire ; tuiles en direct 0, source à l'écran aucune, MyStream aucune, mémoire 65 Mo, nettoyages complets 1)
+[2026-11-20 01:58:42] INFO lenteur : page « annonces » affichée en 463 ms (0 nettoyage(s) de mémoire ; tuiles en direct 0, source à l'écran aucune, MyStream aucune, mémoire 65 Mo, nettoyages complets 1)
+[2026-11-20 01:58:43] INFO anti-veille : projection ouverte, l'écran reste allumé
+[2026-11-20 01:59:13] INFO anti-veille : projection ouverte, l'écran reste allumé
+[2026-11-20 01:59:19] INFO anti-veille : projection ouverte, l'écran reste allumé
+[2026-11-20 01:59:31] INFO OBS : [audio monitoring: 'Siloé Stream f65d74a9e88b4690a56908b9e3085363'] audio_monitor_init_wasapi: Failed to get device: 80070490
+[2026-11-20 01:59:33] INFO OBS (erreur) : RTWQ setup failed: RtwqLockSharedWorkQueue failed (0xC00D3E85)
+[2026-11-20 01:59:33] INFO OBS : [WASAPISource::TryInitialize]:[default] Failed GetDefaultAudioEndpoint: 80070490
+[2026-11-20 01:59:33] INFO OBS (erreur) : RTWQ setup failed: RtwqLockSharedWorkQueue failed (0xC00D3E85)
+[2026-11-20 01:59:33] INFO OBS : [WASAPISource::TryInitialize]:[{autotest-hp}] Failed to enumerate device: 80070057
+[2026-11-20 01:59:33] INFO OBS : [audio monitoring: 'Siloé Stream 16edfbd3a2764ed8bd41190a35df0e60'] audio_monitor_init_wasapi: Failed to get device: 80070490
+[2026-11-20 01:59:33] ERREUR entrées séparées : ouverture de default : COMException : Element not found. (0x80070490) @ at System.Runtime.InteropServices.Marshal.ThrowExceptionForHR(Int32 errorCode)
+[2026-11-20 01:59:36] ERREUR entrées séparées : ouverture de default : COMException : Element not found. (0x80070490) @ at System.Runtime.InteropServices.Marshal.ThrowExceptionForHR(Int32 errorCode)
+[2026-11-20 01:59:37] ERREUR entrées séparées : ouverture de default : COMException : Element not found. (0x80070490) @ at System.Runtime.InteropServices.Marshal.ThrowExceptionForHR(Int32 errorCode)
+[2026-11-20 01:59:38] ERREUR entrées séparées : ouverture de default : COMException : Element not found. (0x80070490) @ at System.Runtime.InteropServices.Marshal.ThrowExceptionForHR(Int32 errorCode)
+[2026-11-20 01:59:38] ERREUR entrées séparées : ouverture de default : COMException : Element not found. (0x80070490) @ at System.Runtime.InteropServices.Marshal.ThrowExceptionForHR(Int32 errorCode)
+[2026-11-20 01:59:39] ERREUR entrées séparées : ouverture de default : COMException : Element not found. (0x80070490) @ at System.Runtime.InteropServices.Marshal.ThrowExceptionForHR(Int32 errorCode)
+[2026-11-20 01:59:39] INFO anti-veille : projection ouverte, l'écran reste allumé
+[2026-11-20 01:59:39] ERREUR entrées séparées : ouverture de default : COMException : Element not found. (0x80070490) @ at System.Runtime.InteropServices.Marshal.ThrowExceptionForHR(Int32 errorCode)
+[2026-11-20 01:59:42] ERREUR entrées séparées : ouverture de default : COMException : Element not found. (0x80070490) @ at System.Runtime.InteropServices.Marshal.ThrowExceptionForHR(Int32 errorCode)
+[2026-11-20 01:59:44] ERREUR entrées séparées : ouverture de default : COMException : Element not found. (0x80070490) @ at System.Runtime.InteropServices.Marshal.ThrowExceptionForHR(Int32 errorCode)
+[2026-11-20 01:59:44] INFO anti-veille : projection ouverte, l'écran reste allumé
+[2026-11-20 01:59:45] ERREUR entrées séparées : ouverture de default : COMException : Element not found. (0x80070490) @ at System.Runtime.InteropServices.Marshal.ThrowExceptionForHR(Int32 errorCode)
+[2026-11-20 01:59:45] ERREUR entrées séparées : ouverture de default : COMException : Element not found. (0x80070490) @ at System.Runtime.InteropServices.Marshal.ThrowExceptionForHR(Int32 errorCode)
+[2026-11-20 01:59:45] ERREUR entrées séparées : ouverture de default : COMException : Element not found. (0x80070490) @ at System.Runtime.InteropServices.Marshal.ThrowExceptionForHR(Int32 errorCode)
+[2026-11-20 01:59:45] INFO anti-veille : projection ouverte, l'écran reste allumé
+[2026-11-20 01:59:47] ERREUR entrées séparées : ouverture de default : COMException : Element not found. (0x80070490) @ at System.Runtime.InteropServices.Marshal.ThrowExceptionForHR(Int32 errorCode)
+[2026-11-20 01:59:47] INFO anti-veille : projection ouverte, l'écran reste allumé
+[2026-11-20 01:59:48] ERREUR entrées séparées : ouverture de default : COMException : Element not found. (0x80070490) @ at System.Runtime.InteropServices.Marshal.ThrowExceptionForHR(Int32 errorCode)
+[2026-11-20 01:59:49] INFO OBS (erreur) : RTWQ setup failed: RtwqLockSharedWorkQueue failed (0xC00D3E85)
+[2026-11-20 01:59:49] INFO OBS : [WASAPISource::TryInitialize]:[{autotest-umc}] Failed to enumerate device: 80070057
+[2026-11-20 01:59:49] ERREUR entrées séparées : ouverture de default : COMException : Element not found. (0x80070490) @ at System.Runtime.InteropServices.Marshal.ThrowExceptionForHR(Int32 errorCode)
+[2026-11-20 01:59:49] ERREUR entrées séparées : ouverture de default : COMException : Element not found. (0x80070490) @ at System.Runtime.InteropServices.Marshal.ThrowExceptionForHR(Int32 errorCode)
+[2026-11-20 01:59:49] ERREUR entrées séparées : ouverture de default : COMException : Element not found. (0x80070490) @ at System.Runtime.InteropServices.Marshal.ThrowExceptionForHR(Int32 errorCode)
+[2026-11-20 01:59:55] ERREUR entrées séparées : ouverture de default : COMException : Element not found. (0x80070490) @ at System.Runtime.InteropServices.Marshal.ThrowExceptionForHR(Int32 errorCode)
+[2026-11-20 01:59:55] ERREUR entrées séparées : ouverture de default : COMException : Element not found. (0x80070490) @ at System.Runtime.InteropServices.Marshal.ThrowExceptionForHR(Int32 errorCode)
+[2026-11-20 01:59:55] ERREUR entrées séparées : ouverture de default : COMException : Element not found. (0x80070490) @ at System.Runtime.InteropServices.Marshal.ThrowExceptionForHR(Int32 errorCode)
+[2026-11-20 01:59:55] ERREUR entrées séparées : ouverture de default : COMException : Element not found. (0x80070490) @ at System.Runtime.InteropServices.Marshal.ThrowExceptionForHR(Int32 errorCode)
+[2026-11-20 02:00:32] INFO lenteur : page « bible » affichée en 543 ms (0 nettoyage(s) de mémoire ; tuiles en direct 0, source à l'écran aucune, MyStream aucune, mémoire 65 Mo, nettoyages complets 40)
+[2026-11-20 02:00:32] INFO lenteur : page « bible » affichée en 542 ms (0 nettoyage(s) de mémoire ; tuiles en direct 0, source à l'écran aucune, MyStream aucune, mémoire 65 Mo, nettoyages complets 40)
+[2026-11-20 02:00:34] INFO anti-veille : arrêtée
+[2026-11-20 02:00:34] INFO anti-veille : projection ouverte, l'écran reste allumé
+[2026-11-20 02:00:35] INFO anti-veille : arrêtée
+[2026-11-20 02:00:35] INFO projecteur débranché : projection fermée, en attente
+[2026-11-20 02:00:35] INFO projecteur rebranché : EPSON PJ 1920×1080 @ -1920,0
+[2026-11-20 02:00:35] INFO anti-veille : projection ouverte, l'écran reste allumé
+[2026-11-20 02:00:36] INFO projecteur : EPSON PJ 1024×768 @ -1920,0, la projection suit
+[2026-11-20 02:00:36] INFO anti-veille : arrêtée
+[2026-11-20 02:00:36] INFO projecteur débranché : projection fermée, en attente
+[2026-11-20 02:00:36] INFO projecteur rebranché : EPSON PJ 1024×768 @ -1920,0
+[2026-11-20 02:00:36] INFO anti-veille : projection ouverte, l'écran reste allumé
+[2026-11-20 02:00:36] INFO anti-veille : arrêtée
+[2026-11-20 02:00:36] INFO démarrage : projection rouverte sur EPSON PJ
+[2026-11-20 02:00:36] INFO anti-veille : projection ouverte, l'écran reste allumé
+[2026-11-20 02:00:36] INFO anti-veille : arrêtée
+[2026-11-20 02:00:36] INFO démarrage : EPSON PJ n'est pas branché, la projection l'attend
+[2026-11-20 02:00:36] INFO projecteur rebranché : EPSON PJ 1280×720 @ 1920,0
+[2026-11-20 02:00:36] INFO anti-veille : projection ouverte, l'écran reste allumé
+[2026-11-20 02:00:37] INFO anti-veille : arrêtée
+[2026-11-20 02:00:37] INFO anti-veille : projection ouverte, l'écran reste allumé
+[2026-11-20 02:00:37] INFO anti-veille : arrêtée
+[2026-11-20 02:00:37] INFO anti-veille : projection ouverte, l'écran reste allumé
+[2026-11-20 02:00:49] INFO anti-veille : projection ouverte, l'écran reste allumé
+[2026-11-20 02:00:54] INFO anti-veille : projection ouverte, l'écran reste allumé
+[2026-11-20 02:00:57] INFO direct automatique (Tous les jours à 01:59) : démarrage de « Culte du vendredi 20 novembre 2026 » (essai 1, 720p, arrêt après 1 h)
+[2026-11-20 02:00:57] INFO anti-veille : projection ouverte, l'écran reste allumé
+[2026-11-20 02:00:57] INFO direct automatique démarré : « Tous les jours à 01:59 », arrêt à 03:00
+[2026-11-20 02:01:02] INFO direct automatique « Tous les jours à 01:59 » : fin prévue (arrêt après 1 h)
+[2026-11-20 02:01:02] INFO anti-veille : projection ouverte, l'écran reste allumé
+[2026-11-20 02:01:07] INFO caméra « @device:absente-autotest » : Caméra absente. (nouvel essai toutes les 2 s)
+[2026-11-20 02:01:09] INFO caméra « @device:absente-autotest » : Caméra absente. (nouvel essai toutes les 2 s)
+[2026-11-20 02:01:11] INFO caméra « @device:absente-autotest » : Caméra absente. (nouvel essai toutes les 2 s)
+[2026-11-20 02:01:24] INFO montage : ffmpeg -hide_banner -nostdin -loglevel error -y -f rawvideo -pixel_format yuv420p -video_size 1280x720 -framerate 30/1 -probesize 32 -analyzeduration 0 -i \\.\pipe\siloestream-montage-83555a4c8e69432ea6da3651792b1297 -f f32le -ar 48000 -ac 2 -probesize 32 -analyzeduration 0 -i \\.\pipe\siloestream-montage-260767135248420690e26272f2962b01 -/filter_complex filtre-sortie.txt -map [vt] -map 1:a:0 -c:v libx264 -preset fast -crf 19 -profile:v high -pix_fmt yuv420p -g 60 -c:a aac -b:a 256k -ar 48000 -ac 2 -f mp4 -movflags +faststart D:\a\sileostream\sileostream\ci\autotest\montage\export.mp4
+
+TOUT EST BON
