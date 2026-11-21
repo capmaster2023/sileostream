@@ -1,0 +1,16 @@
+installateur : code 0
+MyVirtualCam remplacée pendant son utilisation : True
+MyVerse rouvert après la mise à jour : True
+présent SiloeStream.exe : True
+présent Ressources\lsg.json : True
+présent Ressources\obs\ecran.html : True
+présent Desinstaller.exe : True
+présent obs\bin\64bit\obs.dll : True
+présent obs\core\win-wasapi\win-wasapi.dll : True
+présent COPYING.txt : True
+présent ffmpeg\ffmpeg.exe : True
+présent ffmpeg\LICENSE.txt : True
+ancienne installation MyChurch retirée : True
+raccourci Bureau : True
+Applications installées : 3.0.0
+désinstallé (SiloeStream.exe supprimé) : True
