@@ -4,6 +4,7 @@
 #include <ksmedia.h>
 #include <algorithm>
 #include <cstring>
+#include <new>
 
 // {A9D47A18-C751-4BDE-AB6B-A3D13F090501} -- permanent identity, never the OBS camera CLSID.
 const CLSID CLSID_MyVirtualCam = {0xa9d47a18,0xc751,0x4bde,{0xab,0x6b,0xa3,0xd1,0x3f,0x09,0x05,0x01}};
@@ -19,6 +20,10 @@ class CaptureStream final : public CSourceStream, public IAMStreamConfig, public
     const BYTE* memory_ = nullptr;
     REFERENCE_TIME time_ = 0;
     ULONGLONG start_ = 0;
+    // 2.5.1: the last fresh frame, sent again while Siloe Stream is writing the next one (lock busy) or is a little late,
+    // instead of a black frame in the middle of the camera. Black only when Siloe Stream closed or sent nothing for 10 s.
+    BYTE* last_ = nullptr;
+    ULONGLONG lastTick_ = 0;
     void Open() {
         if (!mutex_) mutex_ = CreateMutexW(nullptr, FALSE, Lock);
         if (!mapping_) {
@@ -35,6 +40,7 @@ public:
         if (memory_) UnmapViewOfFile(memory_);
         if (mapping_) CloseHandle(mapping_);
         if (mutex_) CloseHandle(mutex_);
+        delete[] last_;
     }
     DECLARE_IUNKNOWN;
     STDMETHODIMP NonDelegatingQueryInterface(REFIID iid, void** out) override {
@@ -82,18 +88,29 @@ public:
         // Limit the live source to 30 fps even in graphs with no reference clock.
         ULONGLONG due = start_ + static_cast<ULONGLONG>(time_ / 10000), now = GetTickCount64();
         if (due > now) Sleep(static_cast<DWORD>(std::min<ULONGLONG>(due - now, 34)));
-        ZeroMemory(data, Bytes); // available forever, black when Siloe Stream is absent/blank/stale
+        // available forever: black when Siloe Stream is absent or closed
         Open();
+        bool fresh = false, closed = false;
         if (memory_ && mutex_) {
-            DWORD wait = WaitForSingleObject(mutex_, 5);
+            // Siloe Stream copies a frame in about a millisecond, but it can be interrupted while it holds the lock
+            DWORD wait = WaitForSingleObject(mutex_, 20);
             if (wait == WAIT_OBJECT_0 || wait == WAIT_ABANDONED) {
                 auto* h = reinterpret_cast<const FrameHeader*>(memory_);
                 ULONGLONG tick = GetTickCount64();
-                if (h->magic == 0x4D43414D && h->version == 1 && h->width == Width && h->height == Height && h->stride == Stride && h->tick > 0 && tick >= h->tick && tick - h->tick < 2000)
-                    std::memcpy(data, memory_ + 64, Bytes);
+                bool valid = h->magic == 0x4D43414D && h->version == 1 && h->width == Width && h->height == Height && h->stride == Stride;
+                if (valid && h->tick == 0) closed = true; // Siloe Stream closed properly
+                else if (valid && tick >= h->tick && tick - h->tick < 2000) {
+                    if (!last_) last_ = new (std::nothrow) BYTE[Bytes];
+                    if (last_) { std::memcpy(last_, memory_ + 64, Bytes); lastTick_ = tick; }
+                    else std::memcpy(data, memory_ + 64, Bytes);
+                    fresh = true;
+                }
                 ReleaseMutex(mutex_);
             }
         }
+        ULONGLONG now2 = GetTickCount64();
+        if (last_ && lastTick_ > 0 && !closed && now2 - lastTick_ < 10000) std::memcpy(data, last_, Bytes);
+        else if (!fresh || last_) ZeroMemory(data, Bytes);
         REFERENCE_TIME end = time_ + FrameTime;
         sample->SetTime(&time_, &end); time_ = end;
         sample->SetActualDataLength(Bytes); sample->SetSyncPoint(TRUE); return S_OK;

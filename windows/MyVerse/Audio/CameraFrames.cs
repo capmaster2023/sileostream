@@ -142,23 +142,42 @@ public static class CameraFrames
     // ------------------------------------------------------------ le fil de l'appareil
     static void Boucle(Capture state, SourcesDisplay.Peripherique device)
     {
+        // 2.5.1 : les attentes entre deux images à la milliseconde près (sinon Windows réveille le fil par pas de 15,6 ms)
+        bool precision = Minuterie(true);
         try
         {
+            int sansImage = 0, coupures = 0;
             while (!state.Cancel.IsCancellationRequested)
             {
                 int version, ips; string taille;
                 lock (gate) { version = state.Version; ips = state.Ips; taille = state.Taille; }
+                // 2.5.1 : deux ouvertures de suite sans aucune image avec le réglage retenu (le signal HDMI a changé : la caméra est passée
+                // du 4K au 1080p, ou de 60 à 30 images par seconde) : le bon réglage est cherché de nouveau
+                if (sansImage >= 2) { lock (gate) trouves.Remove(device.Id + "|" + ips + "|" + taille); sansImage = 0; }
                 using var camera = Ouvrir(device, ips, taille, state.Cancel.Token, out var r);
                 state.Info = r.ToString();
-                Journal.Info($"caméra « {device.Nom} » : {r} (demandé : {ips} i/s, {taille})");
+                if (coupures == 0) Journal.Info($"caméra « {device.Nom} » : {r} (demandé : {ips} i/s, {taille})");
                 Prevenir(device, ips, r);
-                Lire(state, camera, ips, version);
+                Conseiller(device, r);
+                var fin = Lire(state, camera, ips, version);
+                if (fin == FinLecture.Changement) { sansImage = coupures = 0; continue; }
+                // 2.5.1 : une coupure (plus d'image depuis 3 s alors qu'on s'en sert) : l'appareil est rouvert ; la dernière image reste
+                // à l'écran, sur Zoom et sur YouTube en attendant (pas de noir)
+                sansImage = fin == FinLecture.SansImage ? sansImage + 1 : 0;
+                if (coupures++ % 20 == 0)
+                    Journal.Info($"caméra « {device.Nom} » : plus d'image depuis {Coupure / 1000} s (câble HDMI, caméra éteinte ou en veille ?) : Siloé Stream la rouvre");
+                camera.Dispose();
+                state.Cancel.Token.WaitHandle.WaitOne(300);
+                // l'appareil a pu changer de place dans la liste de Windows (une autre caméra branchée entre-temps)
+                try { if (SourcesDisplay.Peripheriques(true).FirstOrDefault(d => d.Id == device.Id) is { } maj) device = maj; }
+                catch (Exception e) when (e is not OperationCanceledException) { }
             }
         }
         catch (OperationCanceledException) { }
         catch (Exception e) { state.Error = e.Message; Journal.Erreur("caméra partagée", e); }
         finally
         {
+            if (precision) Minuterie(false);
             state.Info = "";
             lock (gate)
             {
@@ -169,15 +188,27 @@ public static class CameraFrames
         }
     }
 
-    /// <summary>Lit les images et les publie, au plus <paramref name="ips"/> par seconde (40 d'une caméra à 60 : une sur trois est sautée).</summary>
-    static void Lire(Capture state, VideoCapture camera, int ips, int version)
+    /// <summary>Pourquoi la lecture s'arrête : un autre réglage demandé (ou la fin), une coupure, ou aucune image depuis l'ouverture.</summary>
+    enum FinLecture { Changement, Coupure, SansImage }
+
+    /// <summary>2.5.1 : plus d'image depuis ce temps (ms) alors qu'on s'en sert : l'appareil est rouvert.</summary>
+    const int Coupure = 3000;
+
+    /// <summary>
+    /// Lit les images et les publie, au plus <paramref name="ips"/> par seconde (40 d'une caméra à 60 : une sur trois est sautée).
+    /// 2.5.1 : avec DirectShow (OpenCV), Grab répond tout de suite et c'est Retrieve qui attend l'image suivante (une seconde au plus) :
+    /// entre deux images voulues, le fil dort jusqu'à la suivante. Avant, il tournait à vide : un cœur du processeur occupé à plein,
+    /// en priorité haute, pris à Zoom, à l'encodeur du direct et à MyStream (la caméra coupait sur Internet).
+    /// </summary>
+    static FinLecture Lire(Capture state, VideoCapture camera, int ips, int version)
     {
         using var frame = new Mat();
         using var bgra = new Mat();
         double intervalle = 1000.0 / ips, tolerance = intervalle * 0.25, prochain = 0;
         var horloge = Stopwatch.StartNew();
         int ratees = 0;
-        double libreDepuis = -1000;
+        double libreDepuis = -1000, derniere = 0;
+        bool recue = false;
         while (!state.Cancel.IsCancellationRequested && Volatile.Read(ref state.Version) == version)
         {
             // personne ne s'en sert : l'appareil est rendu après la garde (sous le verrou : une demande peut arriver en même temps)
@@ -193,35 +224,62 @@ public static class CameraFrames
                     throw new OperationCanceledException();
                 }
             }
-            // Grab attend l'image suivante de l'appareil (une seconde au plus) ; elle n'est convertie (Retrieve) que si on la montre
+            // Grab (DirectShow) répond tout de suite : faux seulement si l'appareil a disparu (débranché) ; Retrieve attend l'image
             if (!camera.Grab())
             {
-                // une image ratée (carte de capture qui hésite, câble HDMI qui bouge) : coupée seulement après 3 de suite
+                // coupée seulement après 3 essais de suite
                 if (++ratees >= 3) throw new IOException("La caméra ne fournit plus d’image.");
+                Thread.Sleep(50);
                 continue;
             }
             ratees = 0;
             double t = horloge.Elapsed.TotalMilliseconds;
-            // en garde : deux images par seconde, pour qu'elle soit fraîche quand la caméra revient
+            bool pleines = Volatile.Read(ref state.Pleines) > 0;
+            // le moment de la prochaine image voulue : en garde, deux par seconde (elle reste fraîche pour quand la caméra revient) ;
+            // 1.8.0 : seulement des tuiles (vignettes), dix petites par seconde ; sinon les images par seconde demandées
+            double attente = libre ? libreDepuis + 500 - t
+                : !pleines ? state.DerniereVignette + 90 - Environment.TickCount64
+                : prochain - tolerance - t;
+            if (attente > 0)
+            {
+                // 2.5.1 : le fil dort jusque-là (Retrieve donnera alors la dernière image arrivée)
+                Thread.Sleep((int)Math.Clamp(Math.Ceiling(attente), 1, 100));
+                continue;
+            }
+            bool ok;
             if (libre)
             {
-                if (t - libreDepuis < 500) continue;
                 libreDepuis = t;
-                if (Recuperer(camera, frame)) Publier(state, frame, bgra, true);
-                continue;
+                ok = Recuperer(camera, frame);
+                if (ok) Publier(state, frame, bgra, true);
             }
-            // 1.8.0 : seulement des tuiles (vignettes) : dix petites images par seconde, rien en grand
-            if (Volatile.Read(ref state.Pleines) <= 0)
+            else if (!pleines)
             {
-                if (Environment.TickCount64 - state.DerniereVignette < 90) continue;
-                if (Recuperer(camera, frame)) Publier(state, frame, bgra, false);
-                continue;
+                ok = Recuperer(camera, frame);
+                if (ok) Publier(state, frame, bgra, false);
             }
-            if (t < prochain - tolerance) continue;
-            prochain = Math.Max(prochain + intervalle, t);
-            if (Recuperer(camera, frame)) Publier(state, frame, bgra, true);
+            else
+            {
+                prochain = Math.Max(prochain + intervalle, t);
+                ok = Recuperer(camera, frame);
+                if (ok) Publier(state, frame, bgra, true);
+            }
+            double apres = horloge.Elapsed.TotalMilliseconds;
+            if (ok) { derniere = apres; recue = true; }
+            // 2.5.1 : plus d'image depuis 3 s alors qu'on s'en sert (signal HDMI perdu ou changé, carte de capture figée) : à rouvrir
+            else if (!libre && apres - derniere > Coupure) return recue ? FinLecture.Coupure : FinLecture.SansImage;
         }
+        return FinLecture.Changement;
     }
+
+    /// <summary>2.5.1 : la minuterie de Windows à la milliseconde pendant qu'un appareil est ouvert (les attentes entre les images).</summary>
+    static bool Minuterie(bool active)
+    {
+        try { if (active) timeBeginPeriod(1); else timeEndPeriod(1); return true; }
+        catch (Exception) { return false; }
+    }
+    [System.Runtime.InteropServices.DllImport("winmm.dll")] static extern uint timeBeginPeriod(uint ms);
+    [System.Runtime.InteropServices.DllImport("winmm.dll")] static extern uint timeEndPeriod(uint ms);
 
     static bool Recuperer(VideoCapture camera, Mat frame) => camera.Retrieve(frame) && !frame.Empty();
 
@@ -402,6 +460,20 @@ public static class CameraFrames
         lock (gate) if (!dits.Add(device.Id + "|" + ips)) return;
         string message = $"« {device.Nom} » donne {Math.Round(r.Mesure)} images par seconde ({r.Largeur} × {r.Hauteur}) au lieu de {ips} : "
             + "cette carte de capture ou cette caméra n'en donne pas plus. Pour une Sony : mode vidéo, « Réglage d'enreg. » en 60p ; sinon choisissez 30 images par seconde (clic droit sur la source).";
+        Journal.Info(message);
+        Application.Current?.Dispatcher.BeginInvoke(new Action(() => (Application.Current.MainWindow as MainWindow)?.Toast(message)));
+    }
+
+    /// <summary>
+    /// 2.5.1 : la caméra arrive en 4K alors que rien n'en a besoin (le direct et l'écran en 1080p) : l'ordinateur réduit chaque image et
+    /// une carte de capture comme la Cam Link 4K est à la limite de l'USB 3. On le dit une fois, avec quoi faire.
+    /// </summary>
+    static void Conseiller(SourcesDisplay.Peripherique device, Reglage r)
+    {
+        if (r.Largeur < 3840 || LargeurMax() >= 3840) return;
+        lock (gate) if (!dits.Add(device.Id + "|4k")) return;
+        string message = $"« {device.Nom} » arrive en 4K alors que le direct et l'écran sont en 1080p : l'ordinateur réduit chaque image et la carte de capture est à la limite de l'USB. "
+            + "Plus léger et plus stable : sur la Sony, Réglages HDMI › Résolution HDMI : 1080p ; puis clic droit sur la source › Taille de l'image : 1080p.";
         Journal.Info(message);
         Application.Current?.Dispatcher.BeginInvoke(new Action(() => (Application.Current.MainWindow as MainWindow)?.Toast(message)));
     }

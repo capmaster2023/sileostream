@@ -1519,6 +1519,13 @@ public static class AutoTest
                 Ok(!R.MonterCalque(calqueImage.Id, -1), "2.5.0 : ▼ ne descend pas plus bas que tout en bas");
                 Ok(R.MonterPrincipal(-1) && R.Etat.Rang == 0 && R.MonterCalque(calqueImage.Id, 1) && R.Calques[^1].Id == calqueImage.Id && !R.MonterCalque(calqueImage.Id, 1),
                     "2.5.0 : ▲ : l'image remonte devant tout (puis ne monte pas plus haut)");
+                // 2.5.1 : ▲ ▼ dans la liste des médias (à gauche) : les mêmes flèches, sur le média lui-même
+                var ditBas = w.TestDeplacerMedia(img, -1);
+                Ok(R.Calques[0].Id == calqueImage.Id && ditBas.Contains("passe derrière"), $"2.5.1 : ▼ dans la liste de gauche : l'image passe derrière le texte (« {ditBas} »)");
+                var ditHaut = w.TestDeplacerMedia(img, 1);
+                Ok(R.Calques[^1].Id == calqueImage.Id && ditHaut.Contains("passe devant"), $"2.5.1 : ▲ dans la liste de gauche : l'image repasse devant (« {ditHaut} »)");
+                var ditDeja = w.TestDeplacerMedia(img, 1);
+                Ok(R.Calques[^1].Id == calqueImage.Id && ditDeja.Contains("déjà tout devant"), $"2.5.1 : ▲ quand elle est déjà tout devant : rien ne bouge, c'est dit (« {ditDeja} »)");
                 // la case : cacher puis montrer
                 Ok(R.MontrerCalque(calqueTexte.Id, false) && !R.Calques.First(c => c.Id == calqueTexte.Id).Visible && R.Etat.AvecCalques, "2.5.0 : la case cache un calque (il reste dans la liste)");
                 R.MontrerCalque(calqueTexte.Id, true);

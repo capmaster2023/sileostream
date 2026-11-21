@@ -48,6 +48,17 @@ public sealed class MyStreamMoteur : IRecordingFrameProvider, IDisposable
     bool sale = true, aComposer;
     long dernierDessin, dernierBattement, derniereComposition;
 
+    // 2.5.1 : une source vivante qui n'a plus d'image un instant (caméra qui se rouvre, carte de capture qui hésite) : MyStream garde
+    // sa dernière image au lieu d'envoyer du noir à Zoom et à YouTube ; après 2 secondes sans image, le noir (ou le dessin seul) revient
+    const long GardeTrou = 2000;
+    /// <summary>Depuis quand le contenu principal n'a plus d'image (-1 : il en a, ou rien à garder).</summary>
+    long trouDepuis = -1;
+    /// <summary>La source du contenu principal vient de changer : sa première image peut être vide (rien à garder de l'ancienne).</summary>
+    bool sourceNeuve;
+    readonly Dictionary<string, long> trousCalques = new();
+    readonly HashSet<string> calquesNeufs = new();
+    long dernierJournalTrou;
+
     // le calque : clé noire (C1), différence (D) et la place de chaque image vivante
     /// <summary>La place d'une image vivante : <paramref name="Calque"/> null pour le contenu principal.</summary>
     sealed record Trou(string? Calque, bool Flou, Point O, Point X, Point Y, OpenCvSharp.Rect Rognage);
@@ -93,7 +104,8 @@ public sealed class MyStreamMoteur : IRecordingFrameProvider, IDisposable
             catch (Exception x) { erreur = x; }
             pret.Set();
             if (erreur == null) Dispatcher.Run();
-        }) { IsBackground = true, Name = "MyStream" };
+        }) { IsBackground = true, Name = "MyStream", Priority = ThreadPriority.AboveNormal };
+        // 2.5.1 : en priorité haute, comme la caméra et l'envoi du direct : Zoom, l'encodeur ou une page lourde ne le font plus attendre
         t.SetApartmentState(ApartmentState.STA);
         t.Start();
         if (!pret.Wait(10000)) throw new TimeoutException("le fil de MyStream ne démarre pas");
@@ -137,6 +149,14 @@ public sealed class MyStreamMoteur : IRecordingFrameProvider, IDisposable
     // ------------------------------------------------------------ ce que l'interface envoie
     public void Afficher(EtatEcran e) => Fil(() =>
     {
+        // 2.5.1 : une autre source : rien à garder de l'image de l'ancienne pendant un trou ; un trou déjà en cours était celui de la
+        // nouvelle source (arrivée juste avant cet état), encore sans image
+        if (e.Media != etat.Media)
+        {
+            sourceNeuve = true;
+            if (trouDepuis >= 0) { trouDepuis = -1; image = null; }
+        }
+        var avant = etat.Calques;
         etat = e;
         // les calques partis ne gardent ni image ni pixels
         var ids = (e.Calques ?? Array.Empty<CalqueEcran>()).Select(c => c.Id).ToHashSet();
@@ -145,6 +165,15 @@ public sealed class MyStreamMoteur : IRecordingFrameProvider, IDisposable
             imagesCalques.Remove(id); vuesCalques.Remove(id); taillesCalques.Remove(id);
             if (matsCalques.Remove(id, out var mat)) mat.Dispose();
         }
+        foreach (var id in trousCalques.Keys.Where(k => !ids.Contains(k)).ToList()) trousCalques.Remove(id);
+        calquesNeufs.RemoveWhere(id => !ids.Contains(id));
+        // un calque qui montre maintenant une autre source (média modifié) : comme une source neuve
+        foreach (var c in e.Calques ?? Array.Empty<CalqueEcran>())
+            if (avant?.FirstOrDefault(x => x.Id == c.Id) is { } a && a.Media != c.Media)
+            {
+                calquesNeufs.Add(c.Id);
+                if (trousCalques.Remove(c.Id)) imagesCalques[c.Id] = null;
+            }
         rendu.Afficher(e);
         sale = true;
     });
@@ -152,7 +181,20 @@ public sealed class MyStreamMoteur : IRecordingFrameProvider, IDisposable
     public void Media(BitmapSource? b)
     {
         b = Gelee(b);
-        Fil(() => { image = b; if (Taille(b) != tailleImage) sale = true; aComposer = true; });
+        Fil(() =>
+        {
+            long maintenant = Environment.TickCount64;
+            // 2.5.1 : la même source n'a plus d'image un instant (caméra qui se rouvre) : sa dernière image reste, 2 secondes au plus (Tic)
+            if (b == null && image != null && !sourceNeuve)
+            {
+                if (trouDepuis < 0) trouDepuis = maintenant;
+                return;
+            }
+            if (b != null && trouDepuis >= 0) NoterTrou(maintenant - trouDepuis, false);
+            trouDepuis = -1;
+            if (b != null) sourceNeuve = false;
+            image = b; if (Taille(b) != tailleImage) sale = true; aComposer = true;
+        });
     }
     /// <summary>2.5.0 : l'image vivante d'un calque.</summary>
     public void ImageCalque(string id, BitmapSource? b)
@@ -160,11 +202,53 @@ public sealed class MyStreamMoteur : IRecordingFrameProvider, IDisposable
         b = Gelee(b);
         Fil(() =>
         {
+            long maintenant = Environment.TickCount64;
+            // 2.5.1 : la caméra d'un calque n'a plus d'image un instant : sa dernière image reste, 2 secondes au plus (Tic)
+            if (b == null && imagesCalques.TryGetValue(id, out var avant) && avant != null && !calquesNeufs.Contains(id) && !Fixe(id))
+            {
+                trousCalques.TryAdd(id, maintenant);
+                return;
+            }
+            if (trousCalques.Remove(id, out var depuis) && b != null) NoterTrou(maintenant - depuis, false);
+            if (b != null) calquesNeufs.Remove(id);
             imagesCalques[id] = b;
             // une image fixe d'un calque (un logo PNG) est dans le dessin WPF lui-même : il est refait
             if (Fixe(id) || Taille(b) != (taillesCalques.TryGetValue(id, out var t) ? t : null)) sale = true;
             aComposer = true;
         });
+    }
+
+    /// <summary>2.5.1 : les sources restées sans image plus de 2 secondes : leur dernière image n'est plus gardée.</summary>
+    void FinirTrous(long maintenant)
+    {
+        if (trouDepuis >= 0 && maintenant - trouDepuis >= GardeTrou)
+        {
+            NoterTrou(maintenant - trouDepuis, true);
+            trouDepuis = -1;
+            image = null;
+            sale = true; aComposer = true;
+        }
+        if (trousCalques.Count == 0) return;
+        foreach (var (id, depuis) in trousCalques.ToList())
+        {
+            if (maintenant - depuis < GardeTrou) continue;
+            trousCalques.Remove(id);
+            NoterTrou(maintenant - depuis, true);
+            imagesCalques[id] = null;
+            sale = true; aComposer = true;
+        }
+    }
+
+    /// <summary>2.5.1 : au journal (une fois par minute au plus) : une source vivante de MyStream a manqué d'images.</summary>
+    void NoterTrou(long ms, bool noir)
+    {
+        if (ms < 250) return;
+        long maintenant = Environment.TickCount64;
+        if (maintenant - dernierJournalTrou < 60_000) return;
+        dernierJournalTrou = maintenant;
+        Journal.Info(noir
+            ? $"MyStream : une source n'a plus d'image depuis {ms / 1000.0:0.0} s : Zoom et YouTube ne la montrent plus"
+            : $"MyStream : une source a manqué d'images pendant {ms} ms (sa dernière image est restée sur Zoom et YouTube)");
     }
 
     /// <summary>
@@ -201,6 +285,7 @@ public sealed class MyStreamMoteur : IRecordingFrameProvider, IDisposable
         {
             if (!Utile) return;
             long maintenant = Environment.TickCount64;
+            FinirTrous(maintenant);
             // pas plus de 15 dessins WPF par seconde (le reste de l'image suit à chaque image vivante)
             if (sale && maintenant - dernierDessin >= 66)
             {

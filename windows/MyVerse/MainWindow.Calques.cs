@@ -120,6 +120,32 @@ public partial class MainWindow
         if ((sender as FrameworkElement)?.DataContext is Annonce a) Superposer(a);
     }
 
+    // ------------------------------------------------------------ 2.5.1 : ▲ ▼ dans la liste des médias (à gauche)
+    void MonterAnnonceListe_Click(object sender, RoutedEventArgs e) => DeplacerAnnonceListe(sender, e, 1);
+    void DescendreAnnonceListe_Click(object sender, RoutedEventArgs e) => DeplacerAnnonceListe(sender, e, -1);
+
+    void DeplacerAnnonceListe(object sender, RoutedEventArgs e, int sens)
+    {
+        e.Handled = true;
+        if ((sender as FrameworkElement)?.DataContext is Annonce a) Toast(DeplacerMedia(a, sens));
+    }
+
+    /// <summary>
+    /// ▲ ▼ d'un média de la liste, comme dans « Sources à l'écran » : il passe devant ou derrière les autres sources à l'écran
+    /// (son calque s'il est superposé, l'écran principal s'il est montré en grand). Renvoie ce qu'il faut dire.
+    /// </summary>
+    string DeplacerMedia(Annonce a, int sens)
+    {
+        var nom = $"« {a.Titre} »";
+        var resultat = R.MonterMedia(a.Id, sens, out var calque);
+        // son calque est choisi dans Médias : ses poignées apparaissent, sa ligne s'allume dans « Sources à l'écran »
+        if (calque != null) { calqueChoisi = calque; MajCalquesUi(R.Etat, true); }
+        if (resultat == null) return $"{nom} n'est pas à l'écran : ⧉ pour le superposer, ou double-clic pour le montrer en grand.";
+        if (resultat == true) return sens > 0 ? $"{nom} passe devant." : $"{nom} passe derrière.";
+        if (R.Calques.Count == 0) return $"{nom} est seul à l'écran : superposez une autre source (⧉) pour choisir laquelle passe devant.";
+        return sens > 0 ? $"{nom} est déjà tout devant." : $"{nom} est déjà tout derrière.";
+    }
+
     // ------------------------------------------------------------ l'écran et la liste
     /// <summary>Après chaque changement de l'écran : le dessin de Médias, ses poignées et la liste des sources (refaite si elle a changé).</summary>
     void MajCalquesUi(EtatEcran e, bool forcer = false)
@@ -397,6 +423,8 @@ public partial class MainWindow
     // ------------------------------------------------------------ pour le test automatique
     public IReadOnlyList<CalqueEcran> TestCalques => R.Calques;
     public void TestSuperposer(Annonce a) => Superposer(a);
+    /// <summary>2.5.1 : ▲ (1) ou ▼ (-1) d'un média de la liste de gauche ; renvoie le message montré.</summary>
+    public string TestDeplacerMedia(Annonce a, int sens) => DeplacerMedia(a, sens);
     /// <summary>Les lignes de la liste (du haut vers le bas) : le nom de chaque source, « Écran principal » pour le contenu principal.</summary>
     public string TestListeCalques => string.Join(" | ", listeCalquesUi.Children.OfType<Border>()
         .Select(b => b.Child is DockPanel d ? d.Children.OfType<StackPanel>().LastOrDefault()?.Children.OfType<TextBlock>().FirstOrDefault()?.Text ?? "" : ""));

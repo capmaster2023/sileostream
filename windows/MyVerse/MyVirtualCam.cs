@@ -23,6 +23,11 @@ public sealed class MyVirtualCam : IDisposable
     readonly object verrouVue = new();
     readonly byte[] trame = new byte[Bytes];
     readonly OpenCvSharp.Mat redim = new(), bgr = new();
+    /// <summary>
+    /// 2.5.1 : l'heure est aussi rafraîchie à part, quatre fois par seconde : si MyStream est occupé un instant (une page lourde,
+    /// l'ordinateur chargé), Zoom garde la dernière image au lieu de passer au noir.
+    /// </summary>
+    readonly System.Threading.Timer battement;
     volatile bool dispose;
     int seq;
     /// <summary>La dernière image n'a pas pu être écrite (le filtre lisait) : on la réécrit au prochain battement.</summary>
@@ -35,6 +40,7 @@ public sealed class MyVirtualCam : IDisposable
         fichier = MemoryMappedFile.CreateOrOpen(@"Local\MyChurch.MyVirtualCam.frames.v1", 64 + Bytes, MemoryMappedFileAccess.ReadWrite);
         vue = fichier.CreateViewAccessor();
         Battre();
+        battement = new System.Threading.Timer(_ => Battre(), null, 250, 250);
     }
 
     /// <summary>Une image de MyStream (BGRA, de haut en bas, toute taille) : mise à 1280 × 720 et écrite pour le filtre.</summary>
@@ -124,6 +130,7 @@ public sealed class MyVirtualCam : IDisposable
     public void Dispose()
     {
         if (dispose) return;
+        battement.Dispose();
         lock (verrouVue)
         {
             dispose = true;

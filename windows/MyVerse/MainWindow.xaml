@@ -116,25 +116,37 @@
                 </DataTrigger>
             </DataTemplate.Triggers>
         </DataTemplate>
-        <!-- une source de la bibliothèque Display : titre, description, et « + » (✓ quand elle est dans la grille) -->
+        <!-- une source de la bibliothèque Display : titre, description, ▲ ▼ (2.5.1), ⧉ et « + » (✓ quand elle est dans la grille) -->
         <DataTemplate x:Key="ModeleAnnonce">
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*" />
                     <ColumnDefinition Width="Auto" />
                     <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
                 </Grid.ColumnDefinitions>
-                <StackPanel VerticalAlignment="Center" Margin="0,0,10,0">
+                <StackPanel VerticalAlignment="Center" Margin="0,0,8,0">
                     <TextBlock Text="{Binding Titre}" FontSize="14.5" FontWeight="Bold" TextTrimming="CharacterEllipsis" Foreground="{StaticResource Blanc}" />
                     <TextBlock Text="{Binding Description}" FontSize="12" MaxHeight="18" Foreground="{StaticResource Brume2}" TextTrimming="CharacterEllipsis" Margin="0,2,0,0" />
                 </StackPanel>
+                <!-- 2.5.1 : ▲ ▼ comme dans « Sources à l'écran » : ce média passe devant ou derrière les autres sources à l'écran -->
+                <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="0,0,6,0">
+                    <Button Style="{StaticResource BtnGrille}" Width="26" Height="16" Margin="0,0,0,2" Click="MonterAnnonceListe_Click"
+                            ToolTip="Monter : ce média passe devant les autres sources à l'écran (la plus haute passe devant)">
+                        <Path Data="M 0,5 L 4.5,0 L 9,5 Z" Fill="{StaticResource Or}" Width="9" Height="5" Stretch="Fill" />
+                    </Button>
+                    <Button Style="{StaticResource BtnGrille}" Width="26" Height="16" Click="DescendreAnnonceListe_Click"
+                            ToolTip="Descendre : ce média passe derrière les autres sources à l'écran">
+                        <Path Data="M 0,0 L 9,0 L 4.5,5 Z" Fill="{StaticResource Or}" Width="9" Height="5" Stretch="Fill" />
+                    </Button>
+                </StackPanel>
                 <!-- 2.5.0 : superposer à l'écran (par-dessus ce qui y est) -->
-                <Button Grid.Column="1" Style="{StaticResource BtnGrille}" Click="SuperposerAnnonceListe_Click" VerticalAlignment="Center" Margin="0,0,6,0"
+                <Button Grid.Column="2" Style="{StaticResource BtnGrille}" Click="SuperposerAnnonceListe_Click" VerticalAlignment="Center" Margin="0,0,6,0"
                         ToolTip="Superposer à l'écran : par-dessus ce qui y est (Médias : le déplacer, l'agrandir, le mettre devant ou derrière)">
                     <Path Data="{StaticResource IconeDuo}" Stroke="{StaticResource Or}" StrokeThickness="2" StrokeStartLineCap="Round" StrokeEndLineCap="Round"
                           StrokeLineJoin="Round" Width="14" Height="14" Stretch="Uniform" />
                 </Button>
-                <Button x:Name="Grille" Grid.Column="2" Style="{StaticResource BtnGrille}" Click="GrilleAnnonceListe_Click" VerticalAlignment="Center" ToolTip="Ajouter à la grille (un clic dans la grille = en direct)">
+                <Button x:Name="Grille" Grid.Column="3" Style="{StaticResource BtnGrille}" Click="GrilleAnnonceListe_Click" VerticalAlignment="Center" ToolTip="Ajouter à la grille (un clic dans la grille = en direct)">
                     <Path x:Name="Signe" Data="{StaticResource IconePlus}" Stroke="{StaticResource Or}" StrokeThickness="2.4" StrokeStartLineCap="Round" StrokeEndLineCap="Round"
                           StrokeLineJoin="Round" Width="13" Height="13" Stretch="Uniform" />
                 </Button>
@@ -397,7 +409,7 @@
                         <!-- 2.1.0 : les caméras à part des médias : MyVirtualCam, webcams, cartes de capture, téléphone MyCam, caméra Sony -->
                         <Button x:Name="DisplayPeripherique" Style="{StaticResource Btn}" Content="+ Ajouter un périphérique vidéo" Height="44" Padding="14,0" Margin="0,8,0,0"
                                 ToolTip="Une caméra : MyVirtualCam (l'image de MyStream), une webcam, une carte de capture USB/HDMI, un téléphone MyCam ou une caméra Sony par Wi-Fi" />
-                        <TextBlock Text="⧉ : le superposer à l'écran (par-dessus ce qui y est). + : le mettre dans la grille (✓ : il y est déjà). Double-clic : le montrer seul. Clic droit : modifier, supprimer."
+                        <TextBlock Text="⧉ : le superposer à l'écran (par-dessus ce qui y est). ▲ ▼ : devant ou derrière les autres sources à l'écran. + : le mettre dans la grille (✓ : il y est déjà). Double-clic : le montrer seul. Clic droit : modifier, supprimer."
                                    TextWrapping="Wrap" Foreground="{StaticResource Brume}" FontSize="12.5" LineHeight="18" Margin="0,10,0,0" />
                     </StackPanel>
                     <Grid Margin="0,12,0,0">

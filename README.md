@@ -1,4 +1,4 @@
-# Siloé Stream 2.5.0
+# Siloé Stream 2.5.1
 
 **Commencer le culte** (2.1.0) : un clic vérifie le projecteur, YouTube, le son et les caméras, puis lance l'enregistrement dans le dossier choisi (Réglages › Son). Médias : « + Ajouter un média » et, à part, « + Ajouter un périphérique vidéo » (MyVirtualCam, webcams, cartes de capture, MyCam, Sony).
 
@@ -27,6 +27,7 @@ La page **Médias** montre l'écran en grand, au-dessus de la grille. Le bouton 
 - Dans l'écran : glisser pour déplacer, les coins pour agrandir (Maj : garder les proportions). Les sources se collent aux bords et au milieu (Alt : sans aimant) ; double-clic : tout l'écran.
 - **Sources à l'écran**, comme la liste d'OBS : ☑ montrer ou cacher, **▲ ▼** monter ou descendre (la plus haute passe devant), ⤢ tout l'écran, ✕ retirer, **Tout retirer**.
 - **L'écran principal** (versets, chants, média montré en grand) est une ligne de la liste : les paroles au-dessus d'une caméra, ou une caméra par-dessus le verset.
+- **▲ ▼ aussi dans la liste des médias** (à gauche, 2.5.1) : le média passe devant ou derrière les autres sources à l'écran (son calque s'il est superposé, l'écran principal s'il est montré en grand).
 
 **Retirer de l'écran** (Échap) ne vide que l'écran principal : les sources superposées restent. La touche **B** masque tout sans rien perdre. Les calques suivent partout : projection, aperçus, MyStream (YouTube, Zoom), MyVirtualCam, page OBS et enregistrements. Un logo PNG garde sa transparence. Le Duo (jusqu'à la 2.4) est remplacé par les calques.
 

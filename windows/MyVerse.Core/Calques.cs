@@ -167,6 +167,32 @@ public sealed partial class Regie
         return true;
     }
 
+    /// <summary>
+    /// 2.5.1 : ▲ ▼ d'un média de la liste (à gauche), comme dans « Sources à l'écran » : il passe devant (sens 1) ou derrière (sens -1)
+    /// les autres sources à l'écran. Superposé, c'est son calque qui bouge (le plus devant, s'il est superposé plusieurs fois) ;
+    /// montré en grand, c'est le contenu principal. <paramref name="calque"/> : le calque qui a bougé (null : aucun).
+    /// Null : le média n'est pas à l'écran ; faux : il est déjà tout devant (ou tout derrière) ; vrai : il a bougé.
+    /// </summary>
+    public bool? MonterMedia(string annonce, int sens, out string? calque)
+    {
+        calque = null;
+        if (Calques.LastOrDefault(c => c.Annonce == annonce) is { } c)
+        {
+            calque = c.Id;
+            return MonterCalque(c.Id, sens);
+        }
+        if (MediaPrincipal(annonce)) return MonterPrincipal(sens);
+        return null;
+    }
+
+    /// <summary>2.5.1 : le média est le contenu principal de l'écran (montré en grand, ou une diapositive de son texte).</summary>
+    public bool MediaPrincipal(string annonce) => Cible switch
+    {
+        CibleDisplay d => d.Id == annonce,
+        CibleTexte t => t.Element == annonce,
+        _ => false,
+    };
+
     /// <summary>Une source des Médias a changé (texte, fenêtre, nom) : ses calques suivent ; supprimée, ils partent.</summary>
     void CalquesSuivent(Annonce? a, string id)
     {

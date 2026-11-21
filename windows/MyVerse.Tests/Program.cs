@@ -1310,6 +1310,25 @@ if (Actif())
     // les calques ne sont pas gardés d'une séance à l'autre
     var rg2 = new Regie(Donnees.Charger(don.Dossier, res), new Bibles(don));
     Ok(rg2.Calques.Count == 0 && rg2.Etat.Vide, "au démarrage : pas de calque");
+    // 2.5.1 : ▲ ▼ dans la liste des médias (à gauche) : le calque du média passe devant ou derrière ; montré en grand, l'écran principal
+    var rgm = new Regie(don, new Bibles(don));
+    var ma = rgm.NouvelleAnnonce("Média A", "Texte A");
+    var mb = rgm.NouvelleAnnonce("Média B", "Texte B");
+    var mc = rgm.NouvelleAnnonce("Média C", "Texte C");
+    rgm.AfficherVerset(42, 3, 16, 16);
+    var ca = rgm.Superposer(ma)!;
+    var cb = rgm.Superposer(mb)!;
+    Ok(rgm.MonterMedia(ma.Id, 1, out var cma) == true && cma == ca.Id && rgm.Calques.Select(c => c.Id).SequenceEqual(new[] { cb.Id, ca.Id }),
+        "2.5.1 : ▲ d'un média de la liste : son calque passe devant");
+    Ok(rgm.MonterMedia(ma.Id, 1, out _) == false && rgm.Calques[^1].Id == ca.Id, "2.5.1 : ▲ d'un média déjà tout devant : rien ne bouge");
+    Ok(rgm.MonterMedia(mb.Id, -1, out _) == true && rgm.Etat.Rang == 1 && rgm.Calques[0].Id == cb.Id, "2.5.1 : ▼ : son calque passe derrière le verset");
+    Ok(rgm.MonterMedia(mc.Id, 1, out var cmc) == null && cmc == null && rgm.Etat.Rang == 1, "2.5.1 : un média qui n'est pas à l'écran : rien ne bouge");
+    rgm.AfficherAnnonce(mc);
+    Ok(rgm.MediaPrincipal(mc.Id) && rgm.MonterMedia(mc.Id, 1, out var cmp) == true && cmp == null && rgm.Etat.Rang == 2,
+        "2.5.1 : ▲ du média montré en grand : l'écran principal passe devant");
+    Ok(rgm.MonterMedia(mc.Id, 1, out _) == false && rgm.MonterMedia(mc.Id, -1, out _) == true && rgm.Etat.Rang == 1, "2.5.1 : … et repasse derrière (▼)");
+    rgm.RetirerCalques();
+    rgm.Effacer();
 }
 
 Groupe("Plus de Duo (2.5.0)");
