@@ -20,6 +20,11 @@ public sealed class Chant
     [JsonPropertyName("sections")] public List<Section> Sections { get; set; } = new();
     [JsonPropertyName("copyright"), JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] public string? Copyright { get; set; }
     [JsonPropertyName("ccli"), JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] public string? Ccli { get; set; }
+    /// <summary>
+    /// 3.0.0 : la traduction (française) du chant, ligne par ligne : la ligne d'origine (sans espaces en trop) → sa traduction.
+    /// Gardée par ligne, elle suit le chant quelle que soit sa découpe (5 lignes, karaoké…).
+    /// </summary>
+    [JsonPropertyName("traductions"), JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] public Dictionary<string, string>? Traductions { get; set; }
 
     public static string NouvelId()
     {

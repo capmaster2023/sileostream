@@ -258,6 +258,8 @@ public partial class MainWindow : Window
         InitCalques();
         InitEcranDefaut();
         InitTelecommande();
+        // 3.0.0 : la traduction française des chants swahili (Wokovu)
+        InitTraduction();
         InitProjecteur();
         InitMyStream();
         // 2.1.0 : « Commencer le culte » (vérifications, enregistrement)
@@ -500,6 +502,11 @@ public partial class MainWindow : Window
                 EnvoyerDansStream();
                 e.Handled = true;
                 break;
+            case Key.T when Keyboard.Modifiers == ModifierKeys.None:
+                // 3.0.0 : la traduction française sous les chants swahili, montrée ou cachée
+                MontrerTraduction(!R.TraductionAffichee);
+                e.Handled = true;
+                break;
             case Key.Right or Key.Space or Key.PageDown:
                 R.Bouger(1);
                 e.Handled = true;
@@ -572,6 +579,7 @@ public partial class MainWindow : Window
         Ajout("retirer", "Échap");
         Ajout("écran noir", "B");
         Ajout("envoyer dans le stream", "S");
+        Ajout("traduction française (chants swahili)", "T");
         Ajout("MyStream : source principale", "M");
         Ajout("diapositive", "1–9");
     }

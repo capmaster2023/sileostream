@@ -343,7 +343,8 @@ public sealed class Rendu : Grid
         bool vide = e.Vide;
         // « fond » (écran par défaut « Fond seul », 3.3) : l'habillage reste, sans texte
         bool sansTexte = vide || e.Mode == "fond";
-        var deux = e.Mode == "verset" && e.Second != null ? e.Second.Texte : "";
+        // 3.0.0 : sous un chant swahili, sa traduction française (seulement si on la montre)
+        var deux = (e.Mode is "verset" or "chant") && e.Second != null ? e.Second.Texte : "";
         var nouvelle = string.Join("\u0001", new[] { e.Mode, string.Join("\n", e.Lignes), e.Ref, e.Taille.ToString(), e.Presentation, deux });
         // 1.5.0 : des fondus plus courts (le texte suivant arrive en un tiers de seconde au lieu de près d'une seconde)
         double dureeFond = Transitions ? 0.35 : 0;

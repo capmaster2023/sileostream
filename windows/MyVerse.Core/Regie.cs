@@ -158,7 +158,8 @@ public sealed partial class Regie
             Mode = "chant", Media = null,
             Lignes = c.Sections[i].Text.Split('\n').Where(l => l.Trim().Length > 0).ToArray(),
             Ref = "",
-            Second = null,
+            // 3.0.0 : la traduction française d'un chant swahili, sous les paroles (seulement si on le veut)
+            Second = SecondChant(c, i),
         };
         NoterAffichage();
         Signaler();
@@ -538,6 +539,8 @@ public sealed partial class Regie
         c.Sections = sections;
         if (sauverPlusTard) donnees.SauverChantsPlusTard(); else donnees.SauverChants();
         ChantsChange?.Invoke();
+        // 3.0.0 : un chant swahili (Wokovu) enregistré : ses lignes nouvelles sont traduites tout de suite (en arrière-plan)
+        if (TraductionChants.ATraduire(c, donnees.Reglages.Traduction) && TraductionChants.Manquantes(c).Count > 0) TraductionDemandee?.Invoke(c, "");
         if (Cible is CibleChant cc && cc.Id == c.Id)
         {
             if (cc.I < c.Sections.Count) AfficherSection(c.Id, cc.I); else Signaler();

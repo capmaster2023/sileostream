@@ -30,7 +30,7 @@ public sealed partial class Regie
     {
         var c = Trouver(id);
         if (c == null || i < 0 || i >= c.Sections.Count) return null;
-        return Neutre() with { Mode = "chant", Lignes = c.Sections[i].Text.Split('\n').Where(l => l.Trim().Length > 0).ToArray() };
+        return Neutre() with { Mode = "chant", Lignes = c.Sections[i].Text.Split('\n').Where(l => l.Trim().Length > 0).ToArray(), Second = SecondChant(c, i) };
     }
 
     /// <summary>Une source Display : son texte ou son média.</summary>

@@ -87,6 +87,8 @@ public sealed class Reglages
     [JsonPropertyName("myStreamAucune")] public bool MyStreamAucune { get; set; }
     /// <summary>Le direct (1.6.0) : YouTube (compte connecté ou clé de stream) ou un autre service.</summary>
     [JsonPropertyName("direct")] public ReglagesDirect Direct { get; set; } = new();
+    /// <summary>3.0.0 : la traduction française des chants swahili (Wokovu).</summary>
+    [JsonPropertyName("traduction")] public ReglagesTraduction Traduction { get; set; } = new();
 }
 
 /// <summary>
@@ -193,6 +195,13 @@ public sealed class Donnees
         r.MyStreamSource ??= "";
         r.Direct ??= new ReglagesDirect();
         r.Direct.Normaliser();
+        // 3.0.0 : la traduction des chants swahili
+        r.Traduction ??= new ReglagesTraduction();
+        r.Traduction.Recueils ??= new List<string> { "wokovu" };
+        r.Traduction.Recueils = r.Traduction.Recueils.Where(x => !string.IsNullOrWhiteSpace(x)).Select(x => x.Trim()).Distinct(StringComparer.OrdinalIgnoreCase).ToList();
+        if (string.IsNullOrWhiteSpace(r.Traduction.De)) r.Traduction.De = "sw";
+        if (string.IsNullOrWhiteSpace(r.Traduction.Vers)) r.Traduction.Vers = "fr";
+        r.Traduction.Courriel ??= "";
         if (string.IsNullOrEmpty(r.Bibles.Principale)) r.Bibles.Principale = "lsg";
         r.Bibles.Seconde ??= "";
         if (r.Bibles.Seconde == r.Bibles.Principale) r.Bibles.Seconde = "";

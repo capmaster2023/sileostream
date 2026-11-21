@@ -535,6 +535,39 @@ public static class AutoTest
     }
 
     /// <summary>
+    /// Siloé Stream 3.0.0 : un chant swahili (Wokovu) déjà traduit (sans Internet) : la traduction n'est montrée sous les paroles que si
+    /// on le veut (touche T) ; la fenêtre « Traduction » la corrige ligne par ligne et l'écran suit.
+    /// </summary>
+    static async Task TestTraduction(MainWindow w)
+    {
+        var R = App.Regie;
+        var id = R.EnregistrerChant(null, "Yesu ni Bwana (test)", new List<Section> { new() { Label = "Ubeti 1", Text = "Yesu ni Bwana\nAmefufuka" } }, "Nyimbo za Wokovu");
+        var c = R.Trouver(id)!;
+        c.Traductions = new Dictionary<string, string> { ["Yesu ni Bwana"] = "Jésus est Seigneur", ["Amefufuka"] = "Il est ressuscité" };
+        bool avant = R.TraductionAffichee;
+        w.TestMontrerTraduction(false);
+        R.AfficherSection(id, 0);
+        await Attendre(600);
+        Ok(R.Etat.Mode == "chant" && R.Etat.Second == null && w.TestTraductionValeur == "Cachée", "3.0.0 : chant swahili : la traduction n'est pas montrée tant qu'on ne le veut pas");
+        w.TestMontrerTraduction(true);
+        await Attendre(900);
+        Ok(R.Etat.Second?.Texte == "Jésus est Seigneur\nIl est ressuscité" && w.TestTraductionValeur == "Montrée", "3.0.0 : « montrer » (touche T) : le français apparaît sous les paroles");
+        if (w.Ecran != null) Capture(w.Ecran, "30-traduction.png");
+        Capture(w, "30b-traduction-regie.png");
+        await Fenetre(w, () => new TraductionWindow(c), "31-traduction-fenetre.png", d =>
+        {
+            var t = (TraductionWindow)d;
+            Ok(t.TestLignes == 2, "3.0.0 : fenêtre Traduction : une case par ligne du chant");
+            t.TestEcrire(1, "Il est vivant");
+            t.TestEnregistrer();
+        });
+        Ok(R.Etat.Second?.Texte == "Jésus est Seigneur\nIl est vivant", "3.0.0 : une traduction corrigée à la main : l'écran suit tout de suite");
+        w.TestMontrerTraduction(avant);
+        R.Effacer();
+        R.SupprimerChant(id);
+    }
+
+    /// <summary>
     /// Siloé Stream 1.6.4 : MyStream (l'écran de Zoom et de YouTube) montre sa source principale, quoi que montre l'église ;
     /// « Envoyer dans le stream » (S) : il montre ce que montre l'église et la suit ; « Source principale » (M) l'y ramène.
     /// Le direct part vraiment (vers un serveur RTMP local : ffmpeg en écoute, comme YouTube), à la main, puis tout seul
@@ -1722,6 +1755,9 @@ public static class AutoTest
             });
             Ok(idEditeur != null && R.Trouver(idEditeur) != null, "1.5.1 : fermer l'éditeur garde le chant enregistré");
             if (idEditeur != null) R.SupprimerChant(idEditeur);
+            // 3.0.0 : la traduction française d'un chant swahili (Wokovu), montrée seulement si on le veut (touche T)
+            try { await TestTraduction(w); }
+            catch (Exception x) { Echec("3.0.0 : traduction : " + x); }
             // 1.6.0 / 1.6.4 : MyStream (les deux écrans, la source principale, « Envoyer dans le stream », la touche M), le direct, le direct automatique
             try { await TestMyStream(w); }
             catch (Exception x) { Echec("1.6.0 : MyStream : " + x); }

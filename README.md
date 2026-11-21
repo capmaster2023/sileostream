@@ -1,4 +1,4 @@
-# Siloé Stream 2.5.1
+# Siloé Stream 3.0.0
 
 **Commencer le culte** (2.1.0) : un clic vérifie le projecteur, YouTube, le son et les caméras, puis lance l'enregistrement dans le dossier choisi (Réglages › Son). Médias : « + Ajouter un média » et, à part, « + Ajouter un périphérique vidéo » (MyVirtualCam, webcams, cartes de capture, MyCam, Sony).
 
@@ -20,6 +20,12 @@ Siloé Stream est un logiciel libre sous licence **GNU GPL version 2 ou ultérie
 - **Barre du bas** : l'écran de projection, les téléphones, l'écran de scène et l'heure.
 - Thème **clair** par défaut (crème), **sombre** au choix d'un clic. Police Manrope.
 
+## Chants swahili traduits et karaoké (3.0.0)
+
+- Les chants du recueil **Wokovu** sont traduits en français tout seuls, en arrière-plan (service gratuit MyMemory ; 50 000 caractères par jour avec un courriel), et la traduction reste dans le chant. Elle ne s'affiche sous les paroles **que si on le veut** : à droite, **Traduction française**, ou la touche **T**. Elle se corrige à la main dans l'éditeur du chant (**Traduction…**).
+- Éditeur du chant › **Lignes par diapositive** : **2 lignes** ou **1 ligne** pour le karaoké ; on revient à 4 lignes sans perdre les couplets.
+- Caméra plus stable sur Zoom et YouTube : la lecture des caméras ne tourne plus à vide, MyStream et MyVirtualCam gardent la dernière image pendant un court trou au lieu du noir.
+
 ## Médias en calques (2.5.0) : des sources superposées, comme dans OBS
 
 La page **Médias** montre l'écran en grand, au-dessus de la grille. Le bouton **⧉ Superposer** d'un média (à gauche, sur sa tuile ou dans son clic droit) le pose par-dessus ce qui est à l'écran : sur un écran vide il prend tout l'écran, sinon un coin.
@@ -27,7 +33,7 @@ La page **Médias** montre l'écran en grand, au-dessus de la grille. Le bouton 
 - Dans l'écran : glisser pour déplacer, les coins pour agrandir (Maj : garder les proportions). Les sources se collent aux bords et au milieu (Alt : sans aimant) ; double-clic : tout l'écran.
 - **Sources à l'écran**, comme la liste d'OBS : ☑ montrer ou cacher, **▲ ▼** monter ou descendre (la plus haute passe devant), ⤢ tout l'écran, ✕ retirer, **Tout retirer**.
 - **L'écran principal** (versets, chants, média montré en grand) est une ligne de la liste : les paroles au-dessus d'une caméra, ou une caméra par-dessus le verset.
-- **▲ ▼ aussi dans la liste des médias** (à gauche, 2.5.1) : le média passe devant ou derrière les autres sources à l'écran (son calque s'il est superposé, l'écran principal s'il est montré en grand).
+- **▲ ▼ aussi dans la liste des médias** (à gauche, 3.0.0) : le média passe devant ou derrière les autres sources à l'écran (son calque s'il est superposé, l'écran principal s'il est montré en grand).
 
 **Retirer de l'écran** (Échap) ne vide que l'écran principal : les sources superposées restent. La touche **B** masque tout sans rien perdre. Les calques suivent partout : projection, aperçus, MyStream (YouTube, Zoom), MyVirtualCam, page OBS et enregistrements. Un logo PNG garde sa transparence. Le Duo (jusqu'à la 2.4) est remplacé par les calques.
 

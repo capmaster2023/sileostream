@@ -18,6 +18,8 @@ public partial class EditeurWindow : FenetreDialogue
     readonly bool nouveau;
     readonly string recueil;
     string brut = "";
+    /// <summary>3.0.0 : brut vient des paroles déjà rangées (pas d'un collage) : il est refait à chaque rangement (les corrections restent).</summary>
+    bool brutDuTexte;
     readonly DispatcherTimer minuterie = new() { Interval = TimeSpan.FromMilliseconds(120) };
     /// <summary>Enregistrement automatique, un instant après la dernière touche.</summary>
     readonly DispatcherTimer sauvegarde = new() { Interval = TimeSpan.FromMilliseconds(700) };
@@ -51,7 +53,7 @@ public partial class EditeurWindow : FenetreDialogue
         Ranger.Click += (_, _) =>
         {
             SauverMaintenant();
-            if (brut.Length == 0) brut = MyVerse.Ranger.SansEntetes(Texte.Text);
+            if (brut.Length == 0 || brutDuTexte) { brut = MyVerse.Ranger.Rassembler(Texte.Text); brutDuTexte = true; }
             RangerTexte(brut);
             SauverMaintenant();
         };
@@ -61,11 +63,19 @@ public partial class EditeurWindow : FenetreDialogue
             App.Donnees.Reglages.LignesDiapo = NbLignes;
             App.Donnees.SauverReglages();
             SauverMaintenant();
-            if (brut.Length == 0) brut = MyVerse.Ranger.SansEntetes(Texte.Text);
+            if (brut.Length == 0 || brutDuTexte) { brut = MyVerse.Ranger.Rassembler(Texte.Text); brutDuTexte = true; }
             if (brut.Trim().Length > 0) RangerTexte(brut);
             SauverMaintenant();
         };
         Brut.Click += (_, _) => { SauverMaintenant(); Texte.Text = brut; Apercu_(); SauverMaintenant(); };
+        // 3.0.0 : un chant swahili (Wokovu) : sa traduction française, ligne par ligne, à corriger à la main
+        MajBoutonTraduction();
+        TraductionBtn.Click += (_, _) =>
+        {
+            SauverMaintenant();
+            if (id != null && App.Regie.Trouver(id) is { } ch) new TraductionWindow(ch) { Owner = this }.ShowDialog();
+            else Dialogue.Informer(this, "Écrivez d'abord les paroles du chant : la traduction vient ensuite.");
+        };
         Annuler.Click += (_, _) => Close();
         Retour.Click += (_, _) => RetourArriere();
         // Ctrl+Z : le même retour en arrière, par étapes (plutôt que lettre par lettre)
@@ -97,6 +107,13 @@ public partial class EditeurWindow : FenetreDialogue
 
     int NbLignes => int.TryParse((Lignes.SelectedItem as ComboBoxItem)?.Tag as string, out var n) ? n : 0;
 
+    /// <summary>3.0.0 : « Traduction… » seulement pour un chant d'un recueil swahili (Wokovu).</summary>
+    void MajBoutonTraduction()
+    {
+        var rec = id != null && App.Regie.Trouver(id) is { } ch ? ch.Author : recueil;
+        TraductionBtn.Visibility = TraductionChants.RecueilSwahili(rec, App.Donnees.Reglages.Traduction) ? Visibility.Visible : Visibility.Collapsed;
+    }
+
     /// <summary>Un chant complet collé dans l'éditeur vide (ou tout sélectionné) : rangé directement.</summary>
     void Coller(object sender, DataObjectPastingEventArgs e)
     {
@@ -107,6 +124,7 @@ public partial class EditeurWindow : FenetreDialogue
         {
             e.CancelCommand();
             brut = t.Replace("\r\n", "\n");
+            brutDuTexte = false;
             Dispatcher.BeginInvoke(new Action(() => { SauverMaintenant(); RangerTexte(brut); SauverMaintenant(); }));
         }
     }
@@ -117,7 +135,7 @@ public partial class EditeurWindow : FenetreDialogue
         if (r.Sections.Count == 0) return;
         if (Titre.Text.Trim().Length == 0 && r.Titre.Length > 0) Titre.Text = r.Titre;
         Texte.Text = ChantsFormats.VersTexte(r.Sections);
-        Brut.Visibility = brut.Length > 0 ? Visibility.Visible : Visibility.Collapsed;
+        Brut.Visibility = brut.Length > 0 && !brutDuTexte ? Visibility.Visible : Visibility.Collapsed;
         Apercu_();
         if (!silence && Owner is MainWindow m) m.Toast($"Chant rangé : {r.Sections.Count} diapositive{(r.Sections.Count > 1 ? "s" : "")}.");
     }
@@ -208,6 +226,7 @@ public partial class EditeurWindow : FenetreDialogue
     public void TestColler(string t)
     {
         brut = t.Replace("\r\n", "\n");
+        brutDuTexte = false;
         RangerTexte(brut, true);
     }
     /// <summary>Enregistre tout de suite (sans attendre la pause de frappe) et rend l'identifiant du chant.</summary>

@@ -258,6 +258,19 @@ if (Actif())
     Egal(string.Join("|", Ranger.CouperLigne("Une très longue ligne de chant, qui ne tient pas sur une ligne", 40)), "Une très longue ligne de chant,|qui ne tient pas sur une ligne", "ligne trop longue coupée à la virgule");
     Ok(Ranger.LigneAccords("Do Ré Mim Sol") && !Ranger.LigneAccords("La"), "accords en français");
     Egal(string.Join(",", Ranger.Tailles(7, 5)), "4,3", "découpe équilibrée 7 → 4+3");
+    // 3.0.0 : karaoké : 2 lignes, 1 ligne par diapositive ; et retour à 4 lignes sans perdre les couplets
+    var k2 = Ranger.Ranger_("Une\nDeux\nTrois\nQuatre\nCinq\n\nRefrain\nGloire\nà Dieu", 2);
+    Egal(string.Join("|", k2.Sections.Select(x => x.Text.Split('\n').Length)), "2|2|1|2", "3.0.0 : karaoké 2 lignes : 2 + 2 + 1, refrain 2");
+    Egal(string.Join("|", k2.Sections.Select(x => x.Label)), "Couplet 1 (1/3)|Couplet 1 (2/3)|Couplet 1 (3/3)|Refrain", "3.0.0 : karaoké 2 lignes : morceaux numérotés");
+    var k1 = Ranger.Ranger_("Une\nDeux\nTrois\n\nRefrain\nGloire\nà Dieu", 1);
+    Ok(k1.Sections.Count == 5 && k1.Sections.All(x => !x.Text.Contains('\n')), "3.0.0 : karaoké 1 ligne : une ligne par diapositive");
+    var texteKaraoke = ChantsFormats.VersTexte(k1.Sections);
+    var rassemble = Ranger.Rassembler(texteKaraoke);
+    Egal(rassemble, "[Couplet 1]\nUne\nDeux\nTrois\n\n[Refrain]\nGloire\nà Dieu", "3.0.0 : les morceaux d'une strophe sont recollés");
+    var k4 = Ranger.Ranger_(rassemble, 4);
+    Egal(string.Join("|", k4.Sections.Select(x => x.Label + "=" + x.Text.Split('\n').Length)), "Couplet 1=3|Refrain=2", "3.0.0 : de 1 ligne à 4 lignes : les couplets reviennent entiers");
+    Egal(Ranger.Rassembler("[Kiitikio]\nAsante Yesu\n\n[Ubeti 1]\nNa wewe"), "Asante Yesu\n\nNa wewe", "3.0.0 : un nom inconnu (swahili) n'est pas pris pour des paroles");
+    Egal(Ranger.Rassembler("Une\nDeux\n\nTrois"), "Une\nDeux\n\nTrois", "3.0.0 : un texte sans noms reste tel quel");
 }
 
 // ------------------------------------------------------------------ recueils
@@ -1331,6 +1344,107 @@ if (Actif())
     rgm.Effacer();
 }
 
+Groupe("Traduction des chants swahili (3.0.0)");
+if (Actif())
+{
+    var trDon = Donnees.Charger(Temp(), res);
+    Ok(trDon.Reglages.Traduction is { Actif: true, Afficher: false, De: "sw", Vers: "fr" } trRt && trRt.Recueils.Contains("wokovu"),
+        "réglages par défaut : traduction automatique, montrée seulement si on le veut, recueil Wokovu, swahili → français");
+    var trRg = new Regie(trDon, new Bibles(trDon));
+    var trSw = trRg.EnregistrerChant(null, "Yesu ni Bwana", new List<Section> { new() { Label = "Ubeti 1", Text = "Yesu ni Bwana\nAmefufuka" }, new() { Label = "Kiitikio", Text = "Haleluya\nYesu  ni Bwana" } }, "Nyimbo za Wokovu");
+    var trFr = trRg.EnregistrerChant(null, "Gloire", new List<Section> { new() { Label = "Couplet 1", Text = "Gloire à Dieu" } }, "Cantiques");
+    var trCSw = trRg.Trouver(trSw)!;
+    var trCFr = trRg.Trouver(trFr)!;
+    Ok(TraductionChants.ATraduire(trCSw, trDon.Reglages.Traduction) && !TraductionChants.ATraduire(trCFr, trDon.Reglages.Traduction), "seuls les chants de Wokovu sont à traduire");
+    Egal(string.Join("|", TraductionChants.Manquantes(trCSw)), "Yesu ni Bwana|Amefufuka|Haleluya", "lignes à traduire : sans doublons (espaces en trop compris), dans l'ordre");
+    // la diapositive montrée : la traduction est demandée ; rien sous les paroles tant qu'elle n'est pas là
+    var trDemandes = new List<string>();
+    trRg.TraductionDemandee += (c, t) => trDemandes.Add(c.Id + ":" + t);
+    trRg.AfficherSection(trSw, 0);
+    Ok(trRg.Etat.Mode == "chant" && trRg.Etat.Second == null && trDemandes.Contains(trSw + ":Yesu ni Bwana\nAmefufuka"), "diapositive pas encore traduite : demandée, rien sous les paroles");
+    // la file traduit (service simulé), la diapositive demandée d'abord ; les lignes restent dans le chant
+    var trFaux = new FauxTraducteur(new() { ["Yesu ni Bwana"] = "Jésus est Seigneur", ["Amefufuka"] = "Il est ressuscité", ["Haleluya"] = "Alléluia" });
+    var trFile = new FileTraduction(trDon, trFaux) { Paquet = 2 };
+    int trTraduits = 0;
+    trFile.Traduit += id => { trTraduits++; trRg.ChantTraduit(id); };
+    trFile.Demander(trCSw, trCSw.Sections[1].Text);
+    trFile.Demander(trCFr);
+    Ok(trFile.EnAttente == 1, "un chant d'un autre recueil n'entre pas dans la file");
+    bool trTour1 = trFile.TourAsync().GetAwaiter().GetResult();
+    Ok(trTour1 && trTraduits == 1 && trFaux.Demandes.SequenceEqual(new[] { "Haleluya", "Yesu ni Bwana" }) && TraductionChants.Traduire(trCSw, trCSw.Sections[1].Text) == "Alléluia\nJésus est Seigneur",
+        "premier paquet : la diapositive demandée d'abord (" + string.Join(", ", trFaux.Demandes) + ")");
+    while (trFile.TourAsync().GetAwaiter().GetResult()) { }
+    Ok(TraductionChants.Manquantes(trCSw).Count == 0 && trFile.EnAttente == 0 && trFaux.Demandes.Count == 3, "tout le chant est traduit, chaque ligne une seule fois");
+    Egal(TraductionChants.Traduire(trCSw, "Yesu ni Bwana\nAmefufuka") ?? "", "Jésus est Seigneur\nIl est ressuscité", "traduction d'une diapositive, ligne par ligne");
+    Ok(trRg.Etat.Second == null, "traduite, mais pas montrée tant qu'on ne le veut pas");
+    trRg.AfficherTraduction(true);
+    Ok(trRg.Etat.Second?.Texte == "Jésus est Seigneur\nIl est ressuscité" && trDon.Reglages.Traduction.Afficher, "« montrer la traduction » : elle apparaît tout de suite sous les paroles");
+    Ok(trRg.EtatSection(trSw, 1)?.Second?.Texte == "Alléluia\nJésus est Seigneur", "aperçus (vignettes, Suivant) : la traduction aussi");
+    // karaoké (1 ligne) : chaque ligne garde sa traduction
+    trRg.EnregistrerChant(trSw, "Yesu ni Bwana", Ranger.Ranger_("Yesu ni Bwana\nAmefufuka\n\nHaleluya\nYesu ni Bwana", 1).Sections);
+    trRg.AfficherSection(trSw, 1);
+    Egal(trRg.Etat.Second?.Texte ?? "", "Il est ressuscité", "karaoké 1 ligne : chaque ligne garde sa traduction");
+    trRg.AfficherTraduction(false);
+    Ok(trRg.Etat.Second == null && !trDon.Reglages.Traduction.Afficher, "cacher la traduction : elle disparaît tout de suite");
+    trRg.AfficherTraduction(true);
+    trRg.AfficherSection(trFr, 0);
+    Ok(trRg.Etat.Second == null && trCFr.Traductions == null, "un chant d'un autre recueil : jamais de traduction");
+    trRg.AfficherTraduction(false);
+    trDon.SauverChants();
+    var trRelu = Donnees.Charger(trDon.Dossier, res);
+    Ok(trRelu.Chants.First(c => c.Id == trSw).Traductions?["Amefufuka"] == "Il est ressuscité" && trRelu.Reglages.Traduction.Afficher == false,
+        "la traduction est gardée avec le chant (chants.json), le choix de la montrer aussi");
+    // la limite gratuite atteinte : la file s'arrête jusqu'à l'heure de reprise, sans redemander au service
+    var trSw2 = trRg.EnregistrerChant(null, "Wimbo", new List<Section> { new() { Label = "", Text = "Bwana asifiwe" } }, "Wokovu");
+    trFaux.Quota = true;
+    trFile.Demander(trRg.Trouver(trSw2)!);
+    bool trTourQuota = trFile.TourAsync().GetAwaiter().GetResult();
+    int trAvant = trFaux.Appels;
+    bool trTourApres = trFile.TourAsync().GetAwaiter().GetResult();
+    Ok(!trTourQuota && !trTourApres && trFaux.Appels == trAvant && trFile.Pause != null && trDon.Reglages.Traduction.Reprise != null && trFile.EnAttente == 1,
+        "limite gratuite atteinte : pause jusqu'à l'heure de reprise, le chant reste dans la file");
+    trFaux.Quota = false;
+    trDon.Reglages.Traduction.Reprise = DateTime.Now.AddMinutes(-1);
+    Ok(trFile.TourAsync().GetAwaiter().GetResult() && TraductionChants.Manquantes(trRg.Trouver(trSw2)!).Count == 0 && trDon.Reglages.Traduction.Reprise == null,
+        "après l'heure de reprise : la traduction repart");
+    // tout le recueil : les chants des programmes d'abord
+    var trSw3 = trRg.EnregistrerChant(null, "Wimbo wa tatu", new List<Section> { new() { Label = "", Text = "Mungu ni mwema" } }, "Wokovu");
+    var trSw4 = trRg.EnregistrerChant(null, "Wimbo wa nne", new List<Section> { new() { Label = "", Text = "Tumshangilie" } }, "Wokovu");
+    trRg.NouvelAgenda("Culte de test");
+    trRg.AjouterChantAgenda(trSw4);
+    trFile.DemanderTout();
+    trFaux.Demandes.Clear();
+    trFile.TourAsync().GetAwaiter().GetResult();
+    Ok(trFaux.Demandes.FirstOrDefault() == "Tumshangilie", "tout le recueil : les chants du programme d'abord (" + string.Join(", ", trFaux.Demandes) + ")");
+    while (trFile.TourAsync().GetAwaiter().GetResult()) { }
+    Ok(TraductionChants.Compte(trDon.Chants, trDon.Reglages.Traduction) == (4, 4), "compte : 4 chants swahili traduits sur 4");
+    // une ligne que le service ne sait pas traduire : la file ne boucle pas dessus, le reste du chant est traduit
+    var trSw5 = trRg.EnregistrerChant(null, "Wimbo mgumu", new List<Section> { new() { Label = "", Text = "Neno gumu\nAmina" } }, "Wokovu");
+    var trFaux2 = new FauxTraducteur(new() { ["Neno gumu"] = "", ["Amina"] = "Amen" });
+    var trFile2 = new FileTraduction(trDon, trFaux2);
+    trFile2.Demander(trRg.Trouver(trSw5)!);
+    int trTours = 0;
+    while (trTours < 10 && trFile2.TourAsync().GetAwaiter().GetResult()) trTours++;
+    Ok(trTours < 10 && trFile2.EnAttente == 0 && trFaux2.Appels == 1 && trRg.Trouver(trSw5)!.Traductions?["Amina"] == "Amen",
+        $"une ligne intraduisible : la file passe à la suite sans boucler ({trTours} tour(s), {trFaux2.Appels} appel(s))");
+    trFile.Dispose();
+    // le service gratuit (MyMemory) : ses réponses
+    Egal(TraducteurMyMemory.Lire("{\"responseData\":{\"translatedText\":\"J&#39;aime Jésus\",\"match\":0.85},\"quotaFinished\":false,\"responseStatus\":200}", 200, DateTime.Now),
+        "J'aime Jésus", "MyMemory : texte traduit (entités HTML décodées)");
+    try
+    {
+        TraducteurMyMemory.Lire("{\"responseData\":{\"translatedText\":\"MYMEMORY WARNING: YOU USED ALL AVAILABLE FREE TRANSLATIONS FOR TODAY. NEXT AVAILABLE IN  10 HOURS 20 MINUTES 33 SECONDS VISIT HTTPS://MYMEMORY.TRANSLATED.NET/DOC/USAGELIMITS.PHP TO TRANSLATE MORE\"},\"quotaFinished\":true,\"responseStatus\":429}", 200, new DateTime(2026, 11, 21, 17, 0, 0));
+        Ok(false, "MyMemory : limite du jour");
+    }
+    catch (QuotaTraduction q) { Ok(q.Reprise == new DateTime(2026, 11, 22, 3, 21, 3), $"MyMemory : limite du jour → reprise à l'heure dite ({q.Reprise:yyyy-MM-dd HH:mm:ss})"); }
+    try
+    {
+        TraducteurMyMemory.Lire("{\"responseData\":{\"translatedText\":\"'XX' IS AN INVALID TARGET LANGUAGE\"},\"responseStatus\":\"403\",\"responseDetails\":\"'XX' IS AN INVALID TARGET LANGUAGE\"}", 200, DateTime.Now);
+        Ok(false, "MyMemory : erreur du service");
+    }
+    catch (IOException) { Ok(true, "MyMemory : une erreur du service n'est pas prise pour une traduction"); }
+}
+
 Groupe("Plus de Duo (2.5.0)");
 if (Actif())
 {
@@ -2293,3 +2407,20 @@ if (Actif()) MyVerse.Tests.MontageTests.RunAsync(Ok).GetAwaiter().GetResult();
 
 Console.WriteLine($"\n{total - echecs}/{total} vérifications réussies" + (echecs > 0 ? $" — {echecs} ÉCHEC(S)" : " — tout est bon"));
 return echecs == 0 ? 0 : 1;
+
+/// <summary>3.0.0 : un service de traduction simulé (un dictionnaire), qui compte ses appels et peut dire « limite atteinte ».</summary>
+sealed class FauxTraducteur : ITraducteur
+{
+    readonly Dictionary<string, string> dico;
+    public readonly List<string> Demandes = new();
+    public int Appels;
+    public bool Quota;
+    public FauxTraducteur(Dictionary<string, string> dico) { this.dico = dico; }
+    public Task<List<string>> TraduireAsync(IReadOnlyList<string> lignes, string de, string vers, CancellationToken annuler)
+    {
+        Appels++;
+        if (Quota) throw new QuotaTraduction("limite du jour", DateTime.Now.AddHours(5));
+        Demandes.AddRange(lignes);
+        return Task.FromResult(lignes.Select(l => dico.TryGetValue(l, out var t) ? t : "« " + l + " »").ToList());
+    }
+}

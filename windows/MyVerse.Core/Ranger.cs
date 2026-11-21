@@ -64,10 +64,12 @@ public static class Ranger
 
     sealed class Bloc { public string Label = ""; public List<string> Lignes = new(); }
 
-    /// <summary>Range un chant brut. max : lignes par diapositive (0 = automatique, 5 au plus).</summary>
+    /// <summary>
+    /// Range un chant brut. max : lignes par diapositive (0 = automatique, 5 au plus ; 3.0.0 : 2 ou 1 pour le karaoké).
+    /// </summary>
     public static Resultat Ranger_(string? brut, int max = 0, string? titre = null, int longueur = 64)
     {
-        max = max > 0 ? Math.Clamp(max, 2, 8) : 5;
+        max = max > 0 ? Math.Clamp(max, 1, 8) : 5;
         var texte = (brut ?? "").Replace("\r\n", "\n").Replace('\r', '\n');
         texte = Regex.Replace(texte, "[​-‍﻿]", "").Replace('\t', ' ');
         texte = Regex.Replace(texte, @"\[[A-G](?:#|b)?[^\]\n]{0,6}\]", ""); // accords ChordPro dans les paroles
@@ -155,4 +157,45 @@ public static class Ranger
 
     /// <summary>Texte de l'éditeur sans les lignes « [Nom] ».</summary>
     public static string SansEntetes(string t) => string.Join("\n", t.Replace("\r\n", "\n").Split('\n').Where(l => !Regex.IsMatch(l, @"^\s*\[[^\]]*\]\s*$")));
+
+    static readonly Regex ENTETE_EDITEUR = new(@"^\s*\[([^\]]*)\]\s*$", RegexOptions.Compiled);
+    static readonly Regex MORCEAU = new(@"\s*\((\d+)/(\d+)\)\s*$", RegexOptions.Compiled);
+
+    /// <summary>
+    /// 3.0.0 : le texte de l'éditeur (« [Couplet 1 (1/3)] » …) remis en strophes entières, avec leur nom, pour être rangé de nouveau :
+    /// les morceaux d'une même strophe (« (1/3) », « (2/3) », « (3/3) ») sont recollés. On peut ainsi passer du karaoké (1 ou 2 lignes)
+    /// à 4 lignes, et revenir, sans perdre les couplets. Un texte sans aucun nom est rendu sans les lignes vides en trop.
+    /// </summary>
+    public static string Rassembler(string t)
+    {
+        var lignes = (t ?? "").Replace("\r\n", "\n").Split('\n');
+        if (!lignes.Any(l => ENTETE_EDITEUR.IsMatch(l))) return SansEntetes(t ?? "");
+        var blocs = new List<(string Nom, List<string> Lignes)>();
+        string? precedent = null;
+        int partPrecedente = 0, totalPrecedent = 0;
+        foreach (var l in lignes)
+        {
+            var m = ENTETE_EDITEUR.Match(l);
+            if (m.Success)
+            {
+                var nom = m.Groups[1].Value.Trim();
+                var morceau = MORCEAU.Match(nom);
+                int part = 0, total = 0;
+                if (morceau.Success) { part = int.Parse(morceau.Groups[1].Value); total = int.Parse(morceau.Groups[2].Value); nom = nom[..morceau.Index].Trim(); }
+                // la suite d'une strophe coupée : même nom, morceau suivant
+                bool suite = morceau.Success && precedent == nom && part == partPrecedente + 1 && total == totalPrecedent && blocs.Count > 0;
+                if (!suite) blocs.Add((nom, new List<string>()));
+                precedent = nom; partPrecedente = part; totalPrecedent = total;
+                continue;
+            }
+            if (l.Trim().Length == 0) continue;
+            if (blocs.Count == 0) blocs.Add(("", new List<string>()));
+            blocs[^1].Lignes.Add(l.Trim());
+        }
+        // un nom que le rangement connaît (« Refrain », « Couplet 2 »…) est gardé ; les autres (« Kiitikio »…) sont retrouvés par le rangement
+        return string.Join("\n\n", blocs.Where(b => b.Lignes.Count > 0)
+            .Select(b => (NomConnu(b.Nom) ? $"[{b.Nom}]\n" : "") + string.Join("\n", b.Lignes)));
+    }
+
+    static bool NomConnu(string nom) => nom.Length > 0 && ENTETE.Match($"[{nom}]") is { Success: true } m && m.Groups[3].Value.Trim().Length == 0;
 }

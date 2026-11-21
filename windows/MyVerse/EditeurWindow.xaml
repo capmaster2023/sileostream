@@ -11,15 +11,21 @@
             <DockPanel Margin="0,12,0,10" LastChildFill="False">
                 <TextBlock DockPanel.Dock="Left" Style="{StaticResource Muet}" VerticalAlignment="Center" MaxWidth="420"
                            Text="Collez un chant complet, même en désordre : il est rangé tout seul." />
+                <!-- 3.0.0 : un chant swahili (Wokovu) : sa traduction française, ligne par ligne, à corriger -->
+                <Button x:Name="TraductionBtn" DockPanel.Dock="Right" Style="{StaticResource BtnPetit}" Content="Traduction…" Margin="8,0,0,0" Visibility="Collapsed"
+                        ToolTip="La traduction française de ce chant swahili, ligne par ligne (à corriger à la main)" />
                 <Button x:Name="Brut" DockPanel.Dock="Right" Style="{StaticResource BtnPetit}" Content="Texte d'origine" Margin="8,0,0,0" Visibility="Collapsed"
                         ToolTip="Revenir au texte collé, tel quel" />
                 <Button x:Name="Ranger" DockPanel.Dock="Right" Style="{StaticResource BtnPetitOr}" Content="Ranger" Margin="8,0,0,0"
                         ToolTip="Ranger les paroles en diapositives (titre, couplets, refrain)" />
-                <ComboBox x:Name="Lignes" DockPanel.Dock="Right" Width="140" Margin="8,0,0,0" ToolTip="Lignes par diapositive">
+                <ComboBox x:Name="Lignes" DockPanel.Dock="Right" Width="170" Margin="8,0,0,0" ToolTip="Lignes par diapositive (2 ou 1 ligne : karaoké)">
                     <ComboBoxItem Tag="0" Content="Auto (3 à 5)" />
                     <ComboBoxItem Tag="3" Content="3 lignes" />
                     <ComboBoxItem Tag="4" Content="4 lignes" />
                     <ComboBoxItem Tag="5" Content="5 lignes" />
+                    <!-- 3.0.0 : karaoké -->
+                    <ComboBoxItem Tag="2" Content="2 lignes (karaoké)" />
+                    <ComboBoxItem Tag="1" Content="1 ligne (karaoké)" />
                 </ComboBox>
                 <TextBlock DockPanel.Dock="Right" Text="Lignes par diapositive" FontSize="13" VerticalAlignment="Center" Foreground="{StaticResource Brume}" />
             </DockPanel>

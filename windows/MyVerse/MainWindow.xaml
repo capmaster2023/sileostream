@@ -752,6 +752,23 @@
                             <Slider x:Name="Taille" Minimum="0.6" Maximum="1.2" SmallChange="0.05" LargeChange="0.05" TickFrequency="0.05" IsSnapToTickEnabled="True" Value="1" />
                         </StackPanel>
 
+                        <!-- 3.0.0 : la traduction française des chants swahili (Wokovu) : faite toute seule, montrée seulement si on le veut (touche T) -->
+                        <ToggleButton x:Name="TiroirTraduction" Style="{StaticResource TiroirTete}" Tag="{StaticResource IconeTraduction}"
+                                      ToolTip="La traduction française sous les chants swahili (Wokovu) : montrée seulement si on le veut (touche T)">
+                            <DockPanel>
+                                <TextBlock x:Name="TiroirTraductionValeur" DockPanel.Dock="Right" FontSize="13" FontWeight="SemiBold" Foreground="{StaticResource Brume}" VerticalAlignment="Center" Text="Cachée" />
+                                <TextBlock Text="Traduction française" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
+                            </DockPanel>
+                        </ToggleButton>
+                        <StackPanel x:Name="CorpsTraduction" Visibility="Collapsed" Margin="2,2,2,14">
+                            <CheckBox x:Name="TraductionMontrer" Content="Montrer le français sous les chants swahili" FontSize="14" Foreground="{StaticResource Blanc}" />
+                            <TextBlock x:Name="TraductionEtat" FontSize="12.5" Foreground="{StaticResource Brume}" TextWrapping="Wrap" Margin="0,8,0,0" />
+                            <CheckBox x:Name="TraductionAuto" Content="Traduire tout seul (par Internet)" FontSize="13" Foreground="{StaticResource Brume}" Margin="0,10,0,0" />
+                            <TextBlock Text="Courriel (facultatif) : 50 000 caractères traduits par jour au lieu de 5 000" FontSize="11.5" Foreground="{StaticResource Brume2}" TextWrapping="Wrap" Margin="0,10,0,4" />
+                            <TextBox x:Name="TraductionCourriel" Style="{StaticResource Champ}" />
+                            <TextBlock Text="Touche T : montrer ou cacher. Une traduction se corrige dans l'éditeur du chant (Traduction…)." FontSize="11.5" Foreground="{StaticResource Brume2}" TextWrapping="Wrap" Margin="0,8,0,0" />
+                        </StackPanel>
+
                         <ToggleButton x:Name="TiroirRepos" Style="{StaticResource TiroirTete}" Tag="{StaticResource IconeLune}" ToolTip="Ce qui revient quand on efface (Échap) : noir, le fond seul, ou un écran du programme (logo…)">
                             <DockPanel>
                                 <TextBlock x:Name="TiroirReposValeur" DockPanel.Dock="Right" FontSize="13" FontWeight="SemiBold" Foreground="{StaticResource Brume}" VerticalAlignment="Center" Text="Noir"

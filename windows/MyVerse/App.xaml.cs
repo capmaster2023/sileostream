@@ -57,6 +57,8 @@ public partial class App : Application
     public static Audio.PlanificateurDirect Planificateur { get; private set; } = null!;
     public static Audio.ChurchAudioService Audio { get; private set; } = null!;
     public static Telephone Telephone { get; private set; } = null!;
+    /// <summary>3.0.0 : la traduction française des chants swahili (Wokovu), en arrière-plan.</summary>
+    public static FileTraduction Traductions { get; private set; } = null!;
     /// <summary>1.9.5 : la caméra Sony reçue par son Wi-Fi (source MyCam « sony-wifi »).</summary>
     public static CameraWifi CameraWifi { get; private set; } = null!;
     /// <summary>Dossier du test automatique (« SiloeStream.exe --autotest dossier »), sinon null.</summary>
@@ -207,6 +209,16 @@ public partial class App : Application
         Direct = new Audio.DirectService(Audio, Donnees);
         // le test automatique fait tourner les directs automatiques lui-même (heure simulée)
         Planificateur = new Audio.PlanificateurDirect(Direct, Donnees, Regie, AutoTest == null);
+        // 3.0.0 : la traduction française des chants swahili (Wokovu) se fait toute seule, en arrière-plan, et reste dans les chants ;
+        // elle n'est montrée sous les paroles que si on le veut (touche T). Le test automatique ne traduit rien par Internet.
+        Traductions = new FileTraduction(Donnees, new TraducteurMyMemory { Courriel = () => Donnees.Reglages.Traduction.Courriel });
+        Regie.TraductionDemandee += (c, texte) => Traductions.Demander(c, texte);
+        Traductions.Traduit += id => Regie.ChantTraduit(id);
+        if (AutoTest == null)
+        {
+            Traductions.Demarrer();
+            Traductions.DemanderTout();
+        }
         var w = new MainWindow();
         MainWindow = w;
         w.Show();
@@ -364,6 +376,7 @@ public partial class App : Application
         }
         Journal.Info("fermeture de MyVerse");
         try { Planificateur?.Dispose(); } catch (Exception x) { Journal.Erreur("fin des directs automatiques", x); }
+        Traductions?.Dispose();
         try { Direct?.Dispose(); } catch (Exception x) { Journal.Erreur("fin du direct", x); }
         Audio?.Dispose();
         Sources?.Dispose();
